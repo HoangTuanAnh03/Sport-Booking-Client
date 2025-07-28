@@ -2,10 +2,12 @@ import { setVenueSearchedFormLocalStorage } from "@/lib/utils";
 import { create } from "zustand";
 
 type SideBarStore = {
-  venueIdSelected: string | null;
-  setVenueIdSelected: (venue: string | null) => void;
+  venueIdSelected: number | null;
+  setVenueIdSelected: (venue: number | null) => void;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  directionMode: boolean;
+  setDirectionMode: (mode: boolean) => void;
 };
 
 export const useSideBarStore = create<SideBarStore>((set) => ({
@@ -16,4 +18,6 @@ export const useSideBarStore = create<SideBarStore>((set) => ({
   },
   sidebarOpen: false,
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  directionMode: false,
+  setDirectionMode: (mode) => set({ directionMode: mode }),
 }));

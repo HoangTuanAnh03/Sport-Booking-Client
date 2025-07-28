@@ -4,17 +4,14 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import envConfig from "@/config";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, getLocation } from "@/lib/utils";
 import { useMapStore } from "@/stores/useMapStore";
 import { useSideBarStore } from "@/stores/useSideBarStore";
+import venueApiRequest from "@/apiRequests/venue";
 
 const MapComponent = () => {
-  const center1: [number, number] = [105.8423624, 20.9991199];
-  const defaultCenter: [number, number] = [105.8423624, 20.9991199];
-  const [center, setCenter] = useState<[number, number]>([
-    105.8423624, 20.9991199,
-  ]);
-  const y: [number, number] = [105.8423624, 20.9991199];
+  const [center, setCenter] = useState<Coord>([0, 0]);
+  const y: Coord = [0, 0];
   const zoom = 15;
   const initialZoom = 13;
   const mapKey = envConfig.NEXT_PUBLIC_MAP_KEY;
@@ -25,32 +22,35 @@ const MapComponent = () => {
   const coordinateVenues = useMapStore((state) => state.coordinateVenues);
   const sidebarOpen = useSideBarStore((state) => state.sidebarOpen);
   const venueIdSelected = useSideBarStore((state) => state.venueIdSelected);
-  const [perVenueIdSelected, setPerVenueIdSelected] = useState<string | null>();
+  const directionMode = useSideBarStore((state) => state.directionMode);
+  const setDirectionMode = useSideBarStore((state) => state.setDirectionMode);
+  const [perVenueIdSelected, setPerVenueIdSelected] = useState<number | null>();
 
   const mapRef = useRef<maplibregl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const venueIdSelectedRef = useRef<string | null>(venueIdSelected);
+  const venueIdSelectedRef = useRef<number | null>(venueIdSelected);
   const typeSportIdRef = useRef<SportTypeEnum | null>(null);
 
-  // get current position
   useEffect(() => {
-    // Thử lấy vị trí người dùng
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        setCenter([lng, lat]);
-        setTimeout(() => {
-          mapRef.current?.flyTo({
-            center: { lng: lng, lat: lat },
-            zoom,
-          });
-        }, 100);
-      });
-    } else {
-      // setCenter(defaultCenter);
+    const { lat, lng } = getLocation();
+    if (lat && lng) {
+      setCenter([lng, lat]);
     }
   }, []);
+
+  useEffect(() => {
+    if (venueIdSelected && directionMode) {
+      const venueSelected = coordinateVenues?.find(
+        (coord) => coord.id === venueIdSelected
+      );
+      if (venueSelected && center[0] !== 0 && center[1] != 0) {
+        fetchDirections(center, [venueSelected.lng, venueSelected.lat]);
+      }
+    } else if (mapRef.current?.getSource("route")) {
+      mapRef.current.removeLayer("route");
+      mapRef.current.removeSource("route");
+    }
+  }, [directionMode]);
 
   // handler reverse marker when change venue id selected
   useEffect(() => {
@@ -58,7 +58,9 @@ const MapComponent = () => {
       (coord) => coord.id === perVenueIdSelected
     );
     if (venueIdSelectedRef.current) {
-      const container = document.getElementById(venueIdSelectedRef.current);
+      const container = document.getElementById(
+        venueIdSelectedRef.current.toString()
+      );
       container
         ?.querySelector("div")
         ?.style.setProperty(
@@ -73,13 +75,11 @@ const MapComponent = () => {
   // handler venue id selected change marker and fly to venue
   useEffect(() => {
     setPerVenueIdSelected(venueIdSelected);
-    console.log("🚀 ~ useEffect ~ venueIdSelected:", venueIdSelected);
-
     if (venueIdSelected !== null && coordinateVenues) {
       const venueSelected = coordinateVenues.find(
-        (coord) => coord.id === venueIdSelected
+        (coord) => coord.id == venueIdSelected
       );
-      const container = document.getElementById(venueIdSelected);
+      const container = document.getElementById(venueIdSelected.toString());
       container
         ?.querySelector("div")
         ?.style.setProperty("background-image", `url('/marker/local-red.png')`);
@@ -89,12 +89,14 @@ const MapComponent = () => {
           zoom,
         });
       }, 500);
+    } else {
+      setDirectionMode(false);
+      removePopup();
     }
   }, [venueIdSelected]);
 
   // remove all default markers, add new markers
   useEffect(() => {
-    console.log("🚀 ~ useEffect ~ coordinateVenues:", coordinateVenues);
     if (coordinateVenues !== null) {
       setIsLoading(true);
 
@@ -104,25 +106,17 @@ const MapComponent = () => {
 
       if (mapRef.current) {
         addMarkers(coordinateVenues ?? [], mapRef.current);
-      }
+        const el = document.createElement("div");
+        el.style.width = "12px";
+        el.style.height = "12px";
+        el.style.borderRadius = "9999px";
+        el.style.backgroundColor = "#3B82F6"; // màu xanh (Tailwind: blue-500)
+        el.style.border = "2px solid white";
+        el.style.boxShadow = "0 0 0 2px rgba(59, 130, 246, 0.5)";
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          // setCenter([lng, lat]);
-          const el = document.createElement("div");
-          el.style.width = "12px";
-          el.style.height = "12px";
-          el.style.borderRadius = "9999px";
-          el.style.backgroundColor = "#3B82F6"; // màu xanh (Tailwind: blue-500)
-          el.style.border = "2px solid white";
-          el.style.boxShadow = "0 0 0 2px rgba(59, 130, 246, 0.5)";
-
-          new maplibregl.Marker({ element: el })
-            .setLngLat(center)
-            .addTo(mapRef.current!);
-        });
+        new maplibregl.Marker({ element: el })
+          .setLngLat(center)
+          .addTo(mapRef.current!);
       }
     }
   }, [coordinateVenues]);
@@ -167,7 +161,7 @@ const MapComponent = () => {
     map: maplibregl.Map
   ): HTMLDivElement => {
     const container = document.createElement("div");
-    container.id = coord.id;
+    container.id = coord.id.toString();
     container.style.display = "flex";
     container.style.flexDirection = "column";
     container.style.alignItems = "center";
@@ -212,7 +206,9 @@ const MapComponent = () => {
 
     const handleClick = () => {
       if (venueIdSelectedRef.current) {
-        const container = document.getElementById(venueIdSelectedRef.current);
+        const container = document.getElementById(
+          venueIdSelectedRef.current.toString()
+        );
         container
           ?.querySelector("div")
           ?.style.setProperty(
@@ -246,6 +242,159 @@ const MapComponent = () => {
     });
   };
 
+  const fetchDirections = (startCoords: Coord, endCoords: Coord) => {
+    const result = venueApiRequest.sGetDirection(
+      [endCoords[1], endCoords[0]],
+      [startCoords[1], startCoords[0]]
+    );
+
+    if (!result) {
+      alert("Could not find a route.");
+      return;
+    }
+
+    result
+      .then((dataPayload) => {
+        const data = dataPayload.payload.data;
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0].overview_polyline.points;
+          const distance = data.routes[0].legs[0].distance.text;
+          const time = data.routes[0].legs[0].duration.text;
+          const decodedRoute = decodePolyline(route);
+          displayRoute(
+            decodedRoute,
+            startCoords,
+            endCoords,
+            distance,
+            time,
+            mapRef.current!
+          );
+        } else {
+          alert("Could not find a route.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching directions:", error);
+        alert("Error fetching directions.");
+      });
+  };
+
+  const decodePolyline = (encoded: any) => {
+    var points = [];
+    var index = 0,
+      len = encoded.length;
+    var lat = 0,
+      lng = 0;
+
+    while (index < len) {
+      var b,
+        shift = 0,
+        result = 0;
+      do {
+        b = encoded.charAt(index++).charCodeAt(0) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      var dlat = result & 1 ? ~(result >> 1) : result >> 1;
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.charAt(index++).charCodeAt(0) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      var dlng = result & 1 ? ~(result >> 1) : result >> 1;
+      lng += dlng;
+
+      points.push([lng * 1e-5, lat * 1e-5]);
+    }
+
+    return points;
+  };
+
+  const displayRoute = (
+    route: any,
+    startCoords: Coord,
+    endCoords: Coord,
+    distance: any,
+    time: any,
+    map: maplibregl.Map
+  ) => {
+    if (map.getSource("route")) {
+      map.removeLayer("route");
+      map.removeSource("route");
+    }
+    const start = [startCoords[1], startCoords[0]];
+    const end = [endCoords[1], endCoords[0]];
+    const longLatStart: Coord = [start[1], start[0]];
+    const longLatEnd: Coord = [end[1], end[0]];
+    //add marker to start and end location
+    // new maplibregl.Marker().setLngLat(longLatStart).addTo(map);
+    // new maplibregl.Marker().setLngLat(longLatEnd).addTo(map);
+    map.addSource("route", {
+      type: "geojson",
+      data: {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: route,
+        },
+      },
+    });
+    map.addLayer({
+      id: "route",
+      type: "line",
+      source: "route",
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": "#00ff05",
+        "line-width": 5,
+        "line-opacity": 0.9,
+      },
+    });
+    // Find the midpoint of the route to show popup
+    const midPoint = route[Math.floor(route.length / 2)];
+    //Add a marker for the midpoint with distance + time information
+    new maplibregl.Popup({
+      closeButton: false, // mặc định là true
+      closeOnClick: false, // nếu muốn không tắt khi click bản đồ
+      className: "custom-popup", // thêm class để tùy chỉnh CSS
+    })
+      .setLngLat(midPoint)
+      .setHTML(
+        `
+      <div class="popup-content">
+        <div class="popup-row">
+          <strong>📏 Khoảng cách: </strong>
+          <div class="popup-value distance">${distance}</div>
+        </div>
+        <div class="popup-row">
+          <strong>⏱️ Thời gian: </strong>
+          <div class="popup-value time">${time}</div>
+        </div>
+      </div>
+    `
+      )
+      .addTo(map);
+
+    map.fitBounds(
+      route.reduce(function (bounds: any, coord: any) {
+        return bounds.extend(coord);
+      }, new maplibregl.LngLatBounds(route[0], route[0]))
+    );
+  };
+
+  const removePopup = () => {
+    const popups = document.querySelectorAll(".maplibregl-popup");
+    popups.forEach((popup) => popup.remove());
+  };
+
   // init map
   useEffect(() => {
     if (!mapRef.current && mapContainerRef.current) {
@@ -273,8 +422,19 @@ const MapComponent = () => {
 
       mapRef.current.on("load", () => {
         addMarkers(coordinateVenues ?? [], mapRef.current!);
+        const el = document.createElement("div");
+        el.style.width = "12px";
+        el.style.height = "12px";
+        el.style.borderRadius = "9999px";
+        el.style.backgroundColor = "#3B82F6"; // màu xanh (Tailwind: blue-500)
+        el.style.border = "2px solid white";
+        el.style.boxShadow = "0 0 0 2px rgba(59, 130, 246, 0.5)";
+
+        new maplibregl.Marker({ element: el })
+          .setLngLat(center)
+          .addTo(mapRef.current!);
         if (venueIdSelected) {
-          const container = document.getElementById(venueIdSelected);
+          const container = document.getElementById(venueIdSelected.toString());
           container
             ?.querySelector("div")
             ?.style.setProperty(
@@ -283,6 +443,15 @@ const MapComponent = () => {
             );
           setPerVenueIdSelected(venueIdSelected);
         }
+      });
+
+      mapRef.current.on("remove", () => {
+        if (mapRef.current?.getSource("route")) {
+          mapRef.current.removeLayer("route");
+          mapRef.current.removeSource("route");
+        }
+        setDirectionMode(false);
+        removePopup();
       });
 
       mapRef.current.addControl(

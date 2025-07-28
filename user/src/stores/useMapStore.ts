@@ -26,7 +26,7 @@ export const useMapStore = create<MapStoreState>((set, get) => ({
       coordinateVenues: venues.map(
         (venue) =>
           ({
-            id: venue.id.toString(),
+            id: venue.id,
             name: venue.name,
             address: venue.address,
             lat: venue.latitude,

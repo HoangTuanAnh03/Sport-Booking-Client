@@ -9,8 +9,9 @@ import { ReviewVenue } from "@/components/ui/venue/detail/Review";
 import FieldModal from "@/components/FieldModal";
 import { Field } from "@/types/field";
 import { useGetFieldByVenueId } from "@/queries/useField";
-import { getAccessTokenFormLocalStorage } from "@/lib/utils";
+import { cn, getAccessTokenFormLocalStorage } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { Star } from "lucide-react";
 
 export const DetailVenue = () => {
   const [detailVenue, setDetailVenue] = useState<VenueDetail>();
@@ -18,8 +19,8 @@ export const DetailVenue = () => {
   const [fieldData, setFieldData] = useState<Field[]>([]);
   const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
 
-  const { data } = useGetVenueDetail(venueIdSelected ?? "");
-  const { data: fields } = useGetFieldByVenueId(venueIdSelected ?? "");
+  const { data } = useGetVenueDetail(venueIdSelected ?? 0);
+  const { data: fields } = useGetFieldByVenueId(venueIdSelected ?? 0);
   const accessToken = getAccessTokenFormLocalStorage();
   const router = useRouter();
 
@@ -35,7 +36,7 @@ export const DetailVenue = () => {
 
     // Lấy URL cơ sở của trang hiện tại
     const baseUrl = window.location.origin;
-    return `${baseUrl}/maps?id=${detailVenue.venue_id}`;
+    return `${baseUrl}/maps?id=${detailVenue.id}`;
   };
 
   // Hàm chia sẻ link
@@ -44,8 +45,8 @@ export const DetailVenue = () => {
     if (navigator.share) {
       navigator
         .share({
-          title: detailVenue?.venue_name,
-          text: `Xem thông tin về ${detailVenue?.venue_name}`,
+          title: detailVenue?.name,
+          text: `Xem thông tin về ${detailVenue?.name}`,
           url: link,
         })
         .catch((err) => {
@@ -73,9 +74,9 @@ export const DetailVenue = () => {
       <div className="relative">
         <div className="h-48 w-full bg-gradient-to-t from-black/20 to-transparent">
           <Image
-              loader={() => detailVenue?.images.cover || "/placeholder.png"}
-            src={detailVenue?.images.cover || "/placeholder.png"}
-            alt={detailVenue?.venue_name ?? "Venue Image"}
+            loader={() => detailVenue?.images.thumbnail || "/placeholder.png"}
+            src={detailVenue?.images.thumbnail || "/placeholder.png"}
+            alt={detailVenue?.name ?? "Venue Image"}
             fill
             className="object-cover"
           />
@@ -84,9 +85,9 @@ export const DetailVenue = () => {
         <div className="absolute -bottom-[68px] left-4">
           <div className="h-28 w-28 rounded-full border-4 border-white bg-white overflow-hidden">
             <Image
-                loader={() => detailVenue?.images.thumbnail || "/default_avatar.png"}
-              src={detailVenue?.images.thumbnail || "/default_avatar.png"}
-              alt={detailVenue?.venue_name ?? "Venue Image"}
+              loader={() => detailVenue?.images.avatar || "/default_avatar.png"}
+              src={detailVenue?.images.avatar || "/default_avatar.png"}
+              alt={detailVenue?.name ?? "Venue Image"}
               width={112}
               height={112}
               className="object-cover"
@@ -97,21 +98,21 @@ export const DetailVenue = () => {
       <div className="flex gap-6 w-full justify-between items-center p-4 pl-36">
         <div className="   ">
           <h1 className="text-xl font-bold text-gray-700">
-            {detailVenue?.venue_name}
+            {detailVenue?.name}
             {/*Venue 1 của Owner 111 Venue 1 của Owner 111*/}
           </h1>
           <div className="flex items-center mt-1">
-            {/* {[...Array(5)].map((_, i) => (
+            {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
                 className={cn(
                   "h-4 w-4 mr-0.5",
-                  i < Math.floor(selectedVenue.rating)
+                  i < Math.floor(detailVenue?.rating || 0)
                     ? "fill-yellow-400 text-yellow-400"
                     : "text-gray-300"
                 )}
               />
-            ))} */}
+            ))}
           </div>
         </div>
         <div className="flex gap-2">
@@ -156,7 +157,7 @@ export const DetailVenue = () => {
           </TabsList>
 
           <TabsContent value="info" className="space-y-4">
-            <InfoDetailVenue />
+            <InfoDetailVenue venue={data?.payload.data} />
           </TabsContent>
 
           <TabsContent value="reviews">
@@ -170,7 +171,7 @@ export const DetailVenue = () => {
           </TabsContent>
 
           <TabsContent value="photos">
-            <div className="grid grid-cols-2 gap-2">
+            {/* <div className="grid grid-cols-2 gap-2">
               {detailVenue?.images.default.map(
                 (image: string, index: number) => {
                   return (
@@ -189,7 +190,7 @@ export const DetailVenue = () => {
                   );
                 }
               )}
-            </div>
+            </div> */}
           </TabsContent>
         </Tabs>
       </div>

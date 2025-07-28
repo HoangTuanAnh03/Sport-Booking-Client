@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import SwipeableFieldTypes from "@/app/maps/components/SwiperTypeSport";
 import { useMapStore } from "@/stores/useMapStore";
 import { useSideBarStore } from "@/stores/useSideBarStore";
+import { set } from "zod";
 
 export default function NavBar() {
   const router = useRouter();
@@ -17,13 +18,14 @@ export default function NavBar() {
   const setSearchFocused = useMapStore((state) => state.setSearchFocused);
   const sidebarOpen = useSideBarStore((state) => state.sidebarOpen);
   const setSidebarOpen = useSideBarStore((state) => state.setSidebarOpen);
+  const setDirectionMode = useSideBarStore((state) => state.setDirectionMode);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const closeSidebar = () => {
     setSearchFocused(false);
     setSidebarOpen(false);
-
+    setDirectionMode(false);
     router.push("/maps");
   };
 

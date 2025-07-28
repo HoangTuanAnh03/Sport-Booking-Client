@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { Field } from "@/types/field";
 import { useGetVenueNearHome } from "@/queries/useVenue";
 import { useRouter } from "next/navigation";
+import { useSaveUserLocation } from "@/hooks/use-location";
 
 export default function Home() {
   const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
@@ -24,6 +25,7 @@ export default function Home() {
   const { data: venues, isLoading } = useGetVenueNearHome();
   const accessToken = getAccessTokenFormLocalStorage();
   const router = useRouter();
+  useSaveUserLocation();
 
   useEffect(() => {
     if (fields?.payload.data) {
@@ -103,7 +105,9 @@ export default function Home() {
                     <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
                       <div className="relative h-48">
                         <Image
-                            loader={() => field.images.thumbnail || "/placeholder.png"}
+                          loader={() =>
+                            field.images.thumbnail || "/placeholder.png"
+                          }
                           src={field.images.thumbnail || "/placeholder.png"}
                           alt={field.venue_name}
                           fill
@@ -114,7 +118,9 @@ export default function Home() {
                         <div className="flex flex-row gap-4 items-center">
                           <div className="h-20 flex-none w-20 rounded-full border-4 border-white bg-white overflow-hidden">
                             <Image
-                                loader={() => field.images?.thumbnail || "/default_avatar.png"}
+                              loader={() =>
+                                field.images?.thumbnail || "/default_avatar.png"
+                              }
                               src={
                                 field.images?.thumbnail || "/default_avatar.png"
                               }

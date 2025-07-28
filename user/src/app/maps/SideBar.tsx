@@ -32,12 +32,12 @@ export default function Sidebar() {
     const resultFilteredVenues = venuesForMap.filter((venue) => {
       const matchesQuery =
         !searchQuery ||
-        venue.venue_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        venue.venue_address.toLowerCase().includes(searchQuery.toLowerCase());
+        venue.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        venue.address.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesType =
         !typeSportIdFilter ||
-        venue.sport_types.some((type) => type.id === typeSportIdFilter);
+        venue.sport_types.some((type) => type === typeSportIdFilter);
 
       return matchesQuery && matchesType;
     });
@@ -85,7 +85,7 @@ export default function Sidebar() {
                 {filteredVenues.length > 0 ? (
                   <div>
                     {coordinateVenues?.map((venue) => (
-                      <VenueItem venue={venue} />
+                      <VenueItem key={venue.id} venue={venue} />
                     ))}
                   </div>
                 ) : (
@@ -110,7 +110,7 @@ export default function Sidebar() {
                     })
                     .map((venue: CoordinateVenue, index: number) => (
                       // setSearchQuery(search);
-                      <VenueItem venue={venue} type="clock" />
+                      <VenueItem key={venue.id} venue={venue} type="clock" />
                     ))}
                 </div>
 

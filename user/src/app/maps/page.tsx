@@ -9,6 +9,7 @@ import { useGetVenueForMap } from "@/queries/useVenue";
 import { useMapStore } from "@/stores/useMapStore";
 import NavBar from "@/app/maps/NavBar";
 import { useSideBarStore } from "@/stores/useSideBarStore";
+import { useSaveUserLocation } from "@/hooks/use-location";
 
 export default function MapPage() {
   const searchParams = useSearchParams();
@@ -22,7 +23,8 @@ export default function MapPage() {
     (state) => state.setVenueIdSelected
   );
   const setSidebarOpen = useSideBarStore((state) => state.setSidebarOpen);
-  const venueId = searchParams.get("id");
+  const venueId = Number(searchParams.get("id"));
+  useSaveUserLocation();
 
   const { data } = useGetVenueForMap();
 
@@ -52,7 +54,7 @@ export default function MapPage() {
 
   useEffect(() => {
     if (venuesForMap) {
-      const venue = venuesForMap.find((f) => f.id === Number(venueId));
+      const venue = venuesForMap.find((f) => f.id == venueId);
       if (venue) {
         setVenueIdSelected(venueId);
         setSidebarOpen(true);

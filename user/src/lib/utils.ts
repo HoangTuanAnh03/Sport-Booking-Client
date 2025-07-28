@@ -65,7 +65,7 @@ export const setRefreshTokenFormLocalStorage = (refreshToken: string) => {
   isClient && localStorage.setItem("refreshToken", refreshToken);
 };
 
-export const setVenueSearchedFormLocalStorage = (venueId: string) => {
+export const setVenueSearchedFormLocalStorage = (venueId: number) => {
   if (isClient) {
     const storedIds = JSON.parse(
       localStorage.getItem("venueIdSearched") || "[]"
@@ -78,13 +78,13 @@ export const setVenueSearchedFormLocalStorage = (venueId: string) => {
   }
 };
 
-export const removeVenueSearchedFromLocalStorage = (venueId: string) => {
+export const removeVenueSearchedFromLocalStorage = (venueId: number) => {
   if (isClient) {
     const storedIds = JSON.parse(
       localStorage.getItem("venueIdSearched") || "[]"
     );
 
-    const updatedIds = storedIds.filter((id: string) => id !== venueId);
+    const updatedIds = storedIds.filter((id: number) => id !== venueId);
     if (updatedIds.length === 0) {
       localStorage.removeItem("venueIdSearched");
     } else {
@@ -109,4 +109,15 @@ export const removeTokenFormLocalStorage = () => {
 export const formatTimeToHHMM = (time: string) => {
   if (!time) return "";
   return time.slice(0, 5); // Takes only HH:mm part
+};
+
+export const getLocation = () => {
+  if (isClient) {
+    const stored = localStorage.getItem("user_location");
+    return stored
+      ? JSON.parse(stored)
+      : { lat: 21.003424077000034, lng: 105.84267282400003 };
+  } else {
+    return { lat: 21.003424077000034, lng: 105.84267282400003 };
+  }
 };

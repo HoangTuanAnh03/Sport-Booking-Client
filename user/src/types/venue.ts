@@ -1,3 +1,5 @@
+type Coord = [lng: number, lat: number];
+
 type VenueMap = {
   id: number;
   name: string;
@@ -9,7 +11,7 @@ type VenueMap = {
 };
 
 type Venue = {
-  venue_id: string;
+  venue_id: number;
   venue_name: string;
   venue_address: string;
   phone_number: string;
@@ -21,25 +23,24 @@ type Venue = {
 };
 
 type VenueDetail = {
-  venue_id: string;
-  venue_name: string;
-  venue_address: string;
+  id: number;
+  name: string;
+  address: string;
   status: string;
-  phone_number: string;
-  opening: string;
-  closing: string;
+  phoneNumber: string;
+  openTime: string;
+  closeTime: string;
+  rating: number;
+  totalReviews: number;
+  distance: number;
   images: {
     thumbnail: string;
-    cover: string;
-    default: string[];
+    avatar: string;
   };
-  latitude: string;
-  longitude: string;
-  distance: number;
 };
 
 type CoordinateVenue = {
-  id: string;
+  id: number;
   name: string;
   lat: number;
   lng: number;
