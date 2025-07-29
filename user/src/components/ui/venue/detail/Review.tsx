@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
-import { useGetReview } from "@/queries/useReview";
+import { useGetReviewByVenueId } from "@/queries/useReview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useSideBarStore } from "@/stores/useSideBarStore";
@@ -11,11 +11,11 @@ import Image from "next/image";
 export const ReviewVenue = () => {
   const [review, setReview] = useState<Review[]>();
   const venueIdSelected = useSideBarStore((state) => state.venueIdSelected);
-  const { data, isLoading } = useGetReview(venueIdSelected ?? "", 1, 4);
+  const { data, isLoading } = useGetReviewByVenueId(venueIdSelected ?? 0);
 
   useEffect(() => {
     if (data?.payload.data) {
-      setReview(data?.payload.data.data ?? []);
+      setReview(data?.payload.data ?? []);
     }
   }, [data]);
 
@@ -44,9 +44,9 @@ export const ReviewVenue = () => {
   }
 
   return (
-    <div className="py-2 max-h-[400px] overflow-y-auto">
+    <div className="pb-2 max-h-[400px] overflow-y-auto">
       {review?.map((item, index) => (
-        <div key={item.review_id}>
+        <div key={item.id}>
           <div className="flex items-center justify-start my-3">
             <Image
               src={"/default_avatar.png"}
@@ -57,8 +57,19 @@ export const ReviewVenue = () => {
             />
             <div className="flex-row ml-6">
               <div className="flex items-center">
-                <p className="">{item.user.name}</p>
-                <div className="flex items-center ml-4">
+                <p className="">{item.name}</p>
+                <p className="px-2">-</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(item.createdAt).toLocaleDateString("vi-VN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </p>
+              </div>
+              <div className="flex items-center mt-2">
+                <div className="flex items-center">
+                  <p className="text-sm text-yellow-500 mr-2">{item.rating}</p>
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
@@ -71,16 +82,7 @@ export const ReviewVenue = () => {
                     />
                   ))}
                 </div>
-              </div>
-              <div className="flex items-center mt-2">
-                <p className="text-sm text-gray-500">{item.comment}</p>
-                {/* <p className="text-sm text-gray-500 ml-2">
-                  {new Date(item.created_at).toLocaleDateString("vi-VN", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
-                </p> */}
+                <p className="ml-2 text-sm text-gray-500">{item.comment}</p>
               </div>
             </div>
           </div>

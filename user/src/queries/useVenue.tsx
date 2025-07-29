@@ -17,22 +17,18 @@ export const useGetVenueDetail = (id: number) => {
   });
 };
 
-export const useGetVenueNearHome = (lat?: number, lng?: number) => {
+export const useVenues = (options?: {
+  pageNo?: number;
+  pageSize?: number;
+  lng?: number;
+  lat?: number;
+  name?: string;
+  types?: number[];
+  maxDistance?: number;
+}) => {
   return useQuery({
-    queryKey: ["getVenueNearHome", lat, lng],
-    queryFn: () => venueApiRequest.sGetVenueNearHome(lat, lng),
+    queryKey: ["getVenueNearHome", options],
+    queryFn: () => venueApiRequest.useVenues(options),
     staleTime: 10 * 1000,
-  });
-};
-
-export const useGetDirection = (
-  destination: [number, number],
-  origin?: [number, number],
-  vehicle?: string
-) => {
-  return useMutation({
-    mutationKey: ["getDirection", destination, origin, vehicle],
-    mutationFn: () =>
-      venueApiRequest.sGetDirection(destination, origin, vehicle),
   });
 };

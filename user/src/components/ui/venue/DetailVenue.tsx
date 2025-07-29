@@ -12,6 +12,9 @@ import { useGetFieldByVenueId } from "@/queries/useField";
 import { cn, getAccessTokenFormLocalStorage } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
+import StarRatings from "react-star-ratings";
+
+import { ImageVenue } from "@/components/ui/venue/detail/Image";
 
 export const DetailVenue = () => {
   const [detailVenue, setDetailVenue] = useState<VenueDetail>();
@@ -99,20 +102,20 @@ export const DetailVenue = () => {
         <div className="   ">
           <h1 className="text-xl font-bold text-gray-700">
             {detailVenue?.name}
-            {/*Venue 1 của Owner 111 Venue 1 của Owner 111*/}
           </h1>
           <div className="flex items-center mt-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={cn(
-                  "h-4 w-4 mr-0.5",
-                  i < Math.floor(detailVenue?.rating || 0)
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-gray-300"
-                )}
-              />
-            ))}
+            {detailVenue?.rating != 0 && (
+              <p className="text-sm text-yellow-300 mr-2">
+                {detailVenue?.rating}
+              </p>
+            )}
+            <StarRatings
+              rating={detailVenue?.rating || 0}
+              starRatedColor="yellow"
+              name="rating"
+              starDimension="16px"
+              starSpacing="2px"
+            />
           </div>
         </div>
         <div className="flex gap-2">
@@ -122,7 +125,7 @@ export const DetailVenue = () => {
 
           <Button
             className={`${
-              detailVenue?.status !== "active"
+              detailVenue?.status !== "ENABLE"
                 ? "bg-gray-500 cursor-not-allowed"
                 : "bg-orange-500 hover:bg-orange-600"
             }`}
@@ -133,11 +136,9 @@ export const DetailVenue = () => {
                 router.push("/login");
               }
             }}
-            disabled={detailVenue?.status !== "active"}
+            disabled={detailVenue?.status !== "ENABLE"}
           >
-            {detailVenue?.status !== "active"
-              ? "Sân chưa hoạt động"
-              : "Đặt lịch"}
+            Đặt lịch
           </Button>
         </div>
       </div>
@@ -147,14 +148,16 @@ export const DetailVenue = () => {
         setIsOpen={setIsFieldModalOpen}
       />
       {/* Tabs */}
-      <div className="mt-4 px-4">
-        <Tabs defaultValue="info">
-          <TabsList className="grid grid-cols-4 mb-4">
-            <TabsTrigger value="info">Thông tin</TabsTrigger>
-            <TabsTrigger value="reviews">Đánh giá</TabsTrigger>
-            <TabsTrigger value="services">Dịch vụ</TabsTrigger>
-            <TabsTrigger value="photos">Hình ảnh</TabsTrigger>
-          </TabsList>
+      <div className="mt-4 px-4 flex-1 overflow-auto">
+        <Tabs defaultValue="info" className="flex flex-col">
+          <div className="sticky top-0 z-10 bg-white">
+            <TabsList className="grid grid-cols-4 mb-4">
+              <TabsTrigger value="info">Thông tin</TabsTrigger>
+              <TabsTrigger value="reviews">Đánh giá</TabsTrigger>
+              <TabsTrigger value="services">Dịch vụ</TabsTrigger>
+              <TabsTrigger value="photos">Hình ảnh</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="info" className="space-y-4">
             <InfoDetailVenue venue={data?.payload.data} />
@@ -171,26 +174,7 @@ export const DetailVenue = () => {
           </TabsContent>
 
           <TabsContent value="photos">
-            {/* <div className="grid grid-cols-2 gap-2">
-              {detailVenue?.images.default.map(
-                (image: string, index: number) => {
-                  return (
-                    <div
-                      key={index}
-                      className="relative h-32 rounded overflow-hidden"
-                    >
-                      <Image
-                          loader={() => image || "/placeholder.png"}
-                        src={image || "/placeholder.png"}
-                        alt={`${detailVenue?.venue_name} ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  );
-                }
-              )}
-            </div> */}
+            <ImageVenue />
           </TabsContent>
         </Tabs>
       </div>

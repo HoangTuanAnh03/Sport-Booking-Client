@@ -75,6 +75,8 @@ const MapComponent = () => {
   // handler venue id selected change marker and fly to venue
   useEffect(() => {
     setPerVenueIdSelected(venueIdSelected);
+    setDirectionMode(false);
+    removePopup();
     if (venueIdSelected !== null && coordinateVenues) {
       const venueSelected = coordinateVenues.find(
         (coord) => coord.id == venueIdSelected
@@ -89,9 +91,6 @@ const MapComponent = () => {
           zoom,
         });
       }, 500);
-    } else {
-      setDirectionMode(false);
-      removePopup();
     }
   }, [venueIdSelected]);
 
@@ -242,41 +241,34 @@ const MapComponent = () => {
     });
   };
 
-  const fetchDirections = (startCoords: Coord, endCoords: Coord) => {
-    const result = venueApiRequest.sGetDirection(
-      [endCoords[1], endCoords[0]],
-      [startCoords[1], startCoords[0]]
-    );
+  const fetchDirections = async (startCoords: Coord, endCoords: Coord) => {
+    try {
+      const result = await venueApiRequest.sGetDirection(
+        [endCoords[1], endCoords[0]],
+        [startCoords[1], startCoords[0]]
+      );
 
-    if (!result) {
-      alert("Could not find a route.");
-      return;
+      const data = result.payload.data;
+      if (data.routes && data.routes.length > 0) {
+        const route = data.routes[0].overview_polyline.points;
+        const distance = data.routes[0].legs[0].distance.text;
+        const time = data.routes[0].legs[0].duration.text;
+        const decodedRoute = decodePolyline(route);
+        displayRoute(
+          decodedRoute,
+          startCoords,
+          endCoords,
+          distance,
+          time,
+          mapRef.current!
+        );
+      } else {
+        alert("Không tìm thấy tuyến đường.");
+      }
+    } catch (error) {
+      console.error("Error fetching directions:", error);
+      alert("Lỗi khi tìm đường.");
     }
-
-    result
-      .then((dataPayload) => {
-        const data = dataPayload.payload.data;
-        if (data.routes && data.routes.length > 0) {
-          const route = data.routes[0].overview_polyline.points;
-          const distance = data.routes[0].legs[0].distance.text;
-          const time = data.routes[0].legs[0].duration.text;
-          const decodedRoute = decodePolyline(route);
-          displayRoute(
-            decodedRoute,
-            startCoords,
-            endCoords,
-            distance,
-            time,
-            mapRef.current!
-          );
-        } else {
-          alert("Could not find a route.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching directions:", error);
-        alert("Error fetching directions.");
-      });
   };
 
   const decodePolyline = (encoded: any) => {

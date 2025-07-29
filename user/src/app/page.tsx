@@ -12,17 +12,17 @@ import FieldModal from "@/components/FieldModal";
 import { useGetFieldByVenueId } from "@/queries/useField";
 import { useEffect, useState } from "react";
 import { Field } from "@/types/field";
-import { useGetVenueNearHome } from "@/queries/useVenue";
+import { useVenues } from "@/queries/useVenue";
 import { useRouter } from "next/navigation";
 import { useSaveUserLocation } from "@/hooks/use-location";
 
 export default function Home() {
   const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
   const [fieldData, setFieldData] = useState<Field[]>([]);
-  const [venueIdSelected, setVenueIdSelected] = useState<string>("");
+  const [venueIdSelected, setVenueIdSelected] = useState<number>(0);
 
   const { data: fields } = useGetFieldByVenueId(venueIdSelected ?? "");
-  const { data: venues, isLoading } = useGetVenueNearHome();
+  const { data: venues, isLoading } = useVenues();
   const accessToken = getAccessTokenFormLocalStorage();
   const router = useRouter();
   useSaveUserLocation();
@@ -97,19 +97,16 @@ export default function Home() {
                     </CardContent>
                   </Card>
                 ))
-              : venues?.payload.data?.map((field) => (
-                  <Link
-                    href={`/maps?id=${field.venue_id}`}
-                    key={field.venue_id}
-                  >
+              : venues?.payload.data?.map((venue) => (
+                  <Link href={`/maps?id=${venue.id}`} key={venue.id}>
                     <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
                       <div className="relative h-48">
                         <Image
                           loader={() =>
-                            field.images.thumbnail || "/placeholder.png"
+                            venue.images.thumbnail || "/placeholder.png"
                           }
-                          src={field.images.thumbnail || "/placeholder.png"}
-                          alt={field.venue_name}
+                          src={venue.images.thumbnail || "/placeholder.png"}
+                          alt={venue.name}
                           fill
                           className="object-cover"
                         />
@@ -119,12 +116,12 @@ export default function Home() {
                           <div className="h-20 flex-none w-20 rounded-full border-4 border-white bg-white overflow-hidden">
                             <Image
                               loader={() =>
-                                field.images?.thumbnail || "/default_avatar.png"
+                                venue.images?.thumbnail || "/default_avatar.png"
                               }
                               src={
-                                field.images?.thumbnail || "/default_avatar.png"
+                                venue.images?.thumbnail || "/default_avatar.png"
                               }
-                              alt={field.venue_name ?? "Venue Image"}
+                              alt={venue.name ?? "Venue Image"}
                               width={80}
                               height={80}
                               className="object-cover"
@@ -133,32 +130,32 @@ export default function Home() {
                           <div>
                             <div className="flex justify-between items-start">
                               <h3 className="font-semibold text-lg">
-                                {field.venue_name}
+                                {venue.name}
                               </h3>
                             </div>
                             <div className="flex items-center text-muted-foreground text-sm ">
                               <MapPin className="h-4 w-4 mr-1" />
                               <span className="text-red-500">
-                                {field.distance.toFixed(2)} km
+                                {venue.distance.toFixed(2)} km
                               </span>
                               <span className="mx-2">•</span>
-                              <span>{field.venue_address}</span>
+                              <span>{venue.address}</span>
                             </div>
                             <div className="flex items-center text-muted-foreground text-sm ">
                               <Clock className="h-4 w-4 mr-1" />
                               <span>
-                                {field.opening
-                                  ? formatTimeToHHMM(field.opening)
+                                {venue.openTime
+                                  ? formatTimeToHHMM(venue.openTime)
                                   : ""}{" "}
                                 -{" "}
-                                {field.closing
-                                  ? formatTimeToHHMM(field.closing)
+                                {venue.closeTime
+                                  ? formatTimeToHHMM(venue.closeTime)
                                   : ""}
                               </span>
                               <span className="mx-2">•</span>
                               <Phone className="h-4 w-4 mr-1" />
                               <span className="text-green-500">
-                                {field.phone_number}
+                                {venue.phoneNumber}
                               </span>
                             </div>
                           </div>
@@ -170,7 +167,7 @@ export default function Home() {
                             onClick={(e) => {
                               e.preventDefault();
                               if (accessToken) {
-                                setVenueIdSelected(field.venue_id);
+                                setVenueIdSelected(venue.id);
                               } else {
                                 router.push("/login");
                               }

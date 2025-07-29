@@ -4,9 +4,11 @@ export type UserReview = {
 };
 
 export type Review = {
-  review_id: number;
+  id: number;
+  name: string;
+  avatarUrl: string;
   rating: number;
   comment: string;
-  created_at: string; // Hoặc bạn có thể dùng `Date` nếu parse về
-  user: UserReview;
+  createdAt: string;
+  updatedAt: string;
 };
