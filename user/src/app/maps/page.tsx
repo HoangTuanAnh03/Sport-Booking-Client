@@ -29,14 +29,15 @@ export default function MapPage() {
   const { data } = useGetVenueForMap();
 
   const fieldTypesData = [
-    { id: 7, type: "pickleball", name: "Sân pickleball" },
+    { id: 0, type: "multiple", name: "Sân phức hợp" },
     { id: 1, type: "badminton", name: "Sân cầu lông" },
     { id: 2, type: "football", name: "Sân bóng đá" },
-    { id: 5, type: "tennis", name: "Sân tennis" },
-    { id: 4, type: "volleyball", name: "Sân bóng chuyền" },
-    { id: 3, type: "basketball", name: "Sân bóng rổ" },
-    { id: 100, type: "multiple", name: "Sân phức hợp" },
-    { id: 9, type: "golf", name: "Sân golf" },
+    { id: 3, type: "pickleball", name: "Sân pickleball" },
+    { id: 4, type: "tennis", name: "Sân tennis" },
+    { id: 5, type: "volleyball", name: "Sân bóng chuyền" },
+    { id: 6, type: "basketball", name: "Sân bóng rổ" },
+    { id: 7, type: "golf", name: "Sân golf" },
+    { id: 8, type: "tabletennis", name: "Sân bóng bàn" },
   ];
 
   useEffect(() => {

@@ -15,6 +15,7 @@ import { Star } from "lucide-react";
 import StarRatings from "react-star-ratings";
 
 import { ImageVenue } from "@/components/ui/venue/detail/Image";
+import { ServiceVenue } from "@/components/ui/venue/detail/Service";
 
 export const DetailVenue = () => {
   const [detailVenue, setDetailVenue] = useState<VenueDetail>();
@@ -105,16 +106,16 @@ export const DetailVenue = () => {
           </h1>
           <div className="flex items-center mt-1">
             {detailVenue?.rating != 0 && (
-              <p className="text-sm text-yellow-300 mr-2">
+              <p className="text-sm text-[#facc15] mr-2">
                 {detailVenue?.rating}
               </p>
             )}
             <StarRatings
               rating={detailVenue?.rating || 0}
-              starRatedColor="yellow"
+              starRatedColor="#facc15"
               name="rating"
-              starDimension="16px"
-              starSpacing="2px"
+              starDimension="18px"
+              starSpacing="1px"
             />
           </div>
         </div>
@@ -151,7 +152,7 @@ export const DetailVenue = () => {
       <div className="mt-4 px-4 flex-1 overflow-auto">
         <Tabs defaultValue="info" className="flex flex-col">
           <div className="sticky top-0 z-10 bg-white">
-            <TabsList className="grid grid-cols-4 mb-4">
+            <TabsList className="grid grid-cols-4 ">
               <TabsTrigger value="info">Thông tin</TabsTrigger>
               <TabsTrigger value="reviews">Đánh giá</TabsTrigger>
               <TabsTrigger value="services">Dịch vụ</TabsTrigger>
@@ -168,9 +169,10 @@ export const DetailVenue = () => {
           </TabsContent>
 
           <TabsContent value="services">
-            <div className="text-center py-8">
+            {/* <div className="text-center py-8">
               <p className="text-gray-500">Chưa có thông tin dịch vụ.</p>
-            </div>
+            </div> */}
+            <ServiceVenue />
           </TabsContent>
 
           <TabsContent value="photos">

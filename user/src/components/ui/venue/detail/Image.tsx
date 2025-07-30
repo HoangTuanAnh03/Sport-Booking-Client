@@ -27,8 +27,15 @@ export const ImageVenue = () => {
     );
   }
 
-  var r = images?.find((image) => image.imageType == ImageType.DEFAULT);
-  console.log("🚀 ~ r:", r);
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-2">
+        {[...Array(4)].map((_, idx) => (
+          <Skeleton key={idx} className="h-32 w-full rounded" />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 gap-2">
