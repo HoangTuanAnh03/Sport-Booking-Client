@@ -1,18 +1,6 @@
 import userApiRequest from "@/apiRequests/users";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 
-export const useGetAllUserQuery = (
-  spec: IModelSpecificationRequest,
-  page: IModelPaginateRequest
-) => {
-  return useQuery({
-    queryKey: ["users", spec, page],
-    queryFn: () => userApiRequest.sGetAll(spec, page),
-    placeholderData: keepPreviousData,
-    staleTime: 60 * 1000,
-  });
-};
-
 export const useGetByIdQuery = (id: string, enabled: boolean) => {
   return useQuery({
     queryKey: ["userById", id],
@@ -24,6 +12,6 @@ export const useGetByIdQuery = (id: string, enabled: boolean) => {
 
 export const useGetMyInfoMutation = () => {
   return useMutation({
-    mutationFn: userApiRequest.sGetMyInfo
+    mutationFn: userApiRequest.sGetMyInfo,
   });
 };

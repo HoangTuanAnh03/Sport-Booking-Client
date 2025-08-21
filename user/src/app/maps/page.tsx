@@ -30,14 +30,14 @@ export default function MapPage() {
 
   const fieldTypesData = [
     { id: 0, type: "multiple", name: "Sân phức hợp" },
-    { id: 1, type: "badminton", name: "Sân cầu lông" },
-    { id: 2, type: "football", name: "Sân bóng đá" },
-    { id: 3, type: "pickleball", name: "Sân pickleball" },
-    { id: 4, type: "tennis", name: "Sân tennis" },
-    { id: 5, type: "volleyball", name: "Sân bóng chuyền" },
-    { id: 6, type: "basketball", name: "Sân bóng rổ" },
-    { id: 7, type: "golf", name: "Sân golf" },
-    { id: 8, type: "tabletennis", name: "Sân bóng bàn" },
+    { id: 101, type: "badminton", name: "Sân cầu lông" },
+    { id: 102, type: "football", name: "Sân bóng đá" },
+    { id: 103, type: "pickleball", name: "Sân pickleball" },
+    { id: 104, type: "tennis", name: "Sân tennis" },
+    { id: 105, type: "volleyball", name: "Sân bóng chuyền" },
+    { id: 106, type: "basketball", name: "Sân bóng rổ" },
+    { id: 107, type: "golf", name: "Sân golf" },
+    { id: 108, type: "tabletennis", name: "Sân bóng bàn" },
   ];
 
   useEffect(() => {

@@ -1,31 +1,10 @@
-"use client";
-import { useAppStore } from "@/components/app-provider";
-import { getRefreshTokenFormLocalStorage } from "@/lib/utils";
-import { useLogoutMutation } from "@/queries/useAuth";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
-export default function Logout() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { mutateAsync } = useLogoutMutation();
-  const accessToken = searchParams.get("accessToken");
-  const ref = useRef<any>(null);
+import { Suspense } from "react";
+import LogoutComponent from "./LogoutComponent";
 
-  useEffect(() => {
-    if (
-      ref.current ||
-      (accessToken && accessToken === getRefreshTokenFormLocalStorage())
-    )
-      return;
-
-    ref.current = mutateAsync;
-
-    mutateAsync().then((res) => {
-      setTimeout(() => {
-        ref.current = null;
-      }, 1000);
-      router.push("/login");
-    });
-  }, [mutateAsync, router]);
-  return <div>Logout</div>;
+export default function LogoutPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LogoutComponent />
+    </Suspense>
+  );
 }

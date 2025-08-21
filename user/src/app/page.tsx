@@ -116,10 +116,10 @@ export default function Home() {
                           <div className="h-20 flex-none w-20 rounded-full border-4 border-white bg-white overflow-hidden">
                             <Image
                               loader={() =>
-                                venue.images?.thumbnail || "/default_avatar.png"
+                                venue.images?.avatar || "/default_avatar.png"
                               }
                               src={
-                                venue.images?.thumbnail || "/default_avatar.png"
+                                venue.images?.avatar || "/default_avatar.png"
                               }
                               alt={venue.name ?? "Venue Image"}
                               width={80}

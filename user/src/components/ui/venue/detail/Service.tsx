@@ -31,7 +31,7 @@ export function ServiceVenue() {
                 <h3 className="font-medium w-2/3">{service.name}</h3>
                 <div className="border"></div>
                 <p className="flex justify-center items-center w-1/3">
-                  {Number(100000).toLocaleString("vi-VN")} đ / {service.units}
+                  {service.price.toLocaleString("vi-VN")} đ / {service.units}
                 </p>
               </div>
             ))}
