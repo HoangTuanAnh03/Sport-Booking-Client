@@ -42,7 +42,7 @@ const LoginForm = () => {
     if (loginMutation.isPending) return;
 
     const res = await loginMutation.mutateAsync(values);
-    console.log("🚀 ~ onSubmit ~ res:", res)
+    console.log("🚀 ~ onSubmit ~ res:", res);
 
     if (res.status === 200) {
       // toast({ description: "Đăng nhập thành công" });

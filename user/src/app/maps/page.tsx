@@ -37,7 +37,7 @@ export default function MapPage() {
     { id: 105, type: "volleyball", name: "Sân bóng chuyền" },
     { id: 106, type: "basketball", name: "Sân bóng rổ" },
     { id: 107, type: "golf", name: "Sân golf" },
-    { id: 108, type: "tabletennis", name: "Sân bóng bàn" },
+    { id: 108, type: "padel", name: "Sân bóng bàn" },
   ];
 
   useEffect(() => {

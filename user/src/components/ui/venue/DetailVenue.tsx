@@ -131,11 +131,12 @@ export const DetailVenue = () => {
                 : "bg-orange-500 hover:bg-orange-600"
             }`}
             onClick={() => {
-              if (accessToken) {
-                showField();
-              } else {
-                router.push("/login");
-              }
+              // if (accessToken) {
+              showField();
+              // }
+              //  else {
+              //   router.push("/login");
+              // }
             }}
             disabled={detailVenue?.status !== "ENABLE"}
           >
