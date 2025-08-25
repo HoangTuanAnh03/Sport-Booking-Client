@@ -3,7 +3,7 @@ export {};
 
 declare global {
   type IBackendRes<T> = {
-    status: number;
+    code: number;
     data?: T;
   };
 

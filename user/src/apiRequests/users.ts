@@ -1,10 +1,18 @@
 import http from "@/utils/api";
-import { UserResponse } from "@/types/user";
+import {
+  ForgotPasswordBodyType,
+  VerifyOtpBodyType,
+} from "@/schemaValidations/user.schema";
 
 const userApiRequest = {
-  sGetById: (id: string) => http.get<IBackendRes<UserResponse>>(`users/${id}`),
-
-  sGetMyInfo: () => http.get<IBackendRes<UserResponse>>(`/me`),
+  sForgotPassword: (body: ForgotPasswordBodyType) =>
+    http.post<IBackendRes<any>>("/users/forgot-password", body, {
+      baseUrl: "http://localhost:8080",
+    }),
+  sVerifyOtp: (body: VerifyOtpBodyType) =>
+    http.post<IBackendRes<any>>("/users/verify-otp", body, {
+      baseUrl: "http://localhost:8080",
+    }),
 };
 
 export default userApiRequest;

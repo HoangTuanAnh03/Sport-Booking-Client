@@ -3,6 +3,8 @@ import { EntityError } from "@/utils/api";
 import { type ClassValue, clsx } from "clsx";
 import { UseFormSetError } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
+import jwt from "jsonwebtoken";
+import authApiRequest from "@/apiRequests/auth";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -119,5 +121,57 @@ export const getLocation = () => {
       : { lat: 21.003424077000034, lng: 105.84267282400003 };
   } else {
     return { lat: 21.003424077000034, lng: 105.84267282400003 };
+  }
+};
+
+type PayloadJWT = {
+  uid: string;
+  sub: string;
+  scope: string;
+  iss: string;
+  exp: number;
+  iat: number;
+  jti: string;
+};
+
+export const decodeJWT = (token: string) => {
+  return jwt.decode(token) as PayloadJWT;
+};
+
+export const checkAndRefreshToken = async (param?: {
+  onError?: () => void;
+  onSuccess?: () => void;
+}) => {
+  const accessToken = getAccessTokenFormLocalStorage();
+  const refreshToken = getRefreshTokenFormLocalStorage();
+  if (!accessToken || !refreshToken) return;
+
+  const decodedAccessToken = decodeJWT(accessToken);
+  const decodedRefreshToken = decodeJWT(refreshToken);
+
+  const now = Math.round(new Date().getTime() / 1000);
+
+  // trường hợp  refreshToken hết hạn thì không sử lý
+  if (decodedRefreshToken.exp <= now) {
+    removeTokenFormLocalStorage();
+    return param?.onError && param.onError();
+  }
+
+  // thời gian còn lại của accessToken: decodeAccessToken.exp - now
+  // thời gian hết hạn của accessToken: decodedAccessToken.exp - decodedAccessToken.iat
+  // Ví dụ thời gian sống của accessToken là 10s thì check còn < 2.5s thì gọi refreshToken
+  if (
+    decodedAccessToken.exp - now <
+    (decodedAccessToken.exp - decodedAccessToken.iat) / 3
+  ) {
+    try {
+      const { payload } = await authApiRequest.refreshToken();
+      // const { , } = payload!;
+      setAccessTokenFormLocalStorage(payload.data?.token!);
+      setRefreshTokenFormLocalStorage(payload.data?.refresh_token!);
+      param?.onSuccess && param.onSuccess();
+    } catch (error) {
+      param?.onError && param.onError();
+    }
   }
 };

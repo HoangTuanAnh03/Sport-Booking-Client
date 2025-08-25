@@ -55,13 +55,13 @@ export default function AppProvider({
     const fetchData = async () => {
       if (count.current === 0) {
         const accessToken = getAccessTokenFormLocalStorage();
-        if (accessToken) {
-          const res = await userApiRequest.sGetMyInfo();
-          if (res.status === 200) {
-            setImage(res.payload.data?.avatar ?? "");
-            setName(res.payload.data?.name!);
-          }
-        }
+        // if (accessToken) {
+        //   const res = await userApiRequest.sGetMyInfo();
+        //   if (res.status === 200) {
+        //     setImage(res.payload.data?.avatar ?? "");
+        //     setName(res.payload.data?.name!);
+        //   }
+        // }
         count.current++;
       }
     };

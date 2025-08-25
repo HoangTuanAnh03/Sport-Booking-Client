@@ -16,17 +16,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Description } from "@radix-ui/react-toast";
 import Link from "next/link";
-import { useLoginMutation, useLogoutMutation } from "@/queries/useAuth";
-import { useAppStore } from "@/components/app-provider";
+import { useLoginMutation } from "@/queries/useAuth";
+import { decodeJWT, getAccessTokenFormLocalStorage } from "@/lib/utils";
 
 const LoginForm = () => {
   const { toast } = useToast();
   const router = useRouter();
   const loginMutation = useLoginMutation();
-  const logoutMutation = useLogoutMutation();
-
-  const setImage = useAppStore((state) => state.setImage);
-  const setName = useAppStore((state) => state.setName);
 
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
@@ -42,25 +38,13 @@ const LoginForm = () => {
     if (loginMutation.isPending) return;
 
     const res = await loginMutation.mutateAsync(values);
-    console.log("🚀 ~ onSubmit ~ res:", res);
 
     if (res.status === 200) {
-      // toast({ description: "Đăng nhập thành công" });
-      const user = res.payload.data?.user!;
-      form.reset();
-      if (user.role !== "user") {
-        toast({
-          variant: "destructive",
-          title: "Chỉ người dùng thông thường mới được vào trang này",
-        });
-        await logoutMutation.mutateAsync();
-      } else {
-        toast({ description: "Đăng nhập thành công" });
-
-        setImage(user.image);
-        setName(user.name);
-        router.push("/");
-      }
+      toast({
+        variant: "default",
+        title: "Đăng nhập thành công",
+      });
+      router.push("/");
     } else {
       toast({
         variant: "destructive",
@@ -106,7 +90,7 @@ const LoginForm = () => {
                   Mật khẩu <abbr className="text-red-600">*</abbr>
                 </FormLabel>
                 <Description className="text-[#192fb5] font-normal">
-                  <Link href={"/users/password/new"}>Quên mật khẩu?</Link>
+                  <Link href={"/forgot-password"}>Quên mật khẩu?</Link>
                 </Description>
               </div>
               <FormControl>
@@ -131,9 +115,9 @@ const LoginForm = () => {
 
         <Button
           type="submit"
-          className="!mt-8 w-full h-11 bg-[green] hover:bg-[#006400] text-[16px]"
+          className="!mt-8 w-full h-11 bg-[#ED1B2F] hover:bg-[#c83333] text-[16px]"
         >
-          Đăng nhập
+          Đăng nhập bằng Email
         </Button>
       </form>
     </Form>
