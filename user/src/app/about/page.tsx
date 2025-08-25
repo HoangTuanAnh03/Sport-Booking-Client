@@ -11,7 +11,7 @@ export default function AboutPage() {
         <section className="mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-4xl font-bold mb-6">Về SportField</h1>
+              <h1 className="text-4xl font-bold mb-6">Về Sport Booking</h1>
               <p className="text-xl text-muted-foreground mb-8">
                 Chúng tôi kết nối người chơi thể thao với những sân chơi tốt
                 nhất. Nền tảng đặt sân thể thao trực tuyến hàng đầu Việt Nam.
@@ -32,7 +32,12 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="relative h-[400px] rounded-lg overflow-hidden">
-              <Image src="/about_1.png" alt="SportField Team" fill priority />
+              <Image
+                src="/about_1.png"
+                alt="Sport Booking Team"
+                fill
+                priority
+              />
             </div>
           </div>
         </section>
@@ -58,7 +63,7 @@ export default function AboutPage() {
                   <h3 className="text-xl font-semibold mb-2">Khởi đầu</h3>
                 </div>
                 <p className="text-muted-foreground">
-                  SportField được thành lập vào năm 2020 bởi một nhóm những
+                  Sport Booking được thành lập vào năm 2020 bởi một nhóm những
                   người đam mê thể thao, với mong muốn giải quyết vấn đề tìm và
                   đặt sân thể thao một cách dễ dàng.
                 </p>
@@ -90,9 +95,9 @@ export default function AboutPage() {
                   <h3 className="text-xl font-semibold mb-2">Hiện tại</h3>
                 </div>
                 <p className="text-muted-foreground">
-                  Ngày nay, SportField là nền tảng đặt sân thể thao trực tuyến
-                  hàng đầu Việt Nam, kết nối hàng nghìn người chơi mỗi ngày với
-                  các sân thể thao chất lượng.
+                  Ngày nay, Sport Booking là nền tảng đặt sân thể thao trực
+                  tuyến hàng đầu Việt Nam, kết nối hàng nghìn người chơi mỗi
+                  ngày với các sân thể thao chất lượng.
                 </p>
               </CardContent>
             </Card>
@@ -173,7 +178,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold mb-4">Liên hệ với chúng tôi</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
             Bạn có câu hỏi hoặc đề xuất? Đừng ngần ngại liên hệ với chúng tôi.
-            Đội ngũ SportField luôn sẵn sàng hỗ trợ bạn.
+            Đội ngũ Sport Booking luôn sẵn sàng hỗ trợ bạn.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <div className="flex items-center justify-center">

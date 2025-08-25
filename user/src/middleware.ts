@@ -7,7 +7,7 @@ const privatePaths = [
   "/users",
   // "/booking"
 ];
-const authPaths = ["/login", "/register", "/verify"];
+const authPaths = ["/login", "/register", "/authenticate", "/verify"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -32,6 +32,7 @@ export const config = {
     "/login",
     "/register",
     "/verify",
+    "/authenticate",
     // "/booking",
   ],
 };

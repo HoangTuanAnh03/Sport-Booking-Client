@@ -59,7 +59,9 @@ export default function Header() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center">
           <Link href="/" className="text-xl font-bold">
-            SportField
+            <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
+              Sport Booking
+            </span>
           </Link>
         </div>
 

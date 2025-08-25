@@ -14,7 +14,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">SportField</h3>
+            <h3 className="text-lg font-semibold mb-4">Sport Booking</h3>
             <p className="text-muted-foreground mb-4">
               Nền tảng đặt sân thể thao trực tuyến hàng đầu Việt Nam
             </p>
@@ -130,12 +130,12 @@ export default function Footer() {
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-2 text-muted-foreground" />
-                <span className="text-muted-foreground">(028) 9989 6868</span>
+                <span className="text-muted-foreground">0984292224</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-2 text-muted-foreground" />
                 <span className="text-muted-foreground">
-                  contact@sportfield.vn
+                  contact@sportbooking.vn
                 </span>
               </li>
             </ul>
@@ -144,8 +144,8 @@ export default function Footer() {
 
         <div className="border-t mt-12 pt-6 text-center text-muted-foreground">
           <p>
-            &copy; {new Date().getFullYear()} SportField. Tất cả các quyền được
-            bảo lưu.
+            &copy; {new Date().getFullYear()} Sport Booking. Tất cả các quyền
+            được bảo lưu.
           </p>
         </div>
       </div>

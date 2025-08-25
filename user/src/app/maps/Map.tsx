@@ -126,18 +126,51 @@ const MapComponent = () => {
   ): maplibregl.IControl => {
     const customButton = document.createElement("button");
     Object.assign(customButton.style, {
-      backgroundColor: "#3498ff",
-      color: "white",
-      padding: "10px",
-      borderRadius: "100%",
+      backgroundColor: "#ffffff",
+      color: "#374151",
+      padding: "12px",
+      borderRadius: "12px",
       cursor: "pointer",
-      width: "50px",
-      height: "50px",
-      fontSize: "24px",
+      width: "48px",
+      height: "48px",
+      fontSize: "18px",
+      fontWeight: "600",
       textAlign: "center",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
+      border: "1px solid #e5e7eb",
+      boxShadow:
+        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      transition: "all 0.2s ease-in-out",
+      outline: "none",
+    });
+
+    // Add hover effects
+    customButton.addEventListener("mouseenter", () => {
+      Object.assign(customButton.style, {
+        backgroundColor: "#f9fafb",
+        transform: "translateY(-1px)",
+        boxShadow:
+          "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+      });
+    });
+
+    customButton.addEventListener("mouseleave", () => {
+      Object.assign(customButton.style, {
+        backgroundColor: "#ffffff",
+        transform: "translateY(0)",
+        boxShadow:
+          "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      });
+    });
+
+    customButton.addEventListener("mousedown", () => {
+      customButton.style.transform = "translateY(0) scale(0.95)";
+    });
+
+    customButton.addEventListener("mouseup", () => {
+      customButton.style.transform = "translateY(-1px) scale(1)";
     });
     customButton.textContent = textContent;
     customButton.addEventListener("click", handleClick);
