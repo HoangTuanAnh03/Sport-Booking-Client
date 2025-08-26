@@ -8,12 +8,10 @@ declare global {
   };
 
   interface IModelPaginate<T> {
-    meta: {
-      current: number;
-      pageSize: number;
-      pages: number;
-      total: number;
-    };
-    result: T[];
+    content: T[];
+    pageNo: number;
+    pageSize: number;
+    totalPages: number;
+    totalElements: number;
   }
 }
