@@ -8,12 +8,14 @@ import { NewPasswordReq } from "@/schemaValidations/user.schema";
 
 const authApiRequest = {
   refreshTokenRequest: null as Promise<{
-    status: number,
-    payload: IBackendRes<LoginResType>
+    status: number;
+    payload: IBackendRes<LoginResType>;
   }> | null,
 
   sLogin: (body: LoginBodyType) =>
-    http.post<IBackendRes<LoginResType>>("/auth/login", body),
+    http.post<IBackendRes<LoginResType>>("/auth/login", body, {
+      baseUrl: "http://localhost:8080",
+    }),
 
   login: (body: LoginBodyType) =>
     http.post<IBackendRes<LoginResType>>("/api/auth/login", body, {
@@ -23,7 +25,10 @@ const authApiRequest = {
   sOutbound: (code: string) =>
     http.post<IBackendRes<LoginResType>>(
       `/auth/outbound/authentication?code=${code}`,
-      null
+      null,
+      {
+        baseUrl: "http://localhost:8080",
+      }
     ),
 
   outbound: (code: string) =>
@@ -32,7 +37,9 @@ const authApiRequest = {
     }),
 
   sVerifyRegister: (code: string) =>
-    http.get<IBackendRes<LoginResType>>(`/auth/verifyRegister?code=${code}`),
+    http.get<IBackendRes<LoginResType>>(`/auth/verifyRegister?code=${code}`, {
+      baseUrl: "http://localhost:8080",
+    }),
 
   verifyRegister: (code: string) =>
     http.post<IBackendRes<LoginResType>>("/api/auth/verify/register", code, {
@@ -40,7 +47,9 @@ const authApiRequest = {
     }),
 
   sVerifyNewPassword: (body: NewPasswordReq) =>
-    http.post<IBackendRes<LoginResType>>(`/auth/verifyForgotPassword`, body),
+    http.post<IBackendRes<LoginResType>>(`/auth/verifyForgotPassword`, body, {
+      baseUrl: "http://localhost:8080",
+    }),
 
   verifyNewPassword: (body: NewPasswordReq) =>
     http.post<IBackendRes<LoginResType>>("/api/auth/verify/newPassword", body, {
@@ -66,7 +75,9 @@ const authApiRequest = {
     ),
 
   sRegister: (body: RegisterBodyType) =>
-    http.post<IBackendRes<any>>("/auth/register", body),
+    http.post<IBackendRes<any>>("/auth/register", body, {
+      baseUrl: "http://localhost:8080",
+    }),
 
   async refreshToken() {
     if (this.refreshTokenRequest) {
@@ -78,10 +89,10 @@ const authApiRequest = {
       {
         baseUrl: "",
       }
-    )
-    const result = await this.refreshTokenRequest
-    this.refreshTokenRequest = null
-    return result
+    );
+    const result = await this.refreshTokenRequest;
+    this.refreshTokenRequest = null;
+    return result;
   },
 
   sRefreshToken: (refreshToken: string) =>
@@ -90,6 +101,7 @@ const authApiRequest = {
       {},
       {
         headers: { Cookie: `refresh_token=${refreshToken}` },
+        baseUrl: "http://localhost:8080",
       }
     ),
 };

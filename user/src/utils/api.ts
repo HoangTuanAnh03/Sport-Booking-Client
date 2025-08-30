@@ -1,3 +1,4 @@
+import { useAppStore } from "@/components/app-provider";
 import envConfig from "@/config";
 import {
   normalizePath,
@@ -97,9 +98,11 @@ const request = async <Response>(
   // Nếu truyền baseUrl thì lấy giá trị truyền vào, truyền vào '' thì đồng nghĩa với việc chúng ta gọi API đến Next.js Server
 
   const baseUrl =
-    options?.baseUrl === undefined
-      ? envConfig.NEXT_PUBLIC_API_ENDPOINT
-      : options.baseUrl;
+    options?.baseUrl === ""
+      ? ""
+      : envConfig.NEXT_PUBLIC_API_ENDPOINT === ""
+      ? options?.baseUrl
+      : envConfig.NEXT_PUBLIC_API_ENDPOINT;
 
   const fullUrl = `${baseUrl}/${normalizePath(url)}`;
 
@@ -171,11 +174,13 @@ const request = async <Response>(
         "api/auth/refresh-token",
       ].some((item) => normalizePath(url).startsWith(item))
     ) {
-      const { access_token, refresh_token } = (
+      const { access_token, refresh_token, user } = (
         payload as IBackendRes<LoginResType>
       ).data!;
       setAccessTokenFormLocalStorage(access_token);
       setRefreshTokenFormLocalStorage(refresh_token);
+      const { name, avatarUrl, email, noPassword } = user!;
+      useAppStore.setState({ name, avatarUrl, email, noPassword });
     } else if ("api/auth/logout" === normalizePath(url)) {
       removeTokenFormLocalStorage();
     }

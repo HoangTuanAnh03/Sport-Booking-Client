@@ -6,10 +6,18 @@ import {
 import { User } from "@/types/user";
 
 const userApiRequest = {
+  sMyInfo: () =>
+    http.get<IBackendRes<User>>("/users/my-info", {
+      baseUrl: "http://localhost:8080",
+    }),
   sForgotPassword: (body: ForgotPasswordBodyType) =>
-    http.post<IBackendRes<any>>("/users/forgot-password", body),
+    http.post<IBackendRes<any>>("/users/forgot-password", body, {
+      baseUrl: "http://localhost:8080",
+    }),
   sVerifyOtp: (body: VerifyOtpBodyType) =>
-    http.post<IBackendRes<any>>("/users/verify-otp", body),
+    http.post<IBackendRes<any>>("/users/verify-otp", body, {
+      baseUrl: "http://localhost:8080",
+    }),
   sGetListUser: (params?: {
     pageNo?: number;
     pageSize?: number;
@@ -30,7 +38,9 @@ const userApiRequest = {
     const queryString = queryParams.toString();
     const url = queryString ? `/users?${queryString}` : "/users";
 
-    return http.get<IModelPaginate<User>>(url);
+    return http.get<IModelPaginate<User>>(url, {
+      baseUrl: "http://localhost:8080",
+    });
   },
 };
 

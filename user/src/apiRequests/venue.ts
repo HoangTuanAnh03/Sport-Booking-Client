@@ -4,6 +4,15 @@ const venueApiRequest = {
   sGetAllForMap: () => http.get<IBackendRes<VenueMap[]>>(`/venues/map`),
   sGetVenueDetail: (id: number) =>
     http.get<IBackendRes<VenueDetail>>(`/venues/${id}`),
+  sUploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return http.post<IBackendRes<string>>("/venue-images/upload", formData, {
+      baseUrl: "http://localhost:8090",
+      // Don't set Content-Type header - let browser set it automatically with boundary
+    });
+  },
   sGetDirection: (destination: Coord, origin?: Coord, vehicle?: string) => {
     const params = new URLSearchParams();
     if (origin) {

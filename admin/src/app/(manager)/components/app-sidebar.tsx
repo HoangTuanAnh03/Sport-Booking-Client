@@ -68,12 +68,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <SidebarGroupLabel className="h-[56px] flex items-center justify-center ">
-          <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
-            Sport Booking
-          </span>
-        </SidebarGroupLabel>
+      <SidebarHeader className="h-[56px] flex items-center justify-center">
+        <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent group-data-[state=collapsed]:hidden">
+          Sport Booking
+        </span>
+        <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent hidden group-data-[state=collapsed]:block">
+          S
+        </span>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

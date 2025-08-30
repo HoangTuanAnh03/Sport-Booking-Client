@@ -1,11 +1,12 @@
 "use client";
+import userApiRequest from "@/apiRequests/users";
 import {
-  decodeJWT,
   getAccessTokenFormLocalStorage,
   removeTokenFormLocalStorage,
 } from "@/lib/utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { redirect } from "next/navigation";
 import React, { useEffect, useRef } from "react";
 import { create } from "zustand";
 
@@ -20,10 +21,27 @@ const queryClient = new QueryClient({
 
 type AppStoreType = {
   isAuth: boolean;
+  name: string;
+  setName: (name?: string | undefined) => void;
+  avatarUrl: string | null;
+  setImage: (image: string) => void;
+  email: string | null;
+  setEmail: (email: string | null) => void;
 };
 
 export const useAppStore = create<AppStoreType>((set) => ({
   isAuth: false,
+  name: "",
+  setName: (name?: string | undefined) => {
+    set({ name: name, isAuth: Boolean(name) });
+    if (!name) {
+      removeTokenFormLocalStorage();
+    }
+  },
+  avatarUrl: null,
+  setImage: (image) => set({ avatarUrl: image }),
+  email: null,
+  setEmail: (email: string | null) => set({ email: email }),
 }));
 
 export default function AppProvider({
@@ -34,12 +52,28 @@ export default function AppProvider({
   const count = useRef(0);
 
   useEffect(() => {
-    if (count.current === 0) {
-      const accessToken = getAccessTokenFormLocalStorage();
-      // if (accessToken) {
-      //   const role = decodeJWT(accessToken).scope;
-      // }
-      count.current++;
+    const accessToken = getAccessTokenFormLocalStorage();
+    if (count.current === 0 && accessToken) {
+      const initializeApp = async () => {
+        try {
+          const res = await userApiRequest.sMyInfo();
+
+          if (res.status === 200) {
+            const { name, avatarUrl, email } = res.payload.data!;
+            useAppStore.setState({ name, avatarUrl, email });
+          } else {
+            removeTokenFormLocalStorage();
+            window.location.href = `/logout?accessToken=${accessToken}`;
+          }
+        } catch (error) {
+          removeTokenFormLocalStorage();
+          window.location.href = `/logout?accessToken=${accessToken}`;
+        }
+
+        count.current++;
+      };
+
+      initializeApp();
     }
   }, []);
 

@@ -26,24 +26,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAppStore } from "@/components/app-provider";
-import { decodeJWT, getAccessTokenFormLocalStorage } from "@/lib/utils";
 import { ButtonLogout } from "@/app/(manager)/components/ButtonLogout";
-import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const name = useAppStore((state) => state.name);
-  const accessToken = getAccessTokenFormLocalStorage();
-  const image = useAppStore((state) => state.image);
-  const [email, setEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (accessToken) {
-      const decode = decodeJWT(accessToken!);
-      setEmail(decode.sub);
-    }
-  }, [accessToken]);
+  const image = useAppStore((state) => state.avatarUrl);
+  const email = useAppStore((state) => state.email);
 
   return (
     <SidebarMenu>
@@ -57,14 +47,19 @@ export function NavUser() {
               <Avatar className="h-12 w-12 rounded-lg">
                 <AvatarImage
                   className="object-cover"
-                  src={
-                    image !== ""
-                      ? process.env.NEXT_PUBLIC_STORAGE_API_ENDPOINT + image
-                      : "/default_avatar.png"
-                  }
+                  src={image && image !== "" ? image : undefined}
                   alt={name}
                 />
-                <AvatarFallback className="rounded-lg">AD</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {name
+                    ? name
+                        .split(" ")
+                        .slice(-2)
+                        .map((word) => word.charAt(0))
+                        .join("")
+                        .toUpperCase()
+                    : "N/A"}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 {name ? (
@@ -92,25 +87,30 @@ export function NavUser() {
                 <Avatar className="h-12 w-12 rounded-lg">
                   <AvatarImage
                     className="object-cover"
-                    src={
-                      image !== ""
-                        ? process.env.NEXT_PUBLIC_STORAGE_API_ENDPOINT + image
-                        : "/default_avatar.png"
-                    }
+                    src={image && image !== "" ? image : undefined}
                     alt={name}
                   />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {name
+                      ? name
+                          .split(" ")
+                          .slice(-2)
+                          .map((word) => word.charAt(0))
+                          .join("")
+                          .toUpperCase()
+                      : "N/A"}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   {name ? (
                     <span className="truncate font-semibold">{name}</span>
                   ) : (
-                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
                   )}
                   {email ? (
                     <span className="truncate text-xs">{email}</span>
                   ) : (
-                    <Skeleton className="h-3 w-full mt-1" />
+                    <Skeleton className="h-3 w-3/4 mt-1" />
                   )}
                 </div>
               </div>

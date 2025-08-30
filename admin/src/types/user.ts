@@ -5,6 +5,7 @@ export interface User {
   avatarUrl: string | null;
   phoneNumber: string | null;
   realmRole: string;
+  noPassword?: boolean;
 }
 
 export interface UserResponse {
