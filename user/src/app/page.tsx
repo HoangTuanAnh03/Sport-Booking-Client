@@ -24,7 +24,7 @@ export default function Home() {
   const [fieldData, setFieldData] = useState<Field[]>([]);
   const [venueIdSelected, setVenueIdSelected] = useState<number>(0);
   const [searchFilters, setSearchFilters] = useState<VenueSearchFilters>({
-    name: "",
+    search: "",
     sportTypes: [],
     maxDistance: undefined,
   });
@@ -37,7 +37,7 @@ export default function Home() {
 
   // Check if any filters are active
   const hasActiveFilters =
-    searchFilters.name ||
+    searchFilters.search ||
     searchFilters.sportTypes.length > 0 ||
     searchFilters.maxDistance;
 
@@ -45,7 +45,7 @@ export default function Home() {
   const venueQueryParams = {
     pageNo: 0,
     pageSize: 20,
-    ...(searchFilters.name && { name: searchFilters.name }),
+    ...(searchFilters.search && { search: searchFilters.search }),
     ...(searchFilters.sportTypes.length > 0 && {
       types: searchFilters.sportTypes,
     }),
@@ -98,7 +98,6 @@ export default function Home() {
           <div className="max-w-4xl mx-auto mb-8">
             <VenueSearchFilter
               onFiltersChange={handleFiltersChange}
-              placeholder="Tìm kiếm sân thể thao theo tên..."
               debounceDelay={500}
               className="w-full"
             />

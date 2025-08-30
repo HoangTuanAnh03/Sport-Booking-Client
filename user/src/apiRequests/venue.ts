@@ -27,7 +27,7 @@ const venueApiRequest = {
     pageSize?: number;
     lng?: number;
     lat?: number;
-    name?: string;
+    search?: string;
     types?: number[];
     maxDistance?: number;
   }) => {
@@ -38,7 +38,7 @@ const venueApiRequest = {
       params.set("pageSize", options.pageSize.toString());
     if (options?.lng !== undefined) params.set("lng", options.lng.toString());
     if (options?.lat !== undefined) params.set("lat", options.lat.toString());
-    if (options?.name) params.set("name", options.name);
+    if (options?.search) params.set("search", options.search);
     if (options?.types && options.types.length > 0) {
       options.types.forEach((type) => params.append("types", type.toString()));
     }

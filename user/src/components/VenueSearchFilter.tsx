@@ -21,7 +21,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { getSportTypeOptions, DISTANCE_OPTIONS } from "@/lib/sport-types";
 
 export interface VenueSearchFilters {
-  name: string;
+  search: string;
   sportTypes: number[];
   maxDistance?: number;
 }
@@ -29,14 +29,12 @@ export interface VenueSearchFilters {
 interface VenueSearchFilterProps {
   onFiltersChange: (filters: VenueSearchFilters) => void;
   className?: string;
-  placeholder?: string;
   debounceDelay?: number;
 }
 
 export default function VenueSearchFilter({
   onFiltersChange,
   className = "",
-  placeholder = "Tìm kiếm tên sân thể thao...",
   debounceDelay = 500,
 }: VenueSearchFilterProps) {
   const [searchName, setSearchName] = useState("");
@@ -53,7 +51,7 @@ export default function VenueSearchFilter({
   // Notify parent component when filters change
   useEffect(() => {
     const filters: VenueSearchFilters = {
-      name: debouncedSearchName,
+      search: debouncedSearchName,
       sportTypes: selectedSportTypes,
       maxDistance: selectedMaxDistance,
     };
@@ -98,7 +96,7 @@ export default function VenueSearchFilter({
           <Search className="h-4 w-4 text-gray-400 ml-2" />
           <Input
             type="text"
-            placeholder={placeholder}
+            placeholder="Tìm kiếm sân thể thao theo tên, đại chỉ..."
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
             className="border-none shadow-none focus-visible:ring-0 p-0"
@@ -265,7 +263,7 @@ export default function VenueSearchFilter({
         <div className="flex flex-wrap gap-2 mt-3">
           {searchName && (
             <div className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm">
-              <span>Tên sân: &ldquo;{searchName}&rdquo;</span>
+              <span>Tên sân hoặc địa chỉ: &ldquo;{searchName}&rdquo;</span>
               <Button
                 variant="ghost"
                 size="sm"
