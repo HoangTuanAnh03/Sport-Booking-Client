@@ -1,3 +1,4 @@
+import { useAppStore } from "@/components/app-provider";
 import envConfig from "@/config";
 import {
   normalizePath,
@@ -7,6 +8,7 @@ import {
 } from "@/lib/utils";
 import { LoginResType } from "@/schemaValidations/auth.schema";
 import { redirect } from "next/navigation";
+import { any } from "zod";
 
 type CustomOptions = Omit<RequestInit, "method"> & {
   baseUrl?: string | undefined;
@@ -96,10 +98,7 @@ const request = async <Response>(
   // Nếu không truyền baseUrl (hoặc baseUrl = undefined) thì lấy từ envConfig.NEXT_PUBLIC_API_ENDPOINT
   // Nếu truyền baseUrl thì lấy giá trị truyền vào, truyền vào '' thì đồng nghĩa với việc chúng ta gọi API đến Next.js Server
 
-  const baseUrl =
-    options?.baseUrl === undefined
-      ? envConfig.NEXT_PUBLIC_API_ENDPOINT
-      : options.baseUrl;
+  const baseUrl = options?.baseUrl === undefined ? "" : options.baseUrl;
 
   const fullUrl = `${baseUrl}/${normalizePath(url)}`;
 
@@ -112,21 +111,20 @@ const request = async <Response>(
     body,
     method,
   });
-  const payload: Response = await res.json();
-  const data = {
-    status: res.status,
-    payload,
-  };
+  // const payload: Response = await res.json();
+  let payload: Response;
+
   // Interceptor là nời chúng ta xử lý request và response trước khi trả về cho phía component
   if (!res.ok) {
-    if (res.status === ENTITY_ERROR_STATUS) {
-      throw new EntityError(
-        data as {
-          status: 422;
-          payload: EntityErrorPayload;
-        }
-      );
-    } else if (
+    // if (res.status === ENTITY_ERROR_STATUS) {
+    //   throw new EntityError(
+    //     data as {
+    //       status: 422;
+    //       payload: EntityErrorPayload;
+    //     }
+    //   );
+    // } else
+    if (
       res.status === AUTHENTICATION_ERROR_STATUS &&
       !fullUrl.includes("auth/login")
     ) {
@@ -154,12 +152,18 @@ const request = async <Response>(
         )[1];
         redirect(`/logout?accessToken=${accessToken}`);
       }
+    } else {
+      throw new HttpError({
+        status: res.status,
+        payload: null,
+      });
     }
-    // else {
-    //   throw new HttpError(data);
-    // }
     // return data;
   }
+  if (res.status == 204) {
+    return { status: res.status, payload: null };
+  }
+  payload = await res.json();
 
   // Đảm bảo logic dưới đây chỉ chạy ở phía client (browser)
   if (res.ok && isClient) {
@@ -171,16 +175,21 @@ const request = async <Response>(
         "api/auth/refresh-token",
       ].some((item) => normalizePath(url).startsWith(item))
     ) {
-      const { access_token, refresh_token } = (
+      const { access_token, refresh_token, user } = (
         payload as IBackendRes<LoginResType>
       ).data!;
       setAccessTokenFormLocalStorage(access_token);
       setRefreshTokenFormLocalStorage(refresh_token);
+      // const { name, avatarUrl, email, noPassword } = user!;
+      // useAppStore.setState({ name, avatarUrl, email, noPassword });
     } else if ("api/auth/logout" === normalizePath(url)) {
       removeTokenFormLocalStorage();
     }
   }
-  return data;
+  return {
+    status: res.status,
+    payload,
+  };
 };
 
 const http = {

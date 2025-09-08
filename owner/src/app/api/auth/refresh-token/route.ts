@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   const refreshToken = cookieStore.get("refreshToken")?.value;
   const { payload } = await authApiRequest.sRefreshToken(refreshToken ?? "");
 
-  if (payload.code === 200) {
+  if (payload?.code === 200) {
     const { access_token, refresh_token } = payload.data!;
     const decodedAccessToken = decodeJWT(access_token);
     const decodedRefreshToken = decodeJWT(refresh_token);

@@ -18,22 +18,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import authApiRequest from "@/apiRequests/auth";
-import { useAppStore } from "@/components/app-provider";
 import { toast } from "@/hooks/use-toast";
 import { decodeJWT, getAccessTokenFormLocalStorage } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const EditForm = () => {
   const router = useRouter();
-  const setRole = useAppStore((state) => state.setRole);
-  const authCodeRegex = /code=([^&]+)/;
-  const isMatch = window.location.href.match(authCodeRegex);
-  const authCode = isMatch ? isMatch[1] : "";
-  console.log("🚀 ~ EditForm ~ authCode:", authCode);
+  const [authCode, setAuthCode] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!isMatch) {
-    router.push("/login");
-  }
+  useEffect(() => {
+    // This code only runs on the client side
+    const authCodeRegex = /code=([^&]+)/;
+    const isMatch = window.location.href.match(authCodeRegex);
+    const code = isMatch ? isMatch[1] : "";
+
+    setAuthCode(code);
+    setLoading(false);
+
+    if (!isMatch) {
+      router.push("/login");
+    }
+  }, [router]);
 
   const form = useForm<EditPasswordBodyType>({
     resolver: zodResolver(EditPasswordBody),
@@ -45,18 +52,16 @@ const EditForm = () => {
   });
 
   async function onSubmit(values: EditPasswordBodyType) {
+    if (!authCode) return;
+
     const body: NewPasswordReq = { code: authCode, password: values.password };
 
     const { payload } = await authApiRequest.verifyNewPassword(body);
-    if (payload.code === 200) {
+    if (payload?.code === 200) {
       toast({
         title: "Đổi mật khẩu thành công",
       });
       const accessToken = getAccessTokenFormLocalStorage();
-      if (accessToken) {
-        const role = decodeJWT(accessToken).scope;
-        setRole(role);
-      }
       router.push("/");
     } else {
       toast({
@@ -64,6 +69,16 @@ const EditForm = () => {
         title: "Mã code không hợp lệ",
       });
     }
+  }
+
+  // Show loading state while checking auth code
+  if (loading) {
+    return <div>Đang tải...</div>;
+  }
+
+  // If no auth code, component will redirect in the effect
+  if (!authCode) {
+    return <div>Đang chuyển hướng...</div>;
   }
 
   return (

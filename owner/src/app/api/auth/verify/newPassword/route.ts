@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   console.log("🚀 ~ POST ~ payload:", payload);
   const cookieStore = cookies();
 
-  if (payload.code === 200) {
+  if (payload?.code === 200) {
     const { access_token, refresh_token } = payload.data!;
     const decodedAccessToken = decodeJWT(access_token);
     const decodedRefreshToken = decodeJWT(refresh_token);
@@ -37,5 +37,4 @@ export async function POST(request: NextRequest) {
       status: 500,
     });
   }
-  
 }

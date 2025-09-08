@@ -36,11 +36,11 @@ const NewPasswordForm = () => {
   async function onSubmit(values: ForgotPasswordBodyType) {
     const { payload } = await userApiRequest.sForgotPassword(values);
 
-    if (payload.code === 200) {
+    if (payload?.code === 200) {
       router.push(`/verify?email=${values.email}`);
-    } else if (payload.code === 404) {
+    } else if (payload?.code === 404) {
       setError("Oops! Email không tồn tại, vui lòng thử lại.");
-    } else if (payload.code === 1404) {
+    } else if (payload?.code === 1404) {
       setError(
         "Email này đã dùng để đăng ký qua tài khoản Google.\nVui lòng đăng nhập bằng Google"
       );

@@ -42,13 +42,13 @@ export default function ForgotPasswordPage() {
         email: validatedData.email,
       });
 
-      if (response.payload.code === 404) {
+      if (response.payload?.code === 404) {
         // show error not found email in form
         setErrors({ email: "Email không tồn tại" });
         return;
       }
 
-      if (response.payload.code === 429) {
+      if (response.payload?.code === 429) {
         toast({
           variant: "destructive",
           title: "Thao tác quá nhiều",

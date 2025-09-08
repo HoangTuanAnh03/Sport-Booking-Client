@@ -20,10 +20,27 @@ const queryClient = new QueryClient({
 
 type AppStoreType = {
   isAuth: boolean;
+  name: string;
+  setName: (name?: string | undefined) => void;
+  avatarUrl: string | null;
+  setImage: (image: string) => void;
+  email: string | null;
+  setEmail: (email: string | null) => void;
 };
 
 export const useAppStore = create<AppStoreType>((set) => ({
   isAuth: false,
+  name: "",
+  setName: (name?: string | undefined) => {
+    set({ name: name, isAuth: Boolean(name) });
+    if (!name) {
+      removeTokenFormLocalStorage();
+    }
+  },
+  avatarUrl: null,
+  setImage: (image) => set({ avatarUrl: image }),
+  email: null,
+  setEmail: (email: string | null) => set({ email: email }),
 }));
 
 export default function AppProvider({

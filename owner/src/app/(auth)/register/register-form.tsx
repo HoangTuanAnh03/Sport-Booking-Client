@@ -39,7 +39,7 @@ const RegisterForm = () => {
   async function onSubmit(values: RegisterBodyType) {
     const resRegister = await authApiRequest.sRegister(values);
 
-    if (resRegister.payload.code === 201) {
+    if (resRegister.payload?.code === 201) {
       // form.reset();
       router.push(`/verify/register?email=${values.email}`);
     } else if (resRegister.status === 409) {

@@ -8,11 +8,11 @@ export async function POST(request: Request) {
   const cookieStore = cookies();
   const res = await authApiRequest.sLogin(body);
   if (res.status === 200) {
-    const { access_token, refresh_token } = res.payload.data!;
+    const { access_token, refresh_token } = res.payload?.data!;
     const decodedAccessToken = decodeJWT(access_token);
     const decodedRefreshToken = decodeJWT(refresh_token);
 
-    if (res.payload.data?.user.role !== "ROLE_OWNER") {
+    if (res.payload?.data?.user.role !== "ROLE_OWNER") {
       return Response.json(res.payload, {
         status: 403,
       });

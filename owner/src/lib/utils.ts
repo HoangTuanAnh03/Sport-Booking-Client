@@ -108,8 +108,8 @@ export const checkAndRefreshToken = async (param?: {
     (decodedAccessToken.exp - decodedAccessToken.iat) / 3
   ) {
     try {
-      const { payload } = await authApiRequest.refreshToken();
-      const { access_token, refresh_token } = payload.data!;
+      const res = await authApiRequest.refreshToken();
+      const { access_token, refresh_token } = res?.payload?.data!;
       setAccessTokenFormLocalStorage(access_token);
       setRefreshTokenFormLocalStorage(refresh_token);
       param?.onSuccess && param.onSuccess();

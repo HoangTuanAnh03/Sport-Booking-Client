@@ -1,9 +1,6 @@
-import Search from "@/app/components/search/Search";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <main>
-      <Search />
-    </main>
-  );
+  redirect("/dashboard");
+  return <main></main>;
 }

@@ -1,17 +1,13 @@
-"use client"
+"use client";
 import { useAppStore } from "@/components/app-provider";
 import { AvatarOption } from "@/components/header/Avatar";
 import { NavigationMenuDemo } from "@/components/header/Navigation";
 import { ModeToggle } from "@/components/mode-toggle";
-import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 
 function Header() {
-  const isAuth = useAppStore((state) => state.isAuth)
-  const role = useAppStore((state) => state.role)
-  console.log("🚀 ~ Header ~ isAuth:", isAuth)
-  console.log("🚀 ~ Header ~ role:", role)
+  const isAuth = useAppStore((state) => state.isAuth);
 
   return (
     <header className="sticky top-0 h-16 py-0 px-4 z-50 w-full flex items-center justify-center bg-custom-gradient border-b-[1px] border-solid border-[#ffffff1a]">
@@ -29,14 +25,12 @@ function Header() {
             <Link className="" href={"/company"}>
               Nhà tuyển dụng
             </Link>
-            {
-              isAuth ? (
-                <AvatarOption />
-              ) : (
-                <Link href={"/login"}>Đăng Nhập/Đăng ký</Link>
-              )
-            }
-            <ModeToggle/>
+            {isAuth ? (
+              <AvatarOption />
+            ) : (
+              <Link href={"/login"}>Đăng Nhập/Đăng ký</Link>
+            )}
+            <ModeToggle />
           </div>
         </div>
       </div>

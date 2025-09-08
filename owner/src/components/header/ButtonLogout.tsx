@@ -8,14 +8,12 @@ import { useRouter } from "next/navigation";
 export function ButtonLogout() {
   const router = useRouter();
   const logoutMutation = useLogoutMutation();
-  const setRole = useAppStore((state) => state.setRole);
 
   const handleLogout = async () => {
     if (logoutMutation.isPending) return;
 
     try {
       await authApiRequest.logout();
-      setRole();
       router.push("/login");
     } catch (error) {
       handleErrorApi({
