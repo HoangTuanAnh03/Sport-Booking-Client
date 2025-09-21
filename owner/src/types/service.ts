@@ -1,5 +1,3 @@
-import { Service } from "@/types/venue";
-
 export interface CreateServiceRequest {
   name: string;
   price: number;
@@ -23,9 +21,4 @@ export interface ServiceResponse {
   units: string;
   isAvailable: boolean;
   categoryId: number;
-}
-
-export interface RestResponseServiceResponse {
-  code: number;
-  data: ServiceResponse;
 }

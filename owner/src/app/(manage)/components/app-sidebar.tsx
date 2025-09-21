@@ -9,6 +9,7 @@ import {
   Bot,
   BookOpen,
   Settings2,
+  PlusIcon,
 } from "lucide-react";
 
 import {
@@ -29,6 +30,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { NavMain } from "@/app/(manage)/components/nav-main";
 import { useGetMyVenuesQuery } from "@/queries/useVenue";
+import { AddVenueDialog } from "@/components/AddVenueDialog";
+import { Button } from "@/components/ui/button";
 
 type Item = {
   title: string;
@@ -51,6 +54,7 @@ const items: Item[] = [
 
 export function AppSidebar() {
   const [itemCurrent, setItemCurrent] = useState<Item>();
+  const [isAddVenueDialogOpen, setIsAddVenueDialogOpen] = useState(false);
   const { data: venues, isLoading, error } = useGetMyVenuesQuery();
 
   useEffect(() => {
@@ -69,10 +73,20 @@ export function AppSidebar() {
           ? [{ title: "Đang tải...", url: "#" }]
           : error
           ? [{ title: "Lỗi tải dữ liệu", url: "#" }]
-          : venues?.map((venue) => ({
-              title: venue.name,
-              url: `/venues/${venue.id}`,
-            })) || [],
+          : [
+              ...(venues?.map((venue) => ({
+                title: venue.name,
+                url: `/venues/${venue.id}`,
+              })) || []),
+              {
+                title: "Thêm địa điểm",
+                url: "#",
+                onClick: (e: React.MouseEvent) => {
+                  e.preventDefault();
+                  setIsAddVenueDialogOpen(true);
+                },
+              },
+            ],
       },
     ],
   };
@@ -126,6 +140,12 @@ export function AppSidebar() {
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>
+
+      {/* Add Venue Dialog */}
+      <AddVenueDialog
+        open={isAddVenueDialogOpen}
+        onOpenChange={setIsAddVenueDialogOpen}
+      />
     </Sidebar>
   );
 }

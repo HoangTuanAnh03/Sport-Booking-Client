@@ -44,6 +44,15 @@ export interface VenueDetail {
   images: VenueImage[];
 }
 
+export interface CreateVenueRequest {
+  name: string;
+  address: string;
+  phoneNumber: string;
+  bankName: string;
+  bankNumber: string;
+  bankHolderName: string;
+}
+
 export interface UpdateVenueRequest {
   name: string;
   address: string;
@@ -70,22 +79,11 @@ export interface Venue {
   name: string;
 }
 
-export interface VenueResponse {
-  code: number;
-  data: Venue[];
+export interface UpdateCategoryRequest {
+  name: string;
 }
 
-export interface VenueDetailResponse {
-  code: number;
-  data: VenueDetail;
-}
-
-export interface UpdateVenueResponse {
-  code: number;
-  data: VenueDetail;
-}
-
-export interface UpdateVenueStatusResponse {
-  code: number;
-  data?: any;
+export interface CreateCategoryRequest {
+  name: string;
+  venueId: number;
 }

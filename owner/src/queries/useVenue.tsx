@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UpdateVenueBodyType } from "@/schemaValidations/venue.schema";
 import { UpdateVenueStatusBodyType } from "@/schemaValidations/venue.schema";
 import { toast } from "@/hooks/use-toast";
+import { CreateVenueRequest } from "@/types/venue";
 
 export const useGetMyVenuesQuery = () => {
   return useQuery({
@@ -22,6 +23,34 @@ export const useGetVenueDetailQuery = (venueId: number) => {
       return response.payload?.data;
     },
     enabled: !!venueId,
+  });
+};
+
+export const useCreateVenueMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: CreateVenueRequest) => venueApiRequest.sCreateVenue(body),
+    onSuccess: (data, variables) => {
+      toast({
+        title: "Thành công",
+        description: "Tạo địa điểm mới thành công",
+      });
+
+      // Invalidate and refetch venues list
+      queryClient.invalidateQueries({
+        queryKey: ["venues", "me"],
+      });
+
+      return data;
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Lỗi",
+        description: error?.payload?.message ?? "Có lỗi xảy ra khi tạo địa điểm",
+        variant: "destructive",
+      });
+    },
   });
 };
 
@@ -92,6 +121,39 @@ export const useUpdateVenueStatusMutation = () => {
         title: "Lỗi",
         description:
           error?.payload?.message ?? "Có lỗi xảy ra khi cập nhật trạng thái",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useDeleteVenueMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (venueId: number) => venueApiRequest.sDeleteVenue(venueId),
+    onSuccess: (data, variables) => {
+      toast({
+        title: "Thành công",
+        description: "Xóa địa điểm thành công",
+      });
+
+      // Invalidate and refetch venues list
+      queryClient.invalidateQueries({
+        queryKey: ["venues", "me"],
+      });
+
+      // Also invalidate venue detail queries
+      queryClient.invalidateQueries({
+        queryKey: ["venues", "detail", variables],
+      });
+
+      return data;
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Lỗi",
+        description: error?.payload?.message ?? "Có lỗi xảy ra khi xóa địa điểm",
         variant: "destructive",
       });
     },

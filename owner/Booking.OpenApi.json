@@ -1,0 +1,928 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sport Booking API",
+    "description": "This API exposes all endpoints",
+    "termsOfService": "https://tuananhne.com/donate",
+    "contact": {
+      "name": "Hoàng Tuấn Anh",
+      "url": "https://tuananhne.com",
+      "email": "anhht17703@gmail.com"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "https://choosealicense.com/licenses/mit/"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Server URL in Development environment"
+    },
+    {
+      "url": "https://tuananhne.com",
+      "description": "Server URL in Production environment"
+    }
+  ],
+  "security": [
+    {
+      "Bearer Authentication": []
+    }
+  ],
+  "paths": {
+    "/fields/{id}": {
+      "get": {
+        "tags": ["field-controller"],
+        "operationId": "getField",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseFieldInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["field-controller"],
+        "operationId": "updateField",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFieldRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseFieldInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["field-controller"],
+        "operationId": "deleteField",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/courts/{id}": {
+      "get": {
+        "tags": ["court-controller"],
+        "operationId": "getCourtById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseCourtResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["court-controller"],
+        "operationId": "updateCourt",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCourtRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseCourtResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["court-controller"],
+        "operationId": "deleteCourt",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/fields": {
+      "post": {
+        "tags": ["field-controller"],
+        "operationId": "createField",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFieldRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseFieldInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/courts": {
+      "post": {
+        "tags": ["court-controller"],
+        "operationId": "createCourt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCourtRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseCourtResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/court-slots/merge": {
+      "post": {
+        "tags": ["court-slot-controller"],
+        "operationId": "merge",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeCourtSlotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fields/{fieldId}/courts/slots": {
+      "get": {
+        "tags": ["field-controller"],
+        "operationId": "getCourtSlotsByFieldId",
+        "parameters": [
+          {
+            "name": "fieldId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseFieldResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fields/owner/{id}": {
+      "get": {
+        "tags": ["field-controller"],
+        "operationId": "getFieldByVenueId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseListFieldOwnerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/court-slots/{id}": {
+      "delete": {
+        "tags": ["court-slot-controller"],
+        "operationId": "deleteCourtSlot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/court-slots/unmerge/{id}": {
+      "delete": {
+        "tags": ["court-slot-controller"],
+        "operationId": "unmerge",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LocalTime": {
+        "type": "object",
+        "properties": {
+          "hour": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minute": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "second": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nano": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OpeningHourRequest": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "string",
+            "enum": [
+              "MONDAY",
+              "TUESDAY",
+              "WEDNESDAY",
+              "THURSDAY",
+              "FRIDAY",
+              "SATURDAY",
+              "SUNDAY"
+            ]
+          },
+          "openTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "closeTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          }
+        },
+        "required": ["closeTime", "dayOfWeek", "openTime"]
+      },
+      "UpdateFieldRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "monthLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultOpenTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "defaultCloseTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ENABLE", "UNABLE", "DELETED"]
+          },
+          "openingHours": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpeningHourRequest"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "defaultCloseTime",
+          "defaultOpenTime",
+          "monthLimit",
+          "name"
+        ]
+      },
+      "FieldInfoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "monthLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sportTypeId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sportTypeName": {
+            "type": "string"
+          },
+          "venueId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ENABLE", "UNABLE", "DELETED"]
+          },
+          "openingHours": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpeningHourResponse"
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "OpeningHourResponse": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "string",
+            "enum": [
+              "MONDAY",
+              "TUESDAY",
+              "WEDNESDAY",
+              "THURSDAY",
+              "FRIDAY",
+              "SATURDAY",
+              "SUNDAY"
+            ]
+          },
+          "openTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "closeTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          }
+        }
+      },
+      "RestResponseFieldInfoResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FieldInfoResponse"
+          }
+        }
+      },
+      "DailyPricing": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "string",
+            "enum": [
+              "MONDAY",
+              "TUESDAY",
+              "WEDNESDAY",
+              "THURSDAY",
+              "FRIDAY",
+              "SATURDAY",
+              "SUNDAY"
+            ]
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Price"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": ["dayOfWeek", "prices"]
+      },
+      "Price": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "endTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0.0
+          }
+        },
+        "required": ["endTime", "price", "startTime"]
+      },
+      "UpdateCourtRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "defaultPrice": {
+            "type": "number",
+            "minimum": 0.0
+          },
+          "dailyPricing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyPricing"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": ["dailyPricing", "defaultPrice", "name"]
+      },
+      "CourtResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ENABLE", "UNABLE", "DELETED"]
+          },
+          "defaultPrice": {
+            "type": "number"
+          },
+          "fieldId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dailyPricing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyPricing"
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "RestResponseCourtResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CourtResponse"
+          }
+        }
+      },
+      "CreateFieldRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "monthLimit": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "minBookingMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "sportTypeId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "venueId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "defaultOpenTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "defaultCloseTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "openingHours": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpeningHourRequest"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "defaultCloseTime",
+          "defaultOpenTime",
+          "minBookingMinutes",
+          "monthLimit",
+          "name",
+          "sportTypeId",
+          "venueId"
+        ]
+      },
+      "CreateCourtRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "fieldId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "defaultPrice": {
+            "type": "number",
+            "minimum": 0.0
+          },
+          "dailyPricing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyPricing"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": ["dailyPricing", "defaultPrice", "fieldId", "name"]
+      },
+      "MergeCourtSlotRequest": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "endTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "courtId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": ["courtId", "date", "endTime", "startTime"]
+      },
+      "RestResponseVoid": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      },
+      "Court": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ENABLE", "UNABLE", "DELETED"]
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            }
+          }
+        }
+      },
+      "FieldResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "monthLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ENABLE", "UNABLE", "DELETED"]
+          },
+          "openTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "closeTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "minBookingMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "courts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Court"
+            }
+          }
+        }
+      },
+      "RestResponseFieldResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FieldResponse"
+          }
+        }
+      },
+      "Slot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "endTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PAID", "LOCK", "HOLD", "AVAILABLE"]
+          },
+          "isMerge": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      },
+      "FieldOwnerResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "monthLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sportTypeId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "minBookingMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sportTypeName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ENABLE", "UNABLE", "DELETED"]
+          },
+          "openingHours": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpeningHourResponse"
+            },
+            "uniqueItems": true
+          },
+          "courts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CourtResponse"
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "RestResponseListFieldOwnerResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldOwnerResponse"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Bearer Authentication": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

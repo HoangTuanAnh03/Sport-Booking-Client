@@ -16,4 +16,12 @@ declare global {
     };
     result: T[];
   }
+
+  interface PagingResponse<T> {
+    content: T[];
+    pageNo: number;
+    pageSize: number;
+    totalPages: number;
+    totalElements: number;
+  }
 }

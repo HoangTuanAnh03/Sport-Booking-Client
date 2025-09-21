@@ -1,29 +1,46 @@
 import http from "@/utils/api";
 import {
-  VenueResponse,
-  VenueDetailResponse,
   UpdateVenueRequest,
-  UpdateVenueResponse,
   UpdateVenueStatusRequest,
-  UpdateVenueStatusResponse,
+  CreateVenueRequest,
+  Venue,
+  VenueDetail,
 } from "@/types/venue";
 import envConfig from "@/config";
 
+export interface CreateVenueResponse {
+  code: number;
+  data: any;
+}
+
+export interface DeleteVenueResponse {
+  code: number;
+  data?: any;
+}
+
 const venueApiRequest = {
   sGetMyVenues: () =>
-    http.get<VenueResponse>("/venues/me", {
+    http.get<IBackendRes<Venue[]>>("/venues/me", {
       baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     }),
   sGetVenueDetail: (venueId: number) =>
-    http.get<VenueDetailResponse>(`/venues/owner/${venueId}`, {
+    http.get<IBackendRes<VenueDetail>>(`/venues/owner/${venueId}`, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
+    }),
+  sCreateVenue: (body: CreateVenueRequest) =>
+    http.post<IBackendRes<any>>("/venues", body, {
       baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     }),
   sUpdateVenue: (venueId: number, body: UpdateVenueRequest) =>
-    http.put<UpdateVenueResponse>(`/venues/${venueId}`, body, {
+    http.put<IBackendRes<VenueDetail>>(`/venues/${venueId}`, body, {
       baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     }),
   sUpdateVenueStatus: (body: UpdateVenueStatusRequest) =>
-    http.put<UpdateVenueStatusResponse>("/venues/status", body, {
+    http.put<IBackendRes<any>>("/venues/status", body, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
+    }),
+  sDeleteVenue: (venueId: number) =>
+    http.delete<IBackendRes<any>>(`/venues/${venueId}`, {}, {
       baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     }),
   sUploadVenueImage: (file: File) => {

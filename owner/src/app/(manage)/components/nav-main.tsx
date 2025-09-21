@@ -17,6 +17,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { PlusIcon } from "lucide-react";
 
 export function NavMain({
   items,
@@ -29,6 +30,7 @@ export function NavMain({
     items?: {
       title: string;
       url: string;
+      onClick?: (e: React.MouseEvent) => void;
     }[];
   }[];
 }) {
@@ -55,11 +57,24 @@ export function NavMain({
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
-                          <span>{subItem.title}</span>
-                        </a>
-                      </SidebarMenuSubButton>
+                      {subItem.title === "Thêm địa điểm" ? (
+                        <SidebarMenuSubButton
+                          asChild
+                          onClick={subItem.onClick}
+                          className=" text-blue-600 hover:text-blue-800"
+                        >
+                          <a href={subItem.url} className="flex items-center">
+                            <PlusIcon className="!w-4 mr-2" color="blue" />
+                            <span>{subItem.title}</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      ) : (
+                        <SidebarMenuSubButton asChild>
+                          <a href={subItem.url}>
+                            <span>{subItem.title}</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      )}
                     </SidebarMenuSubItem>
                   ))}
                 </SidebarMenuSub>
