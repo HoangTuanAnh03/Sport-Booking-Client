@@ -85,3 +85,49 @@ export interface CreateCourtRequest {
     }[];
   }[];
 }
+
+export type CourtSlotsByField = {
+  id: number;
+  name: string;
+  monthLimit: number;
+  minBookingMinutes: number;
+  status: FieldStatus;
+  openTime: string;
+  closeTime: string;
+  courts: CourtByField[];
+};
+
+export type CourtByField = {
+  id: number;
+  name: string;
+  status: CourtStatus;
+  slots: CourtSlots[];
+};
+
+export type CourtSlots = {
+  id: number;
+  startTime: string;
+  endTime: string;
+  status: CourtSlotStatus;
+  isMerge: boolean;
+  price: number;
+};
+
+export enum CourtSlotStatus {
+  PAID = "PAID",
+  LOCK = "LOCK",
+  HOLD = "HOLD",
+  AVAILABLE = "AVAILABLE",
+}
+
+export enum CourtStatus {
+  ENABLE = "ENABLE",
+  UNABLE = "UNABLE",
+  DELETED = "DELETED",
+}
+
+export enum FieldStatus {
+  ENABLE = "ENABLE",
+  UNABLE = "UNABLE",
+  DELETED = "DELETED",
+}

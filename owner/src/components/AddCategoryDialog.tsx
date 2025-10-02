@@ -39,6 +39,7 @@ export function AddCategoryDialog({
     register,
     handleSubmit,
     formState: { errors },
+    setError,
     reset,
   } = useForm<CreateCategoryBodyType>({
     resolver: zodResolver(CreateCategoryBody),
@@ -77,10 +78,9 @@ export function AddCategoryDialog({
       onCategoryAdded();
       onOpenChange(false);
     } catch (error) {
-      toast({
-        title: "Lỗi",
-        description: "Không thể tạo danh mục. Vui lòng thử lại.",
-        variant: "destructive",
+      setError("name", {
+        type: "manual",
+        message: "Tên danh mục đã tồn tại",
       });
     }
   };
@@ -126,7 +126,11 @@ export function AddCategoryDialog({
             >
               Huỷ
             </Button>
-            <Button type="submit" disabled={createCategoryMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={createCategoryMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               {createCategoryMutation.isPending ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>

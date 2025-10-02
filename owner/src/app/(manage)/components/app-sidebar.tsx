@@ -10,6 +10,7 @@ import {
   BookOpen,
   Settings2,
   PlusIcon,
+  CalendarClock,
 } from "lucide-react";
 
 import {
@@ -49,6 +50,11 @@ const items: Item[] = [
     title: "Quản lý lịch đặt",
     url: "/payments",
     icon: CircleDollarSign,
+  },
+  {
+    title: "Quản lý khung giờ",
+    url: "/slots",
+    icon: CalendarClock,
   },
 ];
 

@@ -287,7 +287,35 @@
         }
       }
     },
-    "/fields/{fieldId}/courts/slots": {
+    "/court-slots/lock": {
+      "post": {
+        "tags": ["court-slot-controller"],
+        "operationId": "lock",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LockCourtSlotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fields/{fieldId}/slots": {
       "get": {
         "tags": ["field-controller"],
         "operationId": "getCourtSlotsByFieldId",
@@ -605,6 +633,10 @@
             "type": "number",
             "minimum": 0.0
           },
+          "status": {
+            "type": "string",
+            "enum": ["ENABLE", "UNABLE"]
+          },
           "dailyPricing": {
             "type": "array",
             "items": {
@@ -627,7 +659,7 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ENABLE", "UNABLE", "DELETED"]
+            "enum": ["ENABLE", "UNABLE"]
           },
           "defaultPrice": {
             "type": "number"
@@ -768,20 +800,50 @@
             "type": "integer",
             "format": "int64"
           },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["ENABLE", "UNABLE", "DELETED"]
-          },
-          "slots": {
+          "timeSlot": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Slot"
+              "$ref": "#/components/schemas/TimeSlot"
             }
           }
-        }
+        },
+        "required": ["id"]
+      },
+      "LockCourtSlotRequest": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "fieldId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "court": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Court"
+            }
+          }
+        },
+        "required": ["date", "fieldId"]
+      },
+      "TimeSlot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "endTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          }
+        },
+        "required": ["endTime", "id"]
       },
       "FieldResponse": {
         "type": "object",
@@ -828,31 +890,6 @@
           },
           "data": {
             "$ref": "#/components/schemas/FieldResponse"
-          }
-        }
-      },
-      "Slot": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "startTime": {
-            "$ref": "#/components/schemas/LocalTime"
-          },
-          "endTime": {
-            "$ref": "#/components/schemas/LocalTime"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["PAID", "LOCK", "HOLD", "AVAILABLE"]
-          },
-          "isMerge": {
-            "type": "boolean"
-          },
-          "price": {
-            "type": "number"
           }
         }
       },

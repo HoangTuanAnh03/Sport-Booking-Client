@@ -42,6 +42,7 @@ export function EditServiceDialog({
     handleSubmit,
     formState: { errors },
     reset,
+    setError,
     setValue,
     watch,
   } = useForm<UpdateServiceBodyType>({
@@ -101,10 +102,9 @@ export function EditServiceDialog({
       onServiceUpdated();
       onOpenChange(false);
     } catch (error) {
-      toast({
-        title: "Lỗi",
-        description: "Không thể cập nhật dịch vụ. Vui lòng thử lại.",
-        variant: "destructive",
+      setError("name", {
+        type: "manual",
+        message: "Tên dịch vụ đã tồn tại",
       });
     }
   };
@@ -214,7 +214,11 @@ export function EditServiceDialog({
             >
               Huỷ
             </Button>
-            <Button type="submit" disabled={updateServiceMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={updateServiceMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               {updateServiceMutation.isPending ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>

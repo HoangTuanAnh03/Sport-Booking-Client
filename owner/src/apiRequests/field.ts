@@ -6,9 +6,23 @@ import {
   UpdateCourtRequest,
   CreateFieldRequest,
   CreateCourtRequest,
+  CourtSlotsByField,
 } from "@/types/field";
 
 const fieldApiRequest = {
+  sGetCourtSlotsByFieldId: (fieldId: string, date?: string) => {
+    const params = new URLSearchParams();
+    if (date !== undefined) params.set("date", date);
+
+    const query = params.toString();
+    return http.get<IBackendRes<CourtSlotsByField>>(
+      `/fields/${fieldId}/slots${query ? `?${query}` : ""}`,
+      {
+        baseUrl: "http://localhost:8100",
+      }
+    );
+  },
+
   sGetFieldsByVenueId: (venueId: number) =>
     http.get<IBackendRes<FieldOwnerResponse[]>>(`/fields/owner/${venueId}`, {
       baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
@@ -47,6 +61,31 @@ const fieldApiRequest = {
     http.delete<IBackendRes<any>>(
       `/fields/${fieldId}`,
       {},
+      {
+        baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+      }
+    ),
+
+  sMergeCourtSlots: (payload: {
+    date: string;
+    fieldId: number;
+    court: Array<{
+      id: number;
+      timeSlot: Array<{
+        id: number;
+        startTime: { hour: number; minute: number; second: number };
+        endTime: { hour: number; minute: number; second: number };
+      }>;
+    }>;
+  }) =>
+    http.post<IBackendRes<any>>("/court-slots/merge", payload, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+    }),
+
+  sLockCourtSlots: (slotIds: number[]) =>
+    http.post<IBackendRes<any>>(
+      "/court-slots/lock",
+      { slotIds },
       {
         baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
       }

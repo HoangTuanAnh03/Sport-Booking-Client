@@ -1,16 +1,20 @@
 import http from "@/utils/api";
 
 const venueApiRequest = {
-  sGetAllForMap: () => http.get<IBackendRes<VenueMap[]>>(`/venues/map`),
+  sGetAllForMap: () =>
+    http.get<IBackendRes<VenueMap[]>>(`/venues/map`, {
+      baseUrl: "http://localhost:8090",
+    }),
   sGetVenueDetail: (id: number) =>
-    http.get<IBackendRes<VenueDetail>>(`/venues/${id}`),
+    http.get<IBackendRes<VenueDetail>>(`/venues/${id}`, {
+      baseUrl: "http://localhost:8090",
+    }),
   sUploadImage: (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
     return http.post<IBackendRes<string>>("/venue-images/upload", formData, {
       baseUrl: "http://localhost:8090",
-      // Don't set Content-Type header - let browser set it automatically with boundary
     });
   },
   sGetDirection: (destination: Coord, origin?: Coord, vehicle?: string) => {
@@ -28,7 +32,10 @@ const venueApiRequest = {
 
     const query = params.toString();
     return http.get<IBackendRes<any>>(
-      `/venues/direction${query ? `?${query}` : ""}`
+      `/venues/direction${query ? `?${query}` : ""}`,
+      {
+        baseUrl: "http://localhost:8090",
+      }
     );
   },
   useVenues: (options?: {
@@ -56,7 +63,10 @@ const venueApiRequest = {
 
     const query = params.toString();
     return http.get<IBackendRes<VenueDetail[]>>(
-      `/venues/search${query ? `?${query}` : ""}`
+      `/venues/search${query ? `?${query}` : ""}`,
+      {
+        baseUrl: "http://localhost:8090",
+      }
     );
   },
 };

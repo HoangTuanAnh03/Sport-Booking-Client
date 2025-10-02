@@ -317,7 +317,7 @@ export default function ProfilePage() {
           <div className="flex gap-2">
             <Button
               onClick={handleSave}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
               disabled={updateUserMutation.isPending}
             >
               {updateUserMutation.isPending ? (

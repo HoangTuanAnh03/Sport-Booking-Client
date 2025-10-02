@@ -5,7 +5,10 @@ import { CourtSlotsByField } from "@/types/field";
 const fieldApiRequest = {
   sGetFieldByVenueId: (id: number) =>
     http.get<IBackendRes<IModelPaginateResponse<Field[]>>>(
-      `/fields/getByVenueId/${id}`
+      `/fields/getByVenueId/${id}`,
+      {
+        baseUrl: "http://localhost:8100",
+      }
     ),
 
   sGetCourtSlotsByFieldId: (fieldId: string, date?: string) => {
@@ -14,7 +17,7 @@ const fieldApiRequest = {
 
     const query = params.toString();
     return http.get<IBackendRes<CourtSlotsByField>>(
-      `/fields/${fieldId}/courts/slots${query ? `?${query}` : ""}`,
+      `/fields/${fieldId}/slots${query ? `?${query}` : ""}`,
       {
         baseUrl: "http://localhost:8100",
       }

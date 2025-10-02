@@ -1,9 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { PlusIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { PlusIcon, PencilIcon, TrashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Accordion,
   AccordionContent,
@@ -100,158 +107,185 @@ export function ServicesTab({
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex ">
-        <Button
-          variant="outline"
-          className="flex items-center gap-2  w-full"
-          onClick={() => setIsAddCategoryDialogOpen(true)}
-        >
-          <PlusIcon className="h-4 w-4" />
-          Thêm danh mục
-        </Button>
-      </div>
-      <Accordion
-        type="single"
-        collapsible
-        className="w-full border rounded-lg overflow-hidden shadow-sm"
-        value={openAccordionItem}
-        onValueChange={setOpenAccordionItem}
-      >
-        {categories.map((category) => (
-          <AccordionItem
-            key={category.id}
-            value={`category-${category.id}`}
-            className="border-b-0 last:border-b-0"
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Danh sách dịch vụ</CardTitle>
+            <CardDescription>
+              Quản lý các danh mục và dịch vụ của địa điểm
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => setIsAddCategoryDialogOpen(true)}
           >
-            <AccordionTrigger className="flex items-center justify-between w-full py-4 hover:no-underline bg-white hover:bg-gray-50 px-6">
-              <div className="w-full flex items-center gap-4 justify-between mr-8">
-                <div className="flex items-center gap-4">
-                  <span className="text-lg font-semibold text-gray-800">
-                    {category.name}
-                  </span>
-                  <Badge
-                    variant="secondary"
-                    className="bg-blue-100 text-blue-800"
-                  >
-                    {category.numberOfServices} dịch vụ
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 w-8 p-0 bg-white hover:bg-gray-50 border-gray-300"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setAddingServiceCategoryId(category.id);
-                      setIsAddServiceDialogOpen(true);
-                    }}
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 w-8 p-0 bg-white hover:bg-gray-50 border-gray-300"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingCategory(category);
-                      setIsEditCategoryDialogOpen(true);
-                    }}
-                  >
-                    <PencilIcon className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 w-8 p-0 bg-white hover:bg-red-50 border-gray-300 text-red-600 hover:text-red-700"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCategoryToDelete({
-                        id: category.id,
-                        name: category.name,
-                      });
-                      setIsDeleteCategoryDialogOpen(true);
-                    }}
-                  >
-                    <Trash2Icon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 px-6">
-                {category.services.map((service) => (
-                  <div
-                    key={service.id}
-                    className="border rounded-lg p-4 space-y-3 bg-white shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start justify-between">
-                      <h4 className="font-medium text-gray-800">
-                        {service.name}
-                      </h4>
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Create a new service object with categoryId from the parent category
-                            const serviceWithCategoryId = {
-                              ...service,
-                              categoryId: category.id,
-                            };
-                            setEditingService(serviceWithCategoryId);
-                            setIsEditServiceDialogOpen(true);
-                          }}
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setServiceToDelete({
-                              id: service.id,
-                              name: service.name,
-                            });
-                            setIsDeleteConfirmDialogOpen(true);
-                          }}
-                        >
-                          <Trash2Icon className="h-4 w-4" />
-                        </Button>
-                        <div className="flex justify-end">
-                          {service.isAvailable ? (
-                            <Badge className="bg-green-100 text-green-800 text-xs">
-                              Có sẵn
-                            </Badge>
-                          ) : (
-                            <Badge variant="destructive" className="text-xs">
-                              Hết hàng
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
+            <PlusIcon className="h-4 w-4" />
+            Thêm danh mục
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {categories.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg">
+            <p className="text-muted-foreground mb-2">Chưa có danh mục nào</p>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => setIsAddCategoryDialogOpen(true)}
+            >
+              <PlusIcon className="h-4 w-4" />
+              Thêm danh mục đầu tiên
+            </Button>
+          </div>
+        ) : (
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full border rounded-lg overflow-hidden shadow-sm"
+            value={openAccordionItem}
+            onValueChange={setOpenAccordionItem}
+          >
+            {categories.map((category) => (
+              <AccordionItem
+                key={category.id}
+                value={`category-${category.id}`}
+                className="border-b-0 last:border-b-0"
+              >
+                <AccordionTrigger className="flex items-center justify-between w-full py-4 hover:no-underline bg-white hover:bg-gray-50 px-6">
+                  <div className="w-full flex items-center gap-4 justify-between mr-8">
+                    <div className="flex items-center gap-4">
+                      <span className="text-lg font-semibold text-gray-800">
+                        {category.name}
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className="bg-blue-100 text-blue-800"
+                      >
+                        {category.numberOfServices} dịch vụ
+                      </Badge>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Đơn vị: {service.units}
-                      </span>
-                      <span className="font-semibold text-blue-600">
-                        {formatPrice(service.price)}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 bg-white hover:bg-gray-50 border-gray-300"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAddingServiceCategoryId(category.id);
+                          setIsAddServiceDialogOpen(true);
+                        }}
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 bg-white hover:bg-gray-50 border-gray-300"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingCategory(category);
+                          setIsEditCategoryDialogOpen(true);
+                        }}
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 bg-white hover:bg-red-50 border-gray-300 text-red-600 hover:text-red-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCategoryToDelete({
+                            id: category.id,
+                            name: category.name,
+                          });
+                          setIsDeleteCategoryDialogOpen(true);
+                        }}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 bg-gray-50">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 px-6">
+                    {category.services.map((service) => (
+                      <div
+                        key={service.id}
+                        className="border rounded-lg p-4 space-y-3 bg-white shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between">
+                          <h4 className="font-medium text-gray-800">
+                            {service.name}
+                          </h4>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Create a new service object with categoryId from the parent category
+                                const serviceWithCategoryId = {
+                                  ...service,
+                                  categoryId: category.id,
+                                };
+                                setEditingService(serviceWithCategoryId);
+                                setIsEditServiceDialogOpen(true);
+                              }}
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setServiceToDelete({
+                                  id: service.id,
+                                  name: service.name,
+                                });
+                                setIsDeleteConfirmDialogOpen(true);
+                              }}
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </Button>
+                            <div className="flex justify-end">
+                              {service.isAvailable ? (
+                                <Badge className="bg-green-100 text-green-800 text-xs">
+                                  Có sẵn
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
+                                  Hết hàng
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Đơn vị: {service.units}
+                          </span>
+                          <span className="font-semibold text-blue-600">
+                            {formatPrice(service.price)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        )}
+      </CardContent>
 
       {/* Edit Category Dialog */}
       {editingCategory && (
@@ -343,6 +377,6 @@ export function ServicesTab({
         onOpenChange={setIsAddCategoryDialogOpen}
         onCategoryAdded={onCategoriesUpdated}
       />
-    </div>
+    </Card>
   );
 }

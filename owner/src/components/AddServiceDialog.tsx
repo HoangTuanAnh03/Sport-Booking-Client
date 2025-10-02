@@ -42,6 +42,7 @@ export function AddServiceDialog({
     formState: { errors },
     reset,
     setValue,
+    setError,
     watch,
   } = useForm<CreateServiceBodyType>({
     resolver: zodResolver(CreateServiceBody),
@@ -86,10 +87,9 @@ export function AddServiceDialog({
       onOpenChange(false);
       reset();
     } catch (error) {
-      toast({
-        title: "Lỗi",
-        description: "Không thể tạo dịch vụ. Vui lòng thử lại.",
-        variant: "destructive",
+      setError("name", {
+        type: "manual",
+        message: "Tên dịch vụ đã tồn tại",
       });
     }
   };
@@ -199,7 +199,11 @@ export function AddServiceDialog({
             >
               Huỷ
             </Button>
-            <Button type="submit" disabled={createServiceMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={createServiceMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               {createServiceMutation.isPending ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>

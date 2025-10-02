@@ -25,13 +25,6 @@ export const useCreateServiceMutation = () => {
 
       return data;
     },
-    onError: (error: any) => {
-      toast({
-        title: "Lỗi",
-        description: error?.payload?.message ?? "Có lỗi xảy ra khi tạo dịch vụ",
-        variant: "destructive",
-      });
-    },
   });
 };
 
@@ -58,14 +51,6 @@ export const useUpdateServiceMutation = () => {
       });
 
       return data;
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Lỗi",
-        description:
-          error?.payload?.message ?? "Có lỗi xảy ra khi cập nhật dịch vụ",
-        variant: "destructive",
-      });
     },
   });
 };

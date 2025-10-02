@@ -277,7 +277,11 @@ export function InlineEditVenueForm({
             <X className="h-4 w-4 mr-2" />
             Huỷ
           </Button>
-          <Button type="submit" disabled={updateVenueMutation.isPending}>
+          <Button
+            type="submit"
+            disabled={updateVenueMutation.isPending}
+            className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+          >
             {updateVenueMutation.isPending ? (
               <>
                 <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>

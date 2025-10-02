@@ -1,4 +1,4 @@
-import fieldApiRequest from "@/apiRequests/field";
+﻿import fieldApiRequest from "@/apiRequests/field";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   FieldOwnerResponse,
@@ -28,8 +28,8 @@ export const useCreateFieldMutation = () => {
       fieldApiRequest.sCreateField(body),
     onSuccess: (data, variables) => {
       toast({
-        title: "Thành công",
-        description: "Tạo cụm sân thành công",
+        title: "ThÃ nh cÃ´ng",
+        description: "Táº¡o cá»¥m sÃ¢n thÃ nh cÃ´ng",
       });
 
       // Invalidate and refetch fields list
@@ -38,13 +38,6 @@ export const useCreateFieldMutation = () => {
       });
 
       return data;
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Lỗi",
-        description: error?.payload?.message ?? "Có lỗi xảy ra khi tạo cụm sân",
-        variant: "destructive",
-      });
     },
   });
 };
@@ -62,8 +55,8 @@ export const useUpdateFieldMutation = () => {
     }) => fieldApiRequest.sUpdateField(fieldId, body),
     onSuccess: (data, variables) => {
       toast({
-        title: "Thành công",
-        description: "Cập nhật cụm sân thành công",
+        title: "ThÃ nh cÃ´ng",
+        description: "Cáº­p nháº­t cá»¥m sÃ¢n thÃ nh cÃ´ng",
       });
 
       // Invalidate and refetch fields list
@@ -72,14 +65,6 @@ export const useUpdateFieldMutation = () => {
       });
 
       return data;
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Lỗi",
-        description:
-          error?.payload?.message ?? "Có lỗi xảy ra khi cập nhật cụm sân",
-        variant: "destructive",
-      });
     },
   });
 };
@@ -97,8 +82,8 @@ export const useUpdateCourtMutation = () => {
     }) => fieldApiRequest.sUpdateCourt(courtId, body),
     onSuccess: (data, variables) => {
       toast({
-        title: "Thành công",
-        description: "Cập nhật sân con thành công",
+        title: "ThÃ nh cÃ´ng",
+        description: "Cáº­p nháº­t sÃ¢n con thÃ nh cÃ´ng",
       });
 
       // Invalidate and refetch fields list
@@ -118,8 +103,8 @@ export const useDeleteCourtMutation = () => {
     mutationFn: (courtId: number) => fieldApiRequest.sDeleteCourt(courtId),
     onSuccess: (data, variables) => {
       toast({
-        title: "Thành công",
-        description: "Xóa sân con thành công",
+        title: "ThÃ nh cÃ´ng",
+        description: "XÃ³a sÃ¢n con thÃ nh cÃ´ng",
       });
 
       // Invalidate and refetch fields list
@@ -131,8 +116,9 @@ export const useDeleteCourtMutation = () => {
     },
     onError: (error: any) => {
       toast({
-        title: "Lỗi",
-        description: error?.payload?.message ?? "Có lỗi xảy ra khi xóa sân con",
+        title: "Lá»—i",
+        description:
+          error?.payload?.message ?? "CÃ³ lá»—i xáº£y ra khi xÃ³a sÃ¢n con",
         variant: "destructive",
       });
     },
@@ -147,8 +133,8 @@ export const useCreateCourtMutation = () => {
       fieldApiRequest.sCreateCourt(body),
     onSuccess: (data, variables) => {
       toast({
-        title: "Thành công",
-        description: "Tạo sân con thành công",
+        title: "ThÃ nh cÃ´ng",
+        description: "Táº¡o sÃ¢n con thÃ nh cÃ´ng",
       });
 
       // Invalidate and refetch fields list
@@ -168,8 +154,8 @@ export const useDeleteFieldMutation = () => {
     mutationFn: (fieldId: number) => fieldApiRequest.sDeleteField(fieldId),
     onSuccess: (data, variables) => {
       toast({
-        title: "Thành công",
-        description: "Xóa cụm sân thành công",
+        title: "ThÃ nh cÃ´ng",
+        description: "XÃ³a cá»¥m sÃ¢n thÃ nh cÃ´ng",
       });
 
       // Invalidate and refetch fields list
@@ -181,8 +167,83 @@ export const useDeleteFieldMutation = () => {
     },
     onError: (error: any) => {
       toast({
+        title: "Lá»—i",
+        description:
+          error?.payload?.message ?? "CÃ³ lá»—i xáº£y ra khi xÃ³a cá»¥m sÃ¢n",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useGetCourtSlotsByFieldId = (id?: string, date?: string) => {
+  return useQuery({
+    queryKey: ["getCourtSlotsByFieldId", id, date],
+    queryFn: () => fieldApiRequest.sGetCourtSlotsByFieldId(id!, date),
+    enabled: !!id,
+    staleTime: 10 * 1000,
+  });
+};
+
+export const useMergeCourtSlotsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: {
+      date: string;
+      fieldId: number;
+      court: {
+        id: number;
+        timeSlot: {
+          id: number;
+          startTime: { hour: number; minute: number; second: number };
+          endTime: { hour: number; minute: number; second: number };
+        }[];
+      }[];
+    }) => fieldApiRequest.sMergeCourtSlots(params),
+    onSuccess: (data) => {
+      toast({
+        title: "Thành công",
+        description: "Gộp khung giờ thành công",
+      });
+
+      // Invalidate court slots queries
+      queryClient.invalidateQueries({
+        queryKey: ["getCourtSlotsByFieldId"],
+      });
+    },
+    onError: (error: any) => {
+      toast({
         title: "Lỗi",
-        description: error?.payload?.message ?? "Có lỗi xảy ra khi xóa cụm sân",
+        description:
+          error?.payload?.message ?? "Có lỗi xảy ra khi gộp khung giờ",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useLockCourtSlotsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (slotIds: number[]) => fieldApiRequest.sLockCourtSlots(slotIds),
+    onSuccess: (data) => {
+      toast({
+        title: "Thành công",
+        description: "Khóa khung giờ thành công",
+      });
+
+      // Invalidate court slots queries
+      queryClient.invalidateQueries({
+        queryKey: ["getCourtSlotsByFieldId"],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Lỗi",
+        description:
+          error?.payload?.message ?? "Có lỗi xảy ra khi khóa khung giờ",
         variant: "destructive",
       });
     },

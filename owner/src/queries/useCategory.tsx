@@ -35,14 +35,6 @@ export const useUpdateCategoryMutation = () => {
 
       return data;
     },
-    onError: (error: any) => {
-      toast({
-        title: "Lỗi",
-        description:
-          error?.payload?.message ?? "Có lỗi xảy ra khi cập nhật danh mục",
-        variant: "destructive",
-      });
-    },
   });
 };
 
@@ -94,14 +86,6 @@ export const useCreateCategoryMutation = () => {
       });
 
       return data;
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Lỗi",
-        description:
-          error?.payload?.message ?? "Có lỗi xảy ra khi tạo danh mục",
-        variant: "destructive",
-      });
     },
   });
 };

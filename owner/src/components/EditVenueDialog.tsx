@@ -301,7 +301,11 @@ export function EditVenueDialog({
             >
               Hủy
             </Button>
-            <Button type="submit" disabled={updateVenueMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={updateVenueMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               {updateVenueMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
           </DialogFooter>

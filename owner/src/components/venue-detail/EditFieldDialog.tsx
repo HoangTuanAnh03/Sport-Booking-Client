@@ -86,12 +86,6 @@ export function EditFieldDialog({
   onSuccess,
 }: EditFieldDialogProps) {
   const updateFieldMutation = useUpdateFieldMutation();
-  const {
-    data: sportTypesData,
-    isLoading: isSportTypesLoading,
-    isError,
-    error,
-  } = useGetAllSportTypesQuery();
 
   const {
     register,
@@ -99,6 +93,7 @@ export function EditFieldDialog({
     handleSubmit,
     formState: { errors },
     reset,
+    setError,
     watch, // Add watch to monitor form values
     setValue, // Add setValue to update form values
   } = useForm<FieldFormData>({
@@ -206,7 +201,10 @@ export function EditFieldDialog({
       }
       onOpenChange(false);
     } catch (error) {
-      console.error("Error updating field:", error);
+      setError("name", {
+        type: "manual",
+        message: "Tên cụm sân đã tồn tại",
+      });
     }
   };
 
@@ -347,6 +345,7 @@ export function EditFieldDialog({
                       <div className="flex-1">
                         <Input
                           type="number"
+                          step="10"
                           value={field.minBookingMinutes}
                           className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                           disabled

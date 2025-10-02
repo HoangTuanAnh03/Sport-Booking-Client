@@ -40,6 +40,7 @@ export function EditCategoryDialog({
     register,
     handleSubmit,
     formState: { errors },
+    setError,
     reset,
   } = useForm<UpdateCategoryBodyType>({
     resolver: zodResolver(UpdateCategoryBody),
@@ -76,10 +77,9 @@ export function EditCategoryDialog({
       onCategoryUpdated();
       onOpenChange(false);
     } catch (error) {
-      toast({
-        title: "Lỗi",
-        description: "Không thể cập nhật danh mục. Vui lòng thử lại.",
-        variant: "destructive",
+      setError("name", {
+        type: "manual",
+        message: "Tên danh mục đã tồn tại",
       });
     }
   };
@@ -125,7 +125,11 @@ export function EditCategoryDialog({
             >
               Huỷ
             </Button>
-            <Button type="submit" disabled={updateCategoryMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={updateCategoryMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               {updateCategoryMutation.isPending ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>

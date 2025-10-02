@@ -28,7 +28,7 @@ const fieldSchema = z.object({
   monthLimit: z.number().min(1, "Giới hạn tháng phải lớn hơn 0"),
   minBookingMinutes: z
     .number()
-    .min(30, "Thời gian đặt tối thiểu phải ít nhất 30 phút"),
+    .min(10, "Thời gian đặt tối thiểu phải ít nhất 10 phút"),
   status: z.enum(["ENABLE", "UNABLE"]),
   openingHours: z
     .array(
@@ -103,6 +103,7 @@ export function AddFieldDialog({
     handleSubmit,
     formState: { errors },
     setValue,
+    setError,
     reset,
     watch, // Add watch to monitor form values
   } = useForm<FieldFormData>({
@@ -218,7 +219,10 @@ export function AddFieldDialog({
       }
       onOpenChange(false);
     } catch (error) {
-      console.error("Error creating field:", error);
+      setError("name", {
+        type: "manual",
+        message: "Tên cụm sân đã tồn tại",
+      });
     }
   };
 
@@ -336,6 +340,7 @@ export function AddFieldDialog({
                           {...register("minBookingMinutes", {
                             valueAsNumber: true,
                           })}
+                          step="10"
                           placeholder="Nhập thời gian đặt tối thiểu"
                           disabled={createFieldMutation.isPending}
                           className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
