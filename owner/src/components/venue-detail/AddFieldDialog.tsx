@@ -356,11 +356,13 @@ export function AddFieldDialog({
                       <div className="flex-1 flex items-center gap-2">
                         <Switch
                           id="fieldStatus"
-                          checked={watch("status") === "ENABLE"}
-                          onCheckedChange={(checked) => {
-                            setValue("status", checked ? "ENABLE" : "UNABLE");
-                          }}
-                          disabled={createFieldMutation.isPending}
+                          checked={false}
+                          disabled
+                          // checked={watch("status") === "ENABLE"}
+                          // onCheckedChange={(checked) => {
+                          //   setValue("status", checked ? "ENABLE" : "UNABLE");
+                          // }}
+                          // disabled={createFieldMutation.isPending}
                         />
                         <span className="text-sm font-medium">
                           {watch("status") === "ENABLE"

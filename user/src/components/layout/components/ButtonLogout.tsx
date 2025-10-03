@@ -24,10 +24,5 @@ export function ButtonLogout() {
     }
   };
 
-  return (
-    <div onClick={handleLogout}>
-      Log out
-      <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-    </div>
-  );
+  return <div onClick={handleLogout}>Đăng xuất</div>;
 }

@@ -32,6 +32,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function NavUser() {
   const { isMobile } = useSidebar();
   const name = useAppStore((state) => state.name);
+  console.log("🚀 ~ NavUser ~ name:", name);
+
   const image = useAppStore((state) => state.avatarUrl);
   const email = useAppStore((state) => state.email);
 
@@ -118,28 +120,28 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <Sparkles />
+                <Sparkles className="mr-2 w-4 h-4" />
                 Upgrade to Pro
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <BadgeCheck />
+                <BadgeCheck className="mr-2 w-4 h-4" />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <CreditCard />
+                <CreditCard className="mr-2 w-4 h-4" />
                 Billing
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Bell />
+                <Bell className="mr-2 w-4 h-4" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <LogOut />
+              <LogOut className="mr-2 w-4 h-4" />
               <ButtonLogout />
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -112,20 +112,19 @@ export function AppSidebar() {
                 >
                   <SidebarMenuButton
                     asChild
-                    size={"md"}
-                    className={`hover:bg-[#f7e6e6] ${
-                      item === itemCurrent
-                        ? "text-[#ed1b2f] bg-red-200 "
-                        : "text-gray-500 "
-                    }`}
+                    // className={`hover:bg-[#f7e6e6] ${
+                    //   item === itemCurrent
+                    //     ? "text-[#ed1b2f] bg-red-200 "
+                    //     : "text-gray-500 "
+                    // }`}
                   >
                     <Link href={item.url}>
                       <item.icon
-                        className={`${
-                          item === itemCurrent
-                            ? "text-[#ed1b2f]"
-                            : "text-gray-500"
-                        }`}
+                      // className={`${
+                      //   item === itemCurrent
+                      //     ? "text-[#ed1b2f]"
+                      //     : "text-gray-500"
+                      // }`}
                       />
                       <span>{item.title}</span>
                     </Link>

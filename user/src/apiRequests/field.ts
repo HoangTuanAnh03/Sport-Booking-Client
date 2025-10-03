@@ -1,11 +1,15 @@
 import http from "@/utils/api";
 import { Field } from "@/types/field";
 import { CourtSlotsByField } from "@/types/field";
+import envConfig from "@/config";
 
 const fieldApiRequest = {
   sGetFieldByVenueId: (id: number) =>
     http.get<IBackendRes<IModelPaginateResponse<Field[]>>>(
-      `/fields/getByVenueId/${id}`
+      `/fields/getByVenueId/${id}`,
+      {
+        baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+      }
     ),
 
   sGetCourtSlotsByFieldId: (fieldId: string, date?: string) => {
@@ -16,7 +20,7 @@ const fieldApiRequest = {
     return http.get<IBackendRes<CourtSlotsByField>>(
       `/fields/${fieldId}/courts/slots${query ? `?${query}` : ""}`,
       {
-        baseUrl: "http://localhost:8100",
+        baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
       }
     );
   },

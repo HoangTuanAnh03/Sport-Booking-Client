@@ -31,7 +31,7 @@ const createCourtSchema = (
     .object({
       name: z.string().min(1, "Tên sân không được để trống"),
       defaultPrice: z.number().min(0, "Giá phải lớn hơn hoặc bằng 0"),
-      status: z.enum(["ENABLE", "UNABLE", "DELETED"]),
+      status: z.enum(["ENABLE", "UNABLE"]),
       // Add daily pricing validation with support for multiple prices per day
       dailyPricing: z.array(
         z.object({
@@ -247,6 +247,7 @@ export function AddCourtDialog({
     reset: resetCourt,
     control: controlCourt,
     watch,
+    setValue,
     setError,
   } = useForm<CourtFormData>({
     resolver: zodResolver(
@@ -410,15 +411,16 @@ export function AddCourtDialog({
                       <div className="flex-1 flex items-center gap-2 h-8">
                         <Switch
                           id="courtStatus"
-                          {...registerCourt("status")}
-                          checked={watch("status") === "ENABLE"}
-                          onCheckedChange={(checked) => {
-                            resetCourt({
-                              ...watch(),
-                              status: checked ? "ENABLE" : "UNABLE",
-                            });
-                          }}
-                          disabled={createCourtMutation.isPending}
+                          // {...registerCourt("status")}
+                          checked={false}
+                          // onCheckedChange={(checked) => {
+                          // resetCourt({
+                          //   ...watch(),
+                          //   status: checked ? "ENABLE" : "UNABLE",
+                          // });
+                          // setValue("status", checked ? "ENABLE" : "UNABLE");
+                          // }}
+                          disabled
                         />
                         <span className="text-sm font-medium">
                           {watch("status") === "ENABLE"

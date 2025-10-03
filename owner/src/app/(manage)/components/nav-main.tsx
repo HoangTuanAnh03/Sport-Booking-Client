@@ -47,7 +47,7 @@ export function NavMain({
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title} size={"md"}>
+                <SidebarMenuButton tooltip={item.title}>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -64,7 +64,7 @@ export function NavMain({
                           className=" text-blue-600 hover:text-blue-800"
                         >
                           <a href={subItem.url} className="flex items-center">
-                            <PlusIcon className="!w-4 mr-2" color="blue" />
+                            <PlusIcon className="!w-4" color="blue" />
                             <span>{subItem.title}</span>
                           </a>
                         </SidebarMenuSubButton>

@@ -1,4 +1,5 @@
 "use client";
+import userApiRequest from "@/apiRequests/users";
 import {
   decodeJWT,
   getAccessTokenFormLocalStorage,
@@ -51,12 +52,28 @@ export default function AppProvider({
   const count = useRef(0);
 
   useEffect(() => {
-    if (count.current === 0) {
-      const accessToken = getAccessTokenFormLocalStorage();
-      // if (accessToken) {
-      //   const role = decodeJWT(accessToken).scope;
-      // }
-      count.current++;
+    const accessToken = getAccessTokenFormLocalStorage();
+    if (count.current === 0 && accessToken) {
+      const initializeApp = async () => {
+        try {
+          const res = await userApiRequest.sMyInfo();
+
+          if (res.status === 200) {
+            const { name, avatarUrl, email } = res.payload?.data!;
+            useAppStore.setState({ name, avatarUrl, email });
+          } else {
+            removeTokenFormLocalStorage();
+            window.location.href = `/logout?accessToken=${accessToken}`;
+          }
+        } catch (error) {
+          removeTokenFormLocalStorage();
+          window.location.href = `/logout?accessToken=${accessToken}`;
+        }
+
+        count.current++;
+      };
+
+      initializeApp();
     }
   }, []);
 

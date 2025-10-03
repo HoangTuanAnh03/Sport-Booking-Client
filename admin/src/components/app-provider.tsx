@@ -6,7 +6,6 @@ import {
 } from "@/lib/utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { redirect } from "next/navigation";
 import React, { useEffect, useRef } from "react";
 import { create } from "zustand";
 
@@ -57,7 +56,6 @@ export default function AppProvider({
       const initializeApp = async () => {
         try {
           const res = await userApiRequest.sMyInfo();
-
           if (res.status === 200) {
             const { name, avatarUrl, email } = res.payload.data!;
             useAppStore.setState({ name, avatarUrl, email });

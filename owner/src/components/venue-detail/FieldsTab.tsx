@@ -386,6 +386,8 @@ export function FieldsTab({ venueId }: FieldsTabProps) {
                               onCheckedChange={(checked) => {
                                 // Update court status
                                 // setUpdatingCourtId(court.id);
+                                console.log("🚀 ~ court.id:", court.id);
+
                                 const newStatus = checked ? "ENABLE" : "UNABLE";
                                 updateCourtMutation.mutate({
                                   courtId: court.id,
@@ -397,15 +399,15 @@ export function FieldsTab({ venueId }: FieldsTabProps) {
                                   },
                                 });
                               }}
-                              disabled={
-                                updateCourtMutation.isPending &&
-                                updatingCourtId === court.id
-                              }
+                              // disabled={
+                              //   updateCourtMutation.isPending &&
+                              //   updatingCourtId === court.id
+                              // }
                             />
-                            {updateCourtMutation.isPending &&
+                            {/* {updateCourtMutation.isPending &&
                               updatingCourtId === court.id && (
                                 <div className="h-4 w-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
-                              )}
+                              )} */}
                             <Button
                               size="sm"
                               variant="ghost"

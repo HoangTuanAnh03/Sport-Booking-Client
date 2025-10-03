@@ -150,7 +150,7 @@ export function InlineEditVenueForm({
                 id="address"
                 {...register("address")}
                 placeholder="Nhập địa chỉ"
-                disabled={updateVenueMutation.isPending}
+                disabled
               />
               {errors.address && (
                 <p className="text-sm text-red-600">{errors.address.message}</p>

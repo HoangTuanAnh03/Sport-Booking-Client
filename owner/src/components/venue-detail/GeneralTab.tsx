@@ -10,9 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { InlineEditVenueForm } from "@/components/InlineEditVenueForm";
-import { Venue, VenueDetail } from "@/types/venue";
+import { VenueDetail } from "@/types/venue";
 
 interface GeneralTabProps {
   venue: VenueDetail;
@@ -21,55 +20,6 @@ interface GeneralTabProps {
 
 export function GeneralTab({ venue, onVenueUpdated }: GeneralTabProps) {
   const [isEditing, setIsEditing] = useState(false);
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "ENABLE":
-        return (
-          <Badge variant="default" className="bg-green-100 text-green-800">
-            Hoạt động
-          </Badge>
-        );
-      case "UNABLE":
-        return (
-          <Badge variant="destructive" className="bg-red-100 text-red-800">
-            Tạm dừng
-          </Badge>
-        );
-      case "PENDING":
-        return (
-          <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
-            Đang chờ
-          </Badge>
-        );
-      case "REJECTED":
-        return (
-          <Badge variant="destructive" className="bg-red-100 text-red-800">
-            Bị từ chối
-          </Badge>
-        );
-      case "LOCK":
-        return (
-          <Badge variant="destructive" className="bg-red-100 text-red-800">
-            Bị khóa
-          </Badge>
-        );
-      case "UNPAID":
-        return (
-          <Badge variant="outline" className="bg-orange-100 text-orange-800">
-            Chưa thanh toán
-          </Badge>
-        );
-      case "DELETED":
-        return (
-          <Badge variant="destructive" className="bg-gray-100 text-gray-800">
-            Đã xóa
-          </Badge>
-        );
-      default:
-        return <Badge variant="secondary">Không xác định</Badge>;
-    }
-  };
 
   return (
     <div className="space-y-6">

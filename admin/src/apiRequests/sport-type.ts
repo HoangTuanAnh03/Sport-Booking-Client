@@ -4,6 +4,8 @@ import {
   UpdateSportTypeBodyType,
 } from "@/schemaValidations/sport-type.schema";
 import { SportTypeResponse, SportTypeSingleResponse } from "@/types/sport-type";
+import { env } from "process";
+import envConfig from "@/config";
 
 const sportTypeApiRequest = {
   // GET /sport-types - Get all sport types with optional parameters
@@ -28,21 +30,21 @@ const sportTypeApiRequest = {
     const url = queryString ? `/sport-types?${queryString}` : "/sport-types";
 
     return http.get<IModelPaginate<SportTypeResponse>>(url, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 
   // GET /sport-types/{id} - Get sport type by ID
   sGetSportTypeById: (id: number) => {
     return http.get<IBackendRes<SportTypeResponse>>(`/sport-types/${id}`, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 
   // POST /sport-types - Create new sport type
   sCreateSportType: (body: CreateSportTypeBodyType) => {
     return http.post<IBackendRes<SportTypeResponse>>("/sport-types", body, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 
@@ -52,7 +54,7 @@ const sportTypeApiRequest = {
       `/sport-types/${id}`,
       body,
       {
-        baseUrl: "http://localhost:8090",
+        baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
       }
     );
   },
@@ -60,7 +62,7 @@ const sportTypeApiRequest = {
   // DELETE /sport-types/{id} - Delete sport type
   sDeleteSportType: (id: number) => {
     return http.delete<null>(`/sport-types/${id}`, undefined, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 };
