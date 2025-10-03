@@ -6,6 +6,7 @@ import {
   UpdateCourtRequest,
   CreateFieldRequest,
   CreateCourtRequest,
+  CourtSlotsByField,
 } from "@/types/field";
 
 const fieldApiRequest = {
@@ -47,6 +48,37 @@ const fieldApiRequest = {
     http.delete<IBackendRes<any>>(
       `/fields/${fieldId}`,
       {},
+      {
+        baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+      }
+    ),
+
+  sGetCourtSlotsByFieldId: (fieldId: string, date?: string) => {
+    const params = new URLSearchParams();
+    if (date !== undefined) params.set("date", date);
+
+    const query = params.toString();
+    return http.get<IBackendRes<CourtSlotsByField>>(
+      `/fields/${fieldId}/courts/slots${query ? `?${query}` : ""}`,
+      {
+        baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+      }
+    );
+  },
+
+  sMergeCourtSlots: (slotIds: number[]) =>
+    http.post<IBackendRes<any>>(
+      `/court-slots/merge`,
+      { slotIds },
+      {
+        baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+      }
+    ),
+
+  sLockCourtSlots: (slotIds: number[]) =>
+    http.post<IBackendRes<any>>(
+      `/court-slots/lock`,
+      { slotIds },
       {
         baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
       }

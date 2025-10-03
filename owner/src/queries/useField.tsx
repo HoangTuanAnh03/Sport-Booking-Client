@@ -188,3 +188,65 @@ export const useDeleteFieldMutation = () => {
     },
   });
 };
+
+export const useGetCourtSlotsByFieldId = (id: string, date?: string) => {
+  return useQuery({
+    queryKey: ["getCourtSlotsByFieldId", id, date],
+    queryFn: () => fieldApiRequest.sGetCourtSlotsByFieldId(id, date),
+    staleTime: 10 * 1000,
+  });
+};
+
+export const useMergeCourtSlotsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (slotIds: number[]) =>
+      fieldApiRequest.sMergeCourtSlots(slotIds),
+    onSuccess: (data) => {
+      toast({
+        title: "Thành công",
+        description: "Gộp khung giờ thành công",
+      });
+
+      // Invalidate court slots queries
+      queryClient.invalidateQueries({
+        queryKey: ["getCourtSlotsByFieldId"],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Lỗi",
+        description: error?.payload?.message ?? "Có lỗi xảy ra khi gộp khung giờ",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useLockCourtSlotsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (slotIds: number[]) => fieldApiRequest.sLockCourtSlots(slotIds),
+    onSuccess: (data) => {
+      toast({
+        title: "Thành công",
+        description: "Khóa khung giờ thành công",
+      });
+
+      // Invalidate court slots queries
+      queryClient.invalidateQueries({
+        queryKey: ["getCourtSlotsByFieldId"],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Lỗi",
+        description:
+          error?.payload?.message ?? "Có lỗi xảy ra khi khóa khung giờ",
+        variant: "destructive",
+      });
+    },
+  });
+};
