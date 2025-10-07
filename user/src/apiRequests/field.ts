@@ -18,7 +18,7 @@ const fieldApiRequest = {
 
     const query = params.toString();
     return http.get<IBackendRes<CourtSlotsByField>>(
-      `/fields/${fieldId}/courts/slots${query ? `?${query}` : ""}`,
+      `/fields/${fieldId}/slots${query ? `?${query}` : ""}`,
       {
         baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
       }

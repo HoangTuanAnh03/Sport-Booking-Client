@@ -6,6 +6,7 @@ import {
   UpdateCourtRequest,
   CreateFieldRequest,
   CreateCourtRequest,
+  CourtSlotsByField,
 } from "@/types/field";
 
 const fieldApiRequest = {
@@ -13,6 +14,19 @@ const fieldApiRequest = {
     http.get<IBackendRes<FieldOwnerResponse[]>>(`/fields/owner/${venueId}`, {
       baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
     }),
+
+  sGetCourtSlotsByFieldId: (fieldId: number, date?: string) => {
+    const params = new URLSearchParams();
+    if (date !== undefined) params.set("date", date);
+
+    const query = params.toString();
+    return http.get<IBackendRes<CourtSlotsByField>>(
+      `/fields/${fieldId}/slots${query ? `?${query}` : ""}`,
+      {
+        baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+      }
+    );
+  },
 
   sCreateField: (body: CreateFieldRequest) =>
     http.post<IBackendRes<FieldOwnerResponse>>("/fields", body, {

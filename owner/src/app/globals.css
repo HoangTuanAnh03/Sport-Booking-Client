@@ -2,12 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================= */
+/* Root color scheme variables   */
+/* ============================= */
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
 }
 
+/* Dark mode preference */
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
@@ -16,12 +20,18 @@
   }
 }
 
+/* ============================= */
+/* Tailwind custom layers        */
+/* ============================= */
+
+/* Utility layer */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
 }
 
+/* Base layer: design tokens */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -58,6 +68,7 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -92,13 +103,42 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-}
 
-@layer base {
+  /* Base styles for all elements */
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
+}
+
+/* ============================= */
+/* Custom scrollbar (TikTok-like) */
+/* ============================= */
+
+html::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: background-color 0.3s, width 0.3s;
+}
+
+html:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Firefox support */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
 }

@@ -50,6 +50,11 @@ const items: Item[] = [
     url: "/payments",
     icon: CircleDollarSign,
   },
+  {
+    title: "Quản lý khung giờ",
+    url: "/slots",
+    icon: CircleDollarSign,
+  },
 ];
 
 export function AppSidebar() {

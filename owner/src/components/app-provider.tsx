@@ -20,6 +20,8 @@ const queryClient = new QueryClient({
 });
 
 type AppStoreType = {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
   isAuth: boolean;
   name: string;
   setName: (name?: string | undefined) => void;
@@ -30,6 +32,8 @@ type AppStoreType = {
 };
 
 export const useAppStore = create<AppStoreType>((set) => ({
+  sidebarOpen: false,
+  setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
   isAuth: false,
   name: "",
   setName: (name?: string | undefined) => {
@@ -52,6 +56,14 @@ export default function AppProvider({
   const count = useRef(0);
 
   useEffect(() => {
+    // get sidebar_state from cookie and set to zustand
+    const sidebar_state = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("sidebar_state="))
+      ?.split("=")[1];
+    if (sidebar_state) {
+      useAppStore.setState({ sidebarOpen: sidebar_state === "true" });
+    }
     const accessToken = getAccessTokenFormLocalStorage();
     if (count.current === 0 && accessToken) {
       const initializeApp = async () => {
