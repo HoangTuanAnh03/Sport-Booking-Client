@@ -5,9 +5,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Field } from "@/types/field";
+import { FieldsByVenueId } from "@/types/field";
 import React from "react";
 import FieldCard from "@/components/FieldCard";
+import { useRouter } from "next/navigation";
 
 const dialogOverlayStyles = `
   [data-radix-dialog-overlay] {
@@ -18,7 +19,7 @@ const dialogOverlayStyles = `
   }
 `;
 interface FieldModalProps {
-  data: Field[];
+  data: FieldsByVenueId;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
@@ -28,6 +29,15 @@ export default function FieldModal({
   isOpen,
   setIsOpen,
 }: FieldModalProps) {
+  const router = useRouter();
+  console.log("🚀 ~ FieldModal ~ data:", data);
+  if (!data) return null;
+
+  if (data.fields.length === 1) {
+    const field = data.fields[0];
+    router.push(`/booking/${field.id}`);
+  }
+
   return (
     <>
       <style>{dialogOverlayStyles}</style>
@@ -39,10 +49,10 @@ export default function FieldModal({
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto px-4">
-            {data.length === 0 ? (
+            {data.fields.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-600 text-lg">
-                  Không có sân, vui lòng đặt sân khác.
+                  Không có cụm sân hoạt động, vui lòng đặt sân khác.
                 </p>
                 <Button
                   variant="outline"
@@ -54,8 +64,8 @@ export default function FieldModal({
               </div>
             ) : (
               <div className="grid gap-6 py-6">
-                {data.map((field) => (
-                  <FieldCard key={field.field_id} field={field} />
+                {data.fields.map((field) => (
+                  <FieldCard key={field.id} field={field} />
                 ))}
               </div>
             )}

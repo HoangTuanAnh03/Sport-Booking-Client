@@ -4,14 +4,6 @@ import React, { useState, useMemo } from "react";
 import { useGetMyVenuesQuery } from "@/queries/useVenue";
 import { useGetFieldsByVenueIdQuery } from "@/queries/useField";
 import { useGetCourtSlotsByFieldIdQuery } from "@/queries/useSlot";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -30,60 +22,6 @@ import { BuildingIcon, ChevronDownIcon } from "lucide-react";
 import { useAppStore } from "@/components/app-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import SlotsTable from "./SlotsTable";
-
-// Utility functions
-const generateTimeLine = (
-  openTime: string,
-  closeTime: string,
-  step: number
-): { time: string }[] => {
-  const times: { time: string }[] = [];
-  const openTimeObj = parseTime(openTime);
-  const closeTimeObj = parseTime(closeTime);
-
-  let h = openTimeObj.hour;
-  let m = openTimeObj.minute;
-  const endH = closeTimeObj.hour;
-  const endM = closeTimeObj.minute;
-
-  while (h < endH || (h === endH && m <= endM)) {
-    const timeStr = `${h.toString().padStart(2, "0")}:${m
-      .toString()
-      .padStart(2, "0")}`;
-    times.push({ time: timeStr });
-    m += step;
-    if (m >= 60) {
-      h += 1;
-      m = m % 60;
-    }
-  }
-  return times;
-};
-
-const parseTime = (timeStr: string | { hour?: number; minute?: number }) => {
-  if (
-    typeof timeStr === "object" &&
-    timeStr !== null &&
-    "hour" in timeStr &&
-    "minute" in timeStr
-  ) {
-    return { hour: timeStr.hour || 0, minute: timeStr.minute || 0 };
-  }
-  const [hour, minute] = (typeof timeStr === "string" ? timeStr : "")
-    .split(":")
-    .map(Number);
-  return { hour: hour || 0, minute: minute || 0 };
-};
-
-const formatTime = (timeObj: any): string => {
-  if (typeof timeObj === "string") return timeObj;
-  if (typeof timeObj === "object" && timeObj !== null) {
-    const hour = (timeObj.hour || 0).toString().padStart(2, "0");
-    const minute = (timeObj.minute || 0).toString().padStart(2, "0");
-    return `${hour}:${minute}`;
-  }
-  return "00:00";
-};
 
 const SlotsPage = () => {
   const [selectedVenueId, setSelectedVenueId] = useState<number | null>(null);
@@ -105,20 +43,6 @@ const SlotsPage = () => {
   );
   const { data: fieldDetails, isLoading: slotsLoading } =
     useGetCourtSlotsByFieldIdQuery(selectedFieldId || 0, selectedDate);
-
-  // Memoized calculations
-  const courts = useMemo(() => fieldDetails?.courts || [], [fieldDetails]);
-
-  const baseTimeLine = useMemo(() => {
-    if (!fieldDetails) return [];
-    const openTime = formatTime(fieldDetails.openTime);
-    const closeTime = formatTime(fieldDetails.closeTime);
-    return generateTimeLine(
-      openTime,
-      closeTime,
-      fieldDetails.minBookingMinutes || 60
-    );
-  }, [fieldDetails]);
 
   const handleVenueSelect = (venueId: number) => {
     setSelectedVenueId(venueId);

@@ -176,7 +176,7 @@ export const Booking = () => {
 
   return (
     <div className="relative overflow-x-auto">
-      <Table className="border-separate border-spacing-0 text-center whitespace-nowrap w-full shadow-lg rounded-lg ">
+      <Table className="border-collapse  border-spacing-0 text-center whitespace-nowrap min-w-max shadow-lg rounded-lg">
         <TableHeader>
           <TableRow className="bg-cyan-200">
             <TableHead className="  border-gray-300 px-6 py-3 text-center font-semibold text-gray-700"></TableHead>
@@ -226,26 +226,28 @@ export const Booking = () => {
                       handleCellClick(court.id.toString(), timeSlot)
                     }
                     colSpan={colspan}
-                    className={`border border-gray-300 px-3 py-3 text-center transition-all duration-200 relative ${
+                    className={`border border-green-300 border-dashed cursor-pointer px-3 py-3 text-center transition-all duration-200 ${
                       isPast
                         ? "cursor-not-allowed bg-gray-200 opacity-50"
                         : isAvailable
-                        ? isSelected
-                          ? "bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
-                          : "hover:bg-gray-300 cursor-pointer"
+                        ? "hover:bg-green-200 bg-white"
                         : timeSlot.status === CourtSlotStatus.LOCK
                         ? "cursor-not-allowed bg-gray-500 hover:bg-gray-400"
                         : "cursor-not-allowed bg-red-500 hover:bg-red-400"
+                    }${
+                      isSelected
+                        ? " border-solid border-4 border-green-400"
+                        : ""
                     }`}
                   >
                     {/* Gray overlay for past time slots */}
-                    {isPast && (
+                    {/* {isPast && (
                       <div className="absolute inset-0 bg-gray-400 opacity-30 pointer-events-none rounded"></div>
-                    )}
+                    )} */}
 
                     {/* Past time indicator */}
                     {isPast && (
-                      <div className="absolute top-1 left-1 text-xs text-gray-600">
+                      <div className=" top-1 left-1 text-xs text-gray-600">
                         <span>⏰</span>
                       </div>
                     )}

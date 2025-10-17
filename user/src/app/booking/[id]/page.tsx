@@ -1,24 +1,23 @@
 "use client";
 import type React from "react";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
-import DatePicker from "react-datepicker";
 import { Booking } from "./Booking";
-import { addMonths, endOfMonth } from "date-fns";
 import { useBookingStore } from "@/stores/useBookingStore";
-import { useGetCourtSlotsByFieldId } from "@/queries/useField";
-import { CalendarSearch } from "lucide-react";
-
-function formatDateToYMD(date: Date): string {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
+import { useGetCourtSlotsByFieldId, useGetFieldById } from "@/queries/useField";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ChevronDownIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Hold from "@/app/booking/[id]/Hold";
+import { formatDateToYMD } from "@/lib/utils";
 
 export default function BookingPage() {
-  // const [selectedDate, setSelectedDate] = useState(new Date());
   const setFieldDetails = useBookingStore((state) => state.setFieldDetails);
   const dateSelection = useBookingStore((state) => state.dateSelection);
   const setDateSelection = useBookingStore((state) => state.setDateSelection);
@@ -26,23 +25,35 @@ export default function BookingPage() {
   const params = useParams();
   const idParam = params?.id;
   const id = Array.isArray(idParam) ? idParam[0] : idParam;
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [openHold, setOpenHold] = useState(false);
 
   const { data } = useGetCourtSlotsByFieldId(
     id,
     formatDateToYMD(dateSelection)
   );
 
-  const handleDateChange = (date: Date | null) => {
-    if (date) {
-      setDateSelection(date);
-    }
-  };
+  const { data: fieldInfo } = useGetFieldById(Number(id));
 
   useEffect(() => {
     if (data) {
       setFieldDetails(data.payload.data ?? null);
     }
   }, [data, setFieldDetails]);
+
+  if (openHold) {
+    return (
+      <Hold
+        fieldInfo={fieldInfo?.payload.data}
+        courts={data?.payload.data}
+        setOpenHold={setOpenHold}
+      />
+    );
+  }
+
+  function handleHold(): void {
+    setOpenHold(true);
+  }
 
   return (
     <div className="relative h-[calc(100vh-65px)] w-full overflow-hidden z-[1000]">
@@ -70,18 +81,38 @@ export default function BookingPage() {
         </div>
 
         {/* Date Picker */}
-        <div className="bg-green-300 rounded-md p-2 px-4 flex items-center space-x-2 ">
-          <DatePicker
-            selected={dateSelection}
-            onChange={handleDateChange}
-            dateFormat="dd/MM/yyyy"
-            className=" py-2 text-gray-800 border-0 outline-none bg-transparent w-32 text-left"
-            minDate={new Date()}
-            maxDate={endOfMonth(
-              addMonths(new Date(), (data?.payload.data?.monthLimit || 2) - 1)
-            )}
-          />
-          <CalendarSearch color="black" className="mr-6" />
+        <div className="bg-green-300 text-gray-800 flex flex-col rounded-lg">
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                id="date"
+                className="bg-green-300 w-48 justify-between font-normal"
+              >
+                {dateSelection
+                  ? dateSelection.toLocaleDateString()
+                  : "Chọn ngày"}
+                <ChevronDownIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto overflow-hidden p-0"
+              align="start"
+            >
+              <Calendar
+                mode="single"
+                selected={dateSelection}
+                captionLayout="dropdown"
+                onSelect={(date) => {
+                  if (date) setDateSelection(date);
+                  setDatePickerOpen(false);
+                }}
+                disabled={(date) =>
+                  date < new Date(new Date().setHours(0, 0, 0, 0))
+                }
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -107,20 +138,20 @@ export default function BookingPage() {
             {totalPrice.toLocaleString("vi-VN")} VND
           </div>
         </div>
-        <button
-          className={`px-8 py-3 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg ${
+        <Button
+          className={`px-8 py-6 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg ${
             totalPrice > 0
               ? "bg-white text-green-700 hover:bg-green-50 hover:shadow-xl border-2 border-white"
               : "bg-gray-400 text-white cursor-not-allowed opacity-50"
           }`}
-          // onClick={handleCheckout}
+          onClick={handleHold}
           disabled={totalPrice === 0}
         >
           <div className="flex items-center space-x-2">
-            <span>🏃‍♂️</span>
+            <span className="text-2xl">🏃‍♂️</span>
             <span>Thanh toán ngay</span>
           </div>
-        </button>
+        </Button>
       </div>
     </div>
   );

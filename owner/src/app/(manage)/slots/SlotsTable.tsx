@@ -91,6 +91,23 @@ const SlotsTable: React.FC<SlotsTableProps> = ({
     );
   }, [fieldDetails]);
 
+  const isPastTimeSlot = (
+    timeSlot: CourtSlots,
+    selectedDate: string
+  ): boolean => {
+    const selectedDateObj = new Date(selectedDate);
+    const today = new Date();
+    const isToday = selectedDateObj.toDateString() === today.toDateString();
+
+    if (!isToday) return false;
+
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const slotStartTime = toMinutes(timeSlot.startTime);
+
+    return slotStartTime <= currentTime;
+  };
+
   // Hàm chuyển đổi định dạng thời gian cho API
   const formatTimeForApi = (time: { hour: number; minute: number }): string => {
     const hour = time.hour.toString().padStart(2, "0");
@@ -365,7 +382,7 @@ const SlotsTable: React.FC<SlotsTableProps> = ({
     return (
       <div>
         <div
-          className="w-full overflow-x-auto"
+          className="soverflow-x-auto"
           style={{
             maxWidth: `calc(100vw - ${sidebar_state ? 255 : 48}px - 34px)`,
           }}
@@ -373,11 +390,11 @@ const SlotsTable: React.FC<SlotsTableProps> = ({
           <Table className="border-collapse  border-spacing-0 text-center whitespace-nowrap min-w-max shadow-lg rounded-lg">
             <TableHeader>
               <TableRow className="bg-cyan-200">
-                <TableHead className="border-gray-300 bg-cyan-200 px-6 py-3 text-center font-semibold text-gray-700"></TableHead>
+                <TableHead className="  border-gray-300 px-6 py-3 text-center font-semibold text-gray-700"></TableHead>
                 {baseTimeLine.map((item, idx) => (
                   <TableHead
                     key={idx}
-                    className="-translate-x-1/2 bg-cyan-200 border-gray-300 px-3 py-3 text-center font-semibold text-gray-700"
+                    className=" -translate-x-1/2 border-gray-300 px-3 py-3 text-center font-semibold text-gray-700"
                   >
                     {item.time}
                   </TableHead>
@@ -399,6 +416,7 @@ const SlotsTable: React.FC<SlotsTableProps> = ({
                     const endTime = formatTime(timeSlot.endTime);
                     const colspan =
                       (toMinutes(endTime) - toMinutes(startTime)) / step;
+                    const isPast = isPastTimeSlot(timeSlot, selectedDate);
 
                     const isSelected = isSlotSelected(
                       timeSlot,
@@ -410,10 +428,12 @@ const SlotsTable: React.FC<SlotsTableProps> = ({
                         key={index}
                         colSpan={colspan}
                         onClick={() => {
-                          toggleSlotSelection(court.id, timeSlot);
+                          !isPast && toggleSlotSelection(court.id, timeSlot);
                         }}
-                        className={`border border-green-300 border-dashed  cursor-pointer px-3 py-3 text-center transition-all duration-200 ${
-                          timeSlot.status === "AVAILABLE"
+                        className={` border border-green-300 border-dashed  cursor-pointer px-3 py-3 text-center transition-all duration-200 ${
+                          isPast
+                            ? "cursor-not-allowed bg-gray-200 opacity-50"
+                            : timeSlot.status === "AVAILABLE"
                             ? "bg-white hover:bg-green-100"
                             : timeSlot.status === "LOCK"
                             ? "bg-gray-400"
@@ -426,9 +446,22 @@ const SlotsTable: React.FC<SlotsTableProps> = ({
                             : ""
                         }`}
                       >
-                        <div className="text-xs">
-                          {timeSlot.price?.toLocaleString()}đ
-                        </div>
+                        {/* Gray overlay for past time slots */}
+                        {/* {isPast && (
+                          <div className="absolute inset-0 bg-gray-400 opacity-30 pointer-events-none rounded"></div>
+                        )} */}
+
+                        {/* Past time indicator */}
+
+                        {isPast ? (
+                          <div className=" top-1 left-1 text-xs text-gray-600">
+                            <span>⏰</span>
+                          </div>
+                        ) : (
+                          <div className="text-xs">
+                            {timeSlot.price?.toLocaleString()}đ
+                          </div>
+                        )}
                       </TableCell>
                     );
                   })}

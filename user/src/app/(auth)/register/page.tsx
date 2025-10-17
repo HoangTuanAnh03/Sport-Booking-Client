@@ -1,13 +1,8 @@
-import LoginForm from "@/app/(auth)/login/login-form";
 import Image from "next/image";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import Google from "@/app/(auth)/login/google";
-import { Checkbox } from "@/components/ui/checkbox";
 import TermsGoogle from "@/app/(auth)/register/terms";
 import RegisterForm from "@/app/(auth)/register/register-form";
-
-// import Icon from "";
 
 export default function RegisterPage() {
   return (

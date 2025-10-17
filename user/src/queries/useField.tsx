@@ -16,3 +16,11 @@ export const useGetCourtSlotsByFieldId = (id: string, date?: string) => {
     staleTime: 10 * 1000,
   });
 };
+
+export const useGetFieldById = (id: number) => {
+  return useQuery({
+    queryKey: ["getFieldById", id],
+    queryFn: () => fieldApiRequest.sGetFieldById(id),
+    staleTime: 10 * 1000,
+  });
+};

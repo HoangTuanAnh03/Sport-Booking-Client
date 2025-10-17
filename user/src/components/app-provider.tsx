@@ -28,6 +28,8 @@ type AppStoreType = {
   setEmail: (email: string | null) => void;
   noPassword: boolean;
   setNoPassword: (noPassword: boolean) => void;
+  phoneNumber?: string | null;
+  setPhoneNumber?: (phoneNumber: string | null) => void;
 };
 
 export const useAppStore = create<AppStoreType>((set) => ({
@@ -45,6 +47,9 @@ export const useAppStore = create<AppStoreType>((set) => ({
   setEmail: (email: string | null) => set({ email: email }),
   noPassword: false,
   setNoPassword: (noPassword: boolean) => set({ noPassword: noPassword }),
+  phoneNumber: null,
+  setPhoneNumber: (phoneNumber: string | null) =>
+    set({ phoneNumber: phoneNumber }),
 }));
 
 export default function AppProvider({
@@ -62,8 +67,15 @@ export default function AppProvider({
           const res = await userApiRequest.sMyInfo();
 
           if (res.status === 200) {
-            const { name, avatarUrl, email, noPassword } = res.payload.data!;
-            useAppStore.setState({ name, avatarUrl, email, noPassword });
+            const { name, avatarUrl, email, noPassword, phoneNumber } =
+              res.payload.data!;
+            useAppStore.setState({
+              name,
+              avatarUrl,
+              email,
+              noPassword,
+              phoneNumber,
+            });
           } else {
             // removeTokenFormLocalStorage();
             // window.location.href = `/logout?accessToken=${accessToken}`;

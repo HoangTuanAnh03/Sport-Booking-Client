@@ -1,16 +1,16 @@
 import http from "@/utils/api";
-import { Field } from "@/types/field";
-import { CourtSlotsByField } from "@/types/field";
+import { CourtSlotsByField, FieldsByVenueId, FieldById } from "@/types/field";
 import envConfig from "@/config";
 
 const fieldApiRequest = {
+  sGetFieldById: (id: number) =>
+    http.get<IBackendRes<FieldById>>(`/fields/${id}`, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+    }),
   sGetFieldByVenueId: (id: number) =>
-    http.get<IBackendRes<IModelPaginateResponse<Field[]>>>(
-      `/fields/getByVenueId/${id}`,
-      {
-        baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
-      }
-    ),
+    http.get<IBackendRes<FieldsByVenueId>>(`/fields/getByVenueId/${id}`, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+    }),
 
   sGetCourtSlotsByFieldId: (fieldId: string, date?: string) => {
     const params = new URLSearchParams();

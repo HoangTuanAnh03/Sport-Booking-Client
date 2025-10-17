@@ -11,7 +11,7 @@ import { formatTimeToHHMM, getAccessTokenFormLocalStorage } from "@/lib/utils";
 import FieldModal from "@/components/FieldModal";
 import { useGetFieldByVenueId } from "@/queries/useField";
 import { useEffect, useState, useCallback } from "react";
-import { Field } from "@/types/field";
+import { FieldsByVenueId } from "@/types/field";
 import { useVenues } from "@/queries/useVenue";
 import { useRouter } from "next/navigation";
 import { useSaveUserLocation, getLocation } from "@/hooks/use-location";
@@ -21,7 +21,7 @@ import VenueSearchFilter, {
 
 export default function Home() {
   const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
-  const [fieldData, setFieldData] = useState<Field[]>([]);
+  const [fieldData, setFieldData] = useState<FieldsByVenueId | undefined>();
   const [venueIdSelected, setVenueIdSelected] = useState<number>(0);
   const [searchFilters, setSearchFilters] = useState<VenueSearchFilters>({
     search: "",
@@ -63,8 +63,8 @@ export default function Home() {
   useSaveUserLocation();
 
   useEffect(() => {
-    if (fields?.payload.data) {
-      setFieldData(fields?.payload.data.data);
+    if (venueIdSelected !== 0 && fields?.payload.data) {
+      setFieldData(fields?.payload.data);
       setIsFieldModalOpen(true);
     }
   }, [fields]);
@@ -262,11 +262,13 @@ export default function Home() {
               </div>
             )}
           </div>
-          <FieldModal
-            data={fieldData}
-            isOpen={isFieldModalOpen}
-            setIsOpen={setIsFieldModalOpen}
-          />
+          {fieldData && (
+            <FieldModal
+              data={fieldData}
+              isOpen={isFieldModalOpen}
+              setIsOpen={setIsFieldModalOpen}
+            />
+          )}
         </section>
       </main>
       <Footer />

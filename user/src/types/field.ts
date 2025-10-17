@@ -17,6 +17,32 @@ export type Field = {
   opening_hour_today?: OpeningHour;
 };
 
+export interface FieldById {
+  id: number;
+  name: string;
+  monthLimit: number;
+  sportTypeId: number;
+  venueId: number;
+  minBookingMinutes: number;
+  sportTypeName: string;
+  status: "ENABLE" | "UNABLE" | "DELETED";
+  openingHours: {
+    dayOfWeek: string;
+    openTime: string;
+    closeTime: string;
+  }[];
+}
+
+export type FieldsByVenueId = {
+  fields: FieldByVenueId[];
+};
+
+export type FieldByVenueId = {
+  id: number;
+  name: string;
+  sportTypeId: number;
+};
+
 export type CourtSlotsByField = {
   id: number;
   name: string;

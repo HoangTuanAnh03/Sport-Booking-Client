@@ -7,7 +7,7 @@ import { useGetVenueDetail } from "@/queries/useVenue";
 import { InfoDetailVenue } from "@/components/ui/venue/detail/Info";
 import { ReviewVenue } from "@/components/ui/venue/detail/Review";
 import FieldModal from "@/components/FieldModal";
-import { Field } from "@/types/field";
+import { Field, FieldsByVenueId } from "@/types/field";
 import { useGetFieldByVenueId } from "@/queries/useField";
 import { cn, getAccessTokenFormLocalStorage } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ import { ServiceVenue } from "@/components/ui/venue/detail/Service";
 export const DetailVenue = () => {
   const [detailVenue, setDetailVenue] = useState<VenueDetail>();
   const venueIdSelected = useSideBarStore((state) => state.venueIdSelected);
-  const [fieldData, setFieldData] = useState<Field[]>([]);
+  const [fieldData, setFieldData] = useState<FieldsByVenueId>();
   const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
 
   const { data } = useGetVenueDetail(venueIdSelected ?? 0);
@@ -67,7 +67,7 @@ export const DetailVenue = () => {
   const showField = () => {
     if (!detailVenue) return "";
     if (fields?.payload.data) {
-      setFieldData(fields?.payload.data.data);
+      setFieldData(fields?.payload.data);
       setIsFieldModalOpen(true);
     }
   };
@@ -144,11 +144,13 @@ export const DetailVenue = () => {
           </Button>
         </div>
       </div>
-      <FieldModal
-        data={fieldData}
-        isOpen={isFieldModalOpen}
-        setIsOpen={setIsFieldModalOpen}
-      />
+      {fieldData && (
+        <FieldModal
+          data={fieldData}
+          isOpen={isFieldModalOpen}
+          setIsOpen={setIsFieldModalOpen}
+        />
+      )}
       {/* Tabs */}
       <div className="mt-4 px-4 flex-1 overflow-auto">
         <Tabs defaultValue="info" className="flex flex-col">
