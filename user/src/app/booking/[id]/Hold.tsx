@@ -1,14 +1,13 @@
 import { useBookingStore } from "@/stores/useBookingStore";
 import { CourtSlotsByField, FieldById } from "@/types/field";
 import { useState } from "react";
-import { FaPlus, FaTimes } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import bookingApiRequest from "@/apiRequests/booking";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -23,9 +22,11 @@ import { CreateBookingRequest } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { useAppStore } from "@/components/app-provider";
 import { formatDateToYMD } from "@/lib/utils";
-import { useQueryClient } from "@tanstack/react-query";
 import { useHoldBooking } from "@/queries/useBooking";
 import { useRouter } from "next/navigation";
+import { useGetServiceByVenueId } from "@/queries/useService";
+import { Service } from "@/types/service";
+import ServiceSelectionDialog from "./components/ServiceSelectionDialog";
 
 // Validation schema for the booking form
 const bookingFormSchema = z.object({
@@ -35,6 +36,15 @@ const bookingFormSchema = z.object({
 });
 
 type BookingFormValues = z.infer<typeof bookingFormSchema>;
+
+// Service item interface
+interface ServiceItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+}
 
 export default function Hold({
   fieldInfo,
@@ -48,6 +58,9 @@ export default function Hold({
   const selectedCourtSlots = useBookingStore(
     (state) => state.selectedCourtSlots
   );
+  const setSelectedCourtSlots = useBookingStore(
+    (state) => state.setSelectedCourtSlots
+  );
   const router = useRouter();
   const { data: venue } = useGetVenueDetail(fieldInfo?.venueId || 0);
   const { toast } = useToast();
@@ -57,7 +70,13 @@ export default function Hold({
   const phoneNumber = useAppStore((state) => state.phoneNumber);
   const name = useAppStore((state) => state.name);
 
-  const queryClient = useQueryClient();
+  // New states for service selection
+  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<ServiceItem[]>([]);
+
+  // Fetch services from the venue
+  const { data: servicesData, isLoading: isLoadingServices } =
+    useGetServiceByVenueId(venue?.payload?.data?.id || 0);
   const holdBookingMutation = useHoldBooking();
 
   // Initialize form
@@ -70,6 +89,18 @@ export default function Hold({
     },
   });
 
+  // Calculate total service price
+  const calculateServiceTotal = () => {
+    return selectedServices.reduce((total, service) => {
+      return total + service.price * service.quantity;
+    }, 0);
+  };
+
+  // Calculate grand total (courts + services)
+  const calculateGrandTotal = () => {
+    return totalPrice + calculateServiceTotal();
+  };
+
   const onSubmit = async (data: BookingFormValues) => {
     try {
       setIsSubmitting(true);
@@ -80,6 +111,10 @@ export default function Hold({
         customerName: data.name,
         customerPhone: data.phone,
         note: data.notes || "",
+        services: selectedServices.map((service) => ({
+          id: service.id,
+          quantity: service.quantity,
+        })),
         courts: Array.from(selectedCourtSlots.entries()).map(([key, slot]) => {
           return {
             courtId: Number(key),
@@ -95,6 +130,7 @@ export default function Hold({
       const response = await holdBookingMutation.mutateAsync(payload);
 
       if (response.status === 200) {
+        setSelectedCourtSlots(new Map());
         router.push(
           `/booking/${fieldInfo?.id}/confirm/${response.payload.data}`
         );
@@ -113,19 +149,12 @@ export default function Hold({
         variant: "destructive",
       });
     } finally {
-      queryClient.invalidateQueries({
-        queryKey: [
-          "getCourtSlotsByFieldId",
-          fieldInfo?.id,
-          formatDateToYMD(dateSelection),
-        ],
-      });
       setIsSubmitting(false);
     }
   };
 
   const handleCancel = () => {
-    // TODO: Thêm logic huỷ đặt sân nếu cần (ví dụ: gọi API hoặc reset form)
+    setSelectedCourtSlots(new Map());
     form.reset();
     setOpenHold(false);
   };
@@ -148,6 +177,49 @@ export default function Hold({
       return `${hours}h${minutes}p`;
     }
     return `${hours}h`;
+  };
+
+  // Function to handle quantity change
+  const handleQuantityChange = (service: Service, newQuantity: number) => {
+    if (newQuantity < 0) return;
+
+    setSelectedServices((prev) => {
+      const existingIndex = prev.findIndex((s) => s.id === service.id);
+
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        if (newQuantity === 0) {
+          // Remove the service if quantity is 0
+          updated.splice(existingIndex, 1);
+        } else {
+          // Update the quantity
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            quantity: newQuantity,
+          };
+        }
+        return updated;
+      } else if (newQuantity > 0) {
+        // Add new service
+        return [
+          ...prev,
+          {
+            id: service.id,
+            name: service.name,
+            price: service.price,
+            quantity: newQuantity,
+            unit: service.units,
+          },
+        ];
+      }
+      return prev;
+    });
+  };
+
+  // Function to get current quantity
+  const getServiceQuantity = (serviceId: number) => {
+    const service = selectedServices.find((s) => s.id === serviceId);
+    return service ? service.quantity : 0;
   };
 
   return (
@@ -247,11 +319,14 @@ export default function Hold({
                           <div className="font-semibold text-gray-700">
                             - {court?.name || `Sân ${courtId}`}
                           </div>
-                          <ul className="ml-4 list-disc ml-8">
+                          <ul className=" list-disc ml-8">
                             {slots.map((slot) => (
                               <li key={slot.id} className="text-gray-700">
-                                {slot.startTime} - {slot.endTime} |{" "}
-                                <span className="text-yellow-500">
+                                <span className="w-28 inline-block">
+                                  {slot.startTime} - {slot.endTime}{" "}
+                                </span>
+                                |
+                                <span className="ml-2 text-yellow-500">
                                   {slot.price} đ
                                 </span>
                               </li>
@@ -270,37 +345,92 @@ export default function Hold({
                 </p>
               </div>
 
-              {/* <div className="p-5 border-b border-gray-100 flex justify-between items-center">
-                <div className="font-medium">Ưu đãi</div>
-                <Button
-                  variant="ghost"
-                  className="text-green-700 hover:text-green-800 hover:bg-green-50 p-0"
-                >
-                  Chọn ưu đãi áp dụng <FaPlus className="ml-2" />
-                </Button>
-              </div> */}
+              {/* Display selected services */}
+              {selectedServices.length > 0 && (
+                <div className="p-5 border-b border-gray-100">
+                  <div className="font-medium mb-2">Dịch vụ:</div>
+                  {selectedServices.map((service) => (
+                    <div
+                      key={service.id}
+                      className="flex justify-between items-center mb-2 text-gray-700"
+                    >
+                      <div className="flex items-center">
+                        <span className="font-semibold text-gray-700 mr-2">
+                          - {service.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-yellow-500 text-sm">
+                          {service.price} đ
+                        </span>
+                        <span className="mx-4">
+                          x {service.quantity} {service.unit}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={() =>
+                            handleQuantityChange(
+                              {
+                                id: service.id,
+                                name: service.name,
+                                price: service.price,
+                              } as Service,
+                              0
+                            )
+                          }
+                        >
+                          <FaTimes className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex justify-between items-center mt-2 font-medium">
+                    <span>Tổng tiền dịch vụ:</span>
+                    <span className="text-yellow-500">
+                      {calculateServiceTotal()} đ
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="p-5 flex justify-between items-center bg-green-50">
                 <div className="font-medium text-base text-green-700">
                   Số tiền cần thanh toán
                 </div>
                 <div className="font-bold text-xl text-green-700">
-                  {totalPrice} đ
+                  {calculateGrandTotal()} đ
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Additional Services */}
+          {/* Additional Services Button */}
           <div className="py-4">
             <Button
               type="button"
               variant="outline"
               className="w-full py-6 border-green-700 text-green-700 hover:bg-green-50"
+              onClick={() => setServiceDialogOpen(true)}
             >
-              Thêm dịch vụ
+              Thêm dịch vụ{" "}
+              {selectedServices.length > 0 && `(${selectedServices.length})`}
             </Button>
           </div>
+
+          {/* Service Selection Dialog Component */}
+          <ServiceSelectionDialog
+            open={serviceDialogOpen}
+            onOpenChange={setServiceDialogOpen}
+            servicesData={servicesData}
+            isLoadingServices={isLoadingServices}
+            selectedServices={selectedServices}
+            handleQuantityChange={handleQuantityChange}
+            getServiceQuantity={getServiceQuantity}
+            calculateServiceTotal={calculateServiceTotal}
+          />
 
           {/* User Information */}
           <div className="py-4">
@@ -379,6 +509,61 @@ export default function Hold({
           </div>
 
           {/* Confirmation & Cancel Buttons */}
+          <div className="mb-4">
+            <div className="rounded-lg overflow-hidden shadow-inner">
+              <div className="bg-gradient-to-r from-green-900 to-green-700 text-white p-4">
+                <div className="flex items-start flex-col">
+                  <div className="mr-3">
+                    <span className="inline-block bg-gradient-to-r from-yellow-500 to-yellow-200 text-green-900 font-semibold px-2 py-1 rounded">
+                      Lưu ý:
+                    </span>
+                  </div>
+                  <div className="text-sm leading-relaxed">
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>
+                        Việc thanh toán được thực hiện trực tiếp giữa bạn và chủ
+                        sân.
+                      </li>
+                      <li>
+                        SportBooking đóng vai trò kết nối, hỗ trợ bạn tìm và đặt
+                        sân dễ dàng hơn.
+                      </li>
+                      <li>
+                        Mỗi sân có thể có quy định và chính sách riêng, hãy dành
+                        chút thời gian đọc kỹ để đảm bảo quyền lợi cho bạn nhé!
+                      </li>
+                    </ul>
+                    <p className="mt-2 text-sm">
+                      Bằng việc bấm{" "}
+                      <span className="font-semibold">
+                        Xác nhận và Thanh toán
+                      </span>
+                      , bạn xác nhận đã đọc và đồng ý với{" "}
+                      <a
+                        className="underline text-yellow-300"
+                        href="/terms"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Điều khoản đặt sân
+                      </a>{" "}
+                      và{" "}
+                      <a
+                        className="underline text-yellow-300"
+                        href="/refund-policy"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Chính sách hoàn tiền và huỷ lịch
+                      </a>
+                      .
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="py-4 flex gap-4">
             <Button
               type="button"
@@ -387,7 +572,7 @@ export default function Hold({
               disabled={isSubmitting}
               onClick={handleCancel}
             >
-              HUỶ ĐẶT SÂN
+              HUỶ GIỮ SÂN
             </Button>
             <Button
               type="submit"

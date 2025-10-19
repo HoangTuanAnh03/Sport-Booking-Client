@@ -68,6 +68,7 @@ export type CourtSlots = {
   status: CourtSlotStatus;
   isMerge: boolean;
   price: number;
+  bookingId: string;
 };
 
 export enum CourtSlotStatus {

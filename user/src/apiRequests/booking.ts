@@ -1,5 +1,9 @@
 import envConfig from "@/config";
-import { ConfirmBookingRequest, CreateBookingRequest } from "@/types/booking";
+import {
+  ConfirmBookingRequest,
+  CreateBookingRequest,
+  Booking,
+} from "@/types/booking";
 import http from "@/utils/api";
 
 const bookingApiRequest = {
@@ -7,6 +11,11 @@ const bookingApiRequest = {
   //   http.get<IBackendRes<Booking>>("/booking/list", {
   //     baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
   //   }),
+
+  sGetBookingById: (bookingId: string) =>
+    http.get<IBackendRes<Booking>>(`/booking/${bookingId}`, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8100",
+    }),
 
   sHoldBooking: (payload: CreateBookingRequest) =>
     http.post<IBackendRes<string>>("/booking/hold", payload, {

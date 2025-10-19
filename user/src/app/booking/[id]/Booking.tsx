@@ -96,10 +96,6 @@ export const Booking = () => {
     );
   }, [fieldDetails]);
 
-  const totalPrice = useMemo(() => {
-    return calculateTotalPrice(selectedCourtSlots);
-  }, [selectedCourtSlots]);
-
   // Optimized click handler with useCallback
   const handleCellClick = useCallback(
     (courtId: string, timeSlot: CourtSlots): void => {
@@ -226,7 +222,7 @@ export const Booking = () => {
                       handleCellClick(court.id.toString(), timeSlot)
                     }
                     colSpan={colspan}
-                    className={`border border-green-300 border-dashed cursor-pointer px-3 py-3 text-center transition-all duration-200 ${
+                    className={`border-2 border-cyan-300 border-dashed cursor-pointer px-3 py-3 text-center transition-all duration-200 ${
                       isPast
                         ? "cursor-not-allowed bg-gray-200 opacity-50"
                         : isAvailable
