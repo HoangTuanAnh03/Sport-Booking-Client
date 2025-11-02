@@ -274,7 +274,7 @@ export default function ConfirmBookingPage() {
       setIsConfirming(true);
       await confirmBookingMutation.mutateAsync({
         bookingId,
-        paymentProofUrl: paymentImage,
+        imageUrl: paymentImage,
       } as ConfirmBookingRequest);
 
       // Clear selected slots
@@ -607,6 +607,30 @@ export default function ConfirmBookingPage() {
                 </h3>
               </div>
               <div className="p-5 divide-y divide-gray-100">
+                <div className="py-3 flex items-start">
+                  <div className="bg-green-100 rounded-full p-2 flex-shrink-0 mr-3">
+                    <FaCalendarAlt className="text-green-600" size={14} />
+                  </div>
+                  <div className="flex-grow">
+                    <div className="text-xs text-gray-500">Tên sân</div>
+                    <div className="font-medium">
+                      {booking?.venueName || "Không có thông tin"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="py-3 flex items-start">
+                  <div className="bg-green-100 rounded-full p-2 flex-shrink-0 mr-3">
+                    <FaCalendarAlt className="text-green-600" size={14} />
+                  </div>
+                  <div className="flex-grow">
+                    <div className="text-xs text-gray-500">Địa chỉ sân</div>
+                    <div className="font-medium">
+                      {booking?.venueAddress || "Không có thông tin"}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="py-3 flex items-start">
                   <div className="bg-green-100 rounded-full p-2 flex-shrink-0 mr-3">
                     <FaUserAlt className="text-green-600" size={14} />

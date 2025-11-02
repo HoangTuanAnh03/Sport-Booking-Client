@@ -82,7 +82,7 @@ export function AvatarOption() {
               </DropdownMenuItem>
             )}
             <DropdownMenuItem asChild className="p-3 cursor-pointer">
-              <Link href="/booking/list" className="flex items-center">
+              <Link href="/booking/history" className="flex items-center">
                 <BookOpen className="h-4 w-4 mr-3" />
                 <span>Lịch sử đặt</span>
               </Link>

@@ -1,15 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import bookingApiRequest from "@/apiRequests/booking";
-import imageApiRequest from "@/apiRequests/image";
 import venueApiRequest from "@/apiRequests/venue";
 
-// export const useGetListBooking = () => {
-//   return useQuery({
-//     queryKey: ["getListBooking"],
-//     queryFn: () => bookingApiRequest.sGetBookingList(),
-//     staleTime: 10 * 1000,
-//   });
-// };
+export const useGetListBooking = () => {
+  return useQuery({
+    queryKey: ["getListBooking"],
+    queryFn: () => bookingApiRequest.sGetBookingList(),
+    staleTime: 10 * 1000,
+  });
+};
 
 // mutation
 export const useHoldBooking = () => {
@@ -19,14 +18,24 @@ export const useHoldBooking = () => {
     mutationKey: ["holdBooking"],
     mutationFn: bookingApiRequest.sHoldBooking,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["getCourtSlotsByFieldId"] });
+      queryClient.invalidateQueries({
+        predicate: (q) =>
+          ["getCourtSlotsByFieldId", "getListBooking"].includes(
+            String(q.queryKey[0])
+          ),
+      });
     },
   });
 };
 
 export const useConfirmBooking = () => {
   const queryClient = useQueryClient();
-  queryClient.refetchQueries({ queryKey: ["getCourtSlotsByFieldId"] });
+  queryClient.refetchQueries({
+    predicate: (q) =>
+      ["getCourtSlotsByFieldId", "getListBooking"].includes(
+        String(q.queryKey[0])
+      ),
+  });
   return useMutation({
     mutationKey: ["confirmBooking"],
     mutationFn: bookingApiRequest.sConfirmBooking,
@@ -35,7 +44,12 @@ export const useConfirmBooking = () => {
 
 export const useCancelBooking = () => {
   const queryClient = useQueryClient();
-  queryClient.refetchQueries({ queryKey: ["getCourtSlotsByFieldId"] });
+  queryClient.refetchQueries({
+    predicate: (q) =>
+      ["getCourtSlotsByFieldId", "getListBooking"].includes(
+        String(q.queryKey[0])
+      ),
+  });
   return useMutation({
     mutationKey: ["cancelBooking"],
     mutationFn: bookingApiRequest.sCancelBooking,

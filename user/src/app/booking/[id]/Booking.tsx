@@ -223,9 +223,7 @@ export const Booking = () => {
                     }
                     colSpan={colspan}
                     className={`border-2 border-cyan-300 border-dashed cursor-pointer px-3 py-3 text-center transition-all duration-200 ${
-                      isPast
-                        ? "cursor-not-allowed bg-gray-200 opacity-50"
-                        : isAvailable
+                      isAvailable
                         ? "hover:bg-green-200 bg-white"
                         : timeSlot.status === CourtSlotStatus.LOCK
                         ? "cursor-not-allowed bg-gray-500 hover:bg-gray-400"
@@ -234,7 +232,8 @@ export const Booking = () => {
                       isSelected
                         ? " border-solid border-4 border-green-400"
                         : ""
-                    }`}
+                    }
+                    ${isPast ? "cursor-not-allowed  opacity-70" : ""}`}
                   >
                     {/* Gray overlay for past time slots */}
                     {/* {isPast && (

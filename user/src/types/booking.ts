@@ -44,6 +44,22 @@ export type Booking = {
   customerName: string;
   customerPhoneNumber: string;
   note?: string | null;
+  status: BookingStatus;
+  imageUrl?: string | null;
+  detail: BookingDetail;
+  createdAt: string; // ISO timestamp
+};
+
+export type BookingHistory = {
+  id: string; // uuid
+  userId: string;
+  venueId: number;
+  venueName: string;
+  venueAddress: string;
+  venuePhoneNumber: string;
+  customerName: string;
+  customerPhoneNumber: string;
+  note?: string | null;
   status: BookingStatus | string;
   imageUrl?: string | null;
   detail: BookingDetail;
@@ -51,6 +67,7 @@ export type Booking = {
 };
 
 export type BookingDetail = {
+  fieldId: number;
   totalAmount: number;
   date: string; // ISO date string (e.g., "2025-10-18")
   courts: BookingCourt[];
