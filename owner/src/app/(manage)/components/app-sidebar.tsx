@@ -1,15 +1,10 @@
 "use client";
 import {
   House,
-  UserCircle2,
-  MapPinned,
-  Swords,
   CircleDollarSign,
   SquareTerminal,
-  Bot,
-  BookOpen,
-  Settings2,
-  PlusIcon,
+  CreditCard,
+  CalendarCheck2
 } from "lucide-react";
 
 import {
@@ -17,7 +12,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -26,12 +20,10 @@ import {
 } from "@/components/ui/sidebar";
 import { NavUser } from "@/app/(manage)/components/nav-user";
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { NavMain } from "@/app/(manage)/components/nav-main";
 import { useGetMyVenuesQuery } from "@/queries/useVenue";
 import { AddVenueDialog } from "@/components/AddVenueDialog";
-import { Button } from "@/components/ui/button";
 
 type Item = {
   title: string;
@@ -47,13 +39,18 @@ const items: Item[] = [
   },
   {
     title: "Quản lý lịch đặt",
-    url: "/payments",
+    url: "/bookings",
     icon: CircleDollarSign,
   },
   {
     title: "Quản lý khung giờ",
     url: "/slots",
-    icon: CircleDollarSign,
+    icon: CalendarCheck2,
+  },
+  {
+    title: "Thanh toán",
+    url: "/payment",
+    icon:  CreditCard,
   },
 ];
 
