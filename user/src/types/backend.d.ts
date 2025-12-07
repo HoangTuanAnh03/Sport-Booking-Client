@@ -54,4 +54,12 @@ declare global {
     label: string;
     active: boolean;
   };
+
+  interface PagingResponse<T> {
+    content: T[];
+    pageNo: number;
+    pageSize: number;
+    totalPages: number;
+    totalElements: number;
+  }
 }

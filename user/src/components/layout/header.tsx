@@ -17,6 +17,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useAppStore } from "@/components/app-provider";
 import { AvatarOption } from "@/components/layout/components/AvatarOption";
+import { NotificationDropdown } from "@/components/layout/notification-dropdown";
 
 export default function Header() {
   const pathname = usePathname();
@@ -91,7 +92,10 @@ export default function Header() {
         <div className="w-[250px] h-[40px] flex items-center justify-end space-x-2">
           {hydrated &&
             (accessToken ? (
-              <AvatarOption />
+              <>
+                <NotificationDropdown />
+                <AvatarOption />
+              </>
             ) : (
               <>
                 <Button variant="outline" asChild>

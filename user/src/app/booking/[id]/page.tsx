@@ -1,7 +1,7 @@
 "use client";
 import type React from "react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { Booking } from "./Booking";
 import { useBookingStore } from "@/stores/useBookingStore";
@@ -16,6 +16,9 @@ import { ChevronDownIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Hold from "@/app/booking/[id]/Hold";
 import { formatDateToYMD } from "@/lib/utils";
+import { Centrifuge } from "centrifuge";
+import envConfig from "@/config";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function BookingPage() {
   const setFieldDetails = useBookingStore((state) => state.setFieldDetails);
@@ -27,6 +30,8 @@ export default function BookingPage() {
   const id = Array.isArray(idParam) ? idParam[0] : idParam;
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [openHold, setOpenHold] = useState(false);
+  const queryClient = useQueryClient();
+  const centrifugeRef = useRef<Centrifuge | null>(null);
 
   const { data } = useGetCourtSlotsByFieldId(
     id,
@@ -40,6 +45,72 @@ export default function BookingPage() {
       setFieldDetails(data.payload.data ?? null);
     }
   }, [data, setFieldDetails]);
+
+  // Centrifugo WebSocket connection for court slots real-time updates
+  useEffect(() => {
+    if (!id) return;
+
+    const formattedDate = formatDateToYMD(dateSelection);
+    console.log("Initializing Centrifugo for court slots:", { fieldId: id, date: formattedDate });
+
+    const centrifuge = new Centrifuge(envConfig.NEXT_PUBLIC_CENTRIFUGO_URL, {
+    });
+    centrifugeRef.current = centrifuge;
+
+    centrifuge
+      .on("connecting", function (ctx) {
+        console.log(`Court slots WS connecting: ${ctx.code}, ${ctx.reason}`);
+      })
+      .on("connected", function (ctx) {
+        console.log(`Court slots WS connected over ${ctx.transport}`);
+      })
+      .on("disconnected", function (ctx) {
+        console.log(`Court slots WS disconnected: ${ctx.code}, ${ctx.reason}`);
+      })
+      .connect();
+
+    // Subscribe to court slots channel
+    const channel = `field:${id}-date:${formattedDate}#courtslot`;
+    const sub = centrifuge.newSubscription(channel);
+
+    sub
+      .on("publication", function (ctx) {
+        console.log(`Court slots update received:`, ctx.data);
+        
+        // Replace the entire court slots data with new data from WebSocket
+        queryClient.setQueryData(
+          ["getCourtSlotsByFieldId", id, formattedDate],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            
+            return {
+              ...oldData,
+              payload: {
+                ...oldData.payload,
+                data: ctx.data,
+              },
+            };
+          }
+        );
+      })
+      .on("subscribing", function (ctx) {
+        console.log(`Subscribing to ${channel}: ${ctx.code}, ${ctx.reason}`);
+      })
+      .on("subscribed", function (ctx) {
+        console.log(`Subscribed to ${channel}`, ctx);
+      })
+      .on("unsubscribed", function (ctx) {
+        console.log(`Unsubscribed from ${channel}: ${ctx.code}, ${ctx.reason}`);
+      })
+      .subscribe();
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      console.log("Cleaning up court slots Centrifugo connection");
+      sub.unsubscribe();
+      centrifuge.disconnect();
+    };
+  }, [id, dateSelection, queryClient]);
 
   if (openHold) {
     return (

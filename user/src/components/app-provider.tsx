@@ -30,6 +30,8 @@ type AppStoreType = {
   setNoPassword: (noPassword: boolean) => void;
   phoneNumber?: string | null;
   setPhoneNumber?: (phoneNumber: string | null) => void;
+  userId: string | null;
+  setUserId: (userId: string | null) => void;
 };
 
 export const useAppStore = create<AppStoreType>((set) => ({
@@ -50,6 +52,8 @@ export const useAppStore = create<AppStoreType>((set) => ({
   phoneNumber: null,
   setPhoneNumber: (phoneNumber: string | null) =>
     set({ phoneNumber: phoneNumber }),
+  userId: null,
+  setUserId: (userId: string | null) => set({ userId: userId }),
 }));
 
 export default function AppProvider({
@@ -67,9 +71,10 @@ export default function AppProvider({
           const res = await userApiRequest.sMyInfo();
 
           if (res.status === 200) {
-            const { name, avatarUrl, email, noPassword, phoneNumber } =
+            const { id, name, avatarUrl, email, noPassword, phoneNumber } =
               res.payload.data!;
             useAppStore.setState({
+              userId: id,
               name,
               avatarUrl,
               email,

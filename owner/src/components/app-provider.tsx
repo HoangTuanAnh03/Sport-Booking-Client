@@ -29,6 +29,8 @@ type AppStoreType = {
   setImage: (image: string) => void;
   email: string | null;
   setEmail: (email: string | null) => void;
+  userId: string | null;
+  setUserId: (userId: string | null) => void;
 };
 
 export const useAppStore = create<AppStoreType>((set) => ({
@@ -46,6 +48,8 @@ export const useAppStore = create<AppStoreType>((set) => ({
   setImage: (image) => set({ avatarUrl: image }),
   email: null,
   setEmail: (email: string | null) => set({ email: email }),
+  userId: null,
+  setUserId: (userId: string | null) => set({ userId: userId }),
 }));
 
 export default function AppProvider({
@@ -71,8 +75,8 @@ export default function AppProvider({
           const res = await userApiRequest.sMyInfo();
 
           if (res.status === 200) {
-            const { name, avatarUrl, email } = res.payload?.data!;
-            useAppStore.setState({ name, avatarUrl, email });
+            const { id, name, avatarUrl, email } = res.payload?.data!;
+            useAppStore.setState({ userId: id, name, avatarUrl, email });
           } else {
             removeTokenFormLocalStorage();
             window.location.href = `/logout?accessToken=${accessToken}`;

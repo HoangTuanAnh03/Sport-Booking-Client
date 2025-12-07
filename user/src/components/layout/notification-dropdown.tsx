@@ -89,9 +89,13 @@ export function NotificationDropdown() {
             };
           }
         );
-        
-        // Invalidate bookings query to refresh booking list
-        queryClient.invalidateQueries({ queryKey: ["bookings"] });
+
+      queryClient.invalidateQueries({
+        predicate: (q) =>
+          ["getCourtSlotsByFieldId", "getListBooking"].includes(
+            String(q.queryKey[0])
+          ),
+      });
         
         // Refetch unread count to update the badge
         queryClient.refetchQueries({ queryKey: ["notifications", "unread-count"] });

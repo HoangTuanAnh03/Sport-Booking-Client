@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useGetMyVenuesQuery } from "@/queries/useVenue";
 import { useGetFieldsByVenueIdQuery } from "@/queries/useField";
 import { useGetCourtSlotsByFieldIdQuery } from "@/queries/useSlot";
@@ -22,12 +22,17 @@ import { BuildingIcon, ChevronDownIcon } from "lucide-react";
 import { useAppStore } from "@/components/app-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import SlotsTable from "./SlotsTable";
+import { Centrifuge } from "centrifuge";
+import envConfig from "@/config";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SlotsPage = () => {
   const [selectedVenueId, setSelectedVenueId] = useState<number | null>(null);
   const [selectedFieldId, setSelectedFieldId] = useState<number | null>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [datePickerValue, setDatePickerValue] = useState<Date>(new Date());
+  const queryClient = useQueryClient();
+  const centrifugeRef = useRef<Centrifuge | null>(null);
 
   // Fix: Use local date string for API request (YYYY-MM-DD)
   const pad = (n: number) => n.toString().padStart(2, "0");
@@ -52,6 +57,69 @@ const SlotsPage = () => {
   const handleFieldSelect = (fieldId: number) => {
     setSelectedFieldId(fieldId);
   };
+
+  // Centrifugo WebSocket connection for court slots real-time updates
+  useEffect(() => {
+    if (!selectedFieldId || !selectedDate) return;
+
+    console.log("Initializing Centrifugo for court slots:", { fieldId: selectedFieldId, date: selectedDate });
+
+    const centrifuge = new Centrifuge(envConfig.NEXT_PUBLIC_CENTRIFUGO_URL, {
+      getToken: async () => {
+        // Get access token from localStorage
+        const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+        return token || "";
+      }
+    });
+    centrifugeRef.current = centrifuge;
+
+    centrifuge
+      .on("connecting", function (ctx) {
+        console.log(`Court slots WS connecting: ${ctx.code}, ${ctx.reason}`);
+      })
+      .on("connected", function (ctx) {
+        console.log(`Court slots WS connected over ${ctx.transport}`);
+      })
+      .on("disconnected", function (ctx) {
+        console.log(`Court slots WS disconnected: ${ctx.code}, ${ctx.reason}`);
+      })
+      .connect();
+
+    // Subscribe to court slots channel
+    const channel = `field:${selectedFieldId}-date:${selectedDate}#courtslot`;
+    const sub = centrifuge.newSubscription(channel);
+
+    sub
+      .on("publication", function (ctx) {
+        console.log(`Court slots update received:`, ctx.data);
+        
+        // Replace the entire court slots data with new data from WebSocket
+        queryClient.setQueryData(
+          ["court-slots", "field", selectedFieldId, selectedDate],
+          () => {
+            // Replace with new data from WebSocket
+            return ctx.data;
+          }
+        );
+      })
+      .on("subscribing", function (ctx) {
+        console.log(`Subscribing to ${channel}: ${ctx.code}, ${ctx.reason}`);
+      })
+      .on("subscribed", function (ctx) {
+        console.log(`Subscribed to ${channel}`, ctx);
+      })
+      .on("unsubscribed", function (ctx) {
+        console.log(`Unsubscribed from ${channel}: ${ctx.code}, ${ctx.reason}`);
+      })
+      .subscribe();
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      console.log("Cleaning up court slots Centrifugo connection");
+      sub.unsubscribe();
+      centrifuge.disconnect();
+    };
+  }, [selectedFieldId, selectedDate, queryClient]);
 
   if (venuesLoading) {
     return (
