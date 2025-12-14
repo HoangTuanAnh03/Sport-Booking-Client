@@ -27,6 +27,6 @@ export default function Logout() {
       }, 1000);
       router.push("/login");
     });
-  }, [mutateAsync, router, refreshToken]);
+  }, [mutateAsync, router, refreshToken, accessToken]);
   return <div>Logout</div>;
 }

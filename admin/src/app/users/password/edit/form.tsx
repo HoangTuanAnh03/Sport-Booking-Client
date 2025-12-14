@@ -18,14 +18,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import authApiRequest from "@/apiRequests/auth";
-import { useAppStore } from "@/components/app-provider";
 import { toast } from "@/hooks/use-toast";
 import { decodeJWT, getAccessTokenFormLocalStorage } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 const EditForm = () => {
   const router = useRouter();
-  const setRole = useAppStore((state) => state.setRole);
   const authCodeRegex = /code=([^&]+)/;
   const isMatch = window.location.href.match(authCodeRegex);
   const authCode = isMatch ? isMatch[1] : "";
@@ -55,7 +53,6 @@ const EditForm = () => {
       const accessToken = getAccessTokenFormLocalStorage();
       if (accessToken) {
         const role = decodeJWT(accessToken).scope;
-        setRole(role);
       }
       router.push("/");
     } else {

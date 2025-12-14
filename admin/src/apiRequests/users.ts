@@ -43,6 +43,10 @@ const userApiRequest = {
       baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080",
     });
   },
+  sGetById: (id: string) =>
+    http.get<IBackendRes<User>>(`/users/${id}`, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080",
+    }),
 };
 
 export default userApiRequest;

@@ -40,7 +40,7 @@ import { useGetAllUserQuery } from "@/queries/useUser";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FooterPaginationState } from "@/app/(manager)/components/footer-pagination-state";
 import { useDebounce } from "@/hooks/use-debound";
-import DetailForm from "@/app/(manager)/users/detail-form";
+// import DetailForm from "@/app/(manager)/users/detail-form";
 
 const UserTableContext = React.createContext<{
   userIdEdit: string | undefined;
@@ -227,33 +227,12 @@ export default function UserPage() {
     {
       id: "actions",
       enableHiding: false,
-      cell: ({ row }) => {
-        const { setUserIdEdit } = useContext(UserTableContext);
-        const [openDropdown, setOpenDropdown] = useState<boolean>(false);
-
-        const openDetail = () => {
-          setUserIdEdit(row.original.id);
-          setOpenDropdown(false);
-        };
-
-        return (
-          <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={openDetail}>Chi tiết</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
+      cell: ({ row }) => <UserActionsCell row={row} />,
     },
   ];
+
+
+
 
   const { data, isLoading } = useGetAllUserQuery({
     pageNo: page - 1,
@@ -444,5 +423,31 @@ export default function UserPage() {
         </div>
       </div>
     </UserTableContext.Provider>
+  );
+}
+
+function UserActionsCell({ row }: { row: any }) {
+  const { setUserIdEdit } = useContext(UserTableContext);
+  const [openDropdown, setOpenDropdown] = useState<boolean>(false);
+
+  const openDetail = () => {
+    setUserIdEdit(row.original.id);
+    setOpenDropdown(false);
+  };
+
+  return (
+    <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={openDetail}>Chi tiết</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

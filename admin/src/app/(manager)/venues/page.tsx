@@ -268,232 +268,12 @@ export default function VenuePage() {
     {
       id: "actions",
       enableHiding: false,
-      cell: ({ row }) => {
-        const { setVenueIdEdit, setMode, setIsDialogOpen } =
-          useContext(VenueTableContext);
-        const [openDropdown, setOpenDropdown] = useState<boolean>(false);
-        const [showDeleteDialog, setShowDeleteDialog] =
-          useState<boolean>(false);
-        const [showStatusDialog, setShowStatusDialog] =
-          useState<boolean>(false);
-        const [newStatus, setNewStatus] = useState<VenueStatus>("ENABLE");
-        const [statusAction, setStatusAction] = useState<string>("");
-
-        const currentStatus = row.original.status;
-
-        // No actions for DELETED and REJECTED venues
-        if (currentStatus === "DELETED" || currentStatus === "REJECTED") {
-          return null;
-        }
-
-        // Define available actions based on current status
-        const getAvailableActions = () => {
-          const actions = [];
-
-          // Always show edit action
-          // actions.push({
-          //   label: "Chỉnh sửa",
-          //   action: "edit",
-          //   className: "",
-          // });
-
-          // Status-specific actions
-          switch (currentStatus) {
-            case "PENDING":
-              actions.push({
-                label: "Duyệt sân",
-                action: "approve",
-                status: "ENABLE" as VenueStatus,
-                className: "text-green-600",
-              });
-              actions.push({
-                label: "Từ chối sân",
-                action: "reject",
-                status: "REJECTED" as VenueStatus,
-                className: "text-red-600",
-              });
-              break;
-            case "UNPAID":
-              actions.push({
-                label: "Đã thanh toán",
-                action: "disable",
-                status: "UNABLE" as VenueStatus,
-                className: "text-orange-600",
-              });
-              break;
-            case "ENABLE":
-            case "UNABLE":
-              actions.push({
-                label: "Khóa sân",
-                action: "lock",
-                status: "LOCK" as VenueStatus,
-                className: "text-red-600",
-              });
-              break;
-            case "LOCK":
-              actions.push({
-                label: "Mở khóa sân",
-                action: "unlock",
-                status: "UNABLE" as VenueStatus,
-                className: "text-blue-600",
-              });
-              break;
-            // No additional status actions for DELETED and REJECTED
-            default:
-              break;
-          }
-
-          return actions;
-        };
-
-        const availableActions = getAvailableActions();
-
-        const handleEdit = () => {
-          setVenueIdEdit(row.original.id);
-          setMode("edit");
-          setIsDialogOpen(true);
-          setOpenDropdown(false);
-        };
-
-        const handleDeleteClick = () => {
-          setShowDeleteDialog(true);
-          setOpenDropdown(false);
-        };
-
-        const handleStatusClick = (action: any) => {
-          setNewStatus(action.status);
-          setStatusAction(action.label);
-          setShowStatusDialog(true);
-          setOpenDropdown(false);
-        };
-
-        const handleDeleteConfirm = () => {
-          deleteVenueMutation.mutate(row.original.id);
-          setShowDeleteDialog(false);
-        };
-
-        const handleStatusConfirm = () => {
-          updateVenueStatusMutation.mutate({
-            id: row.original.id,
-            status: newStatus,
-          });
-          setShowStatusDialog(false);
-        };
-
-        // If no actions available (only edit), don't show dropdown
-        if (
-          availableActions.length === 1 &&
-          availableActions[0].action === "edit"
-        ) {
-          return (
-            <Button
-              variant="ghost"
-              className="h-8 w-8 p-0"
-              onClick={handleEdit}
-            >
-              <span className="sr-only">Chỉnh sửa</span>
-              <MoreHorizontal />
-            </Button>
-          );
-        }
-
-        return (
-          <>
-            <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {availableActions.map((action, index) => {
-                  if (action.action === "edit") {
-                    return (
-                      <DropdownMenuItem key={index} onClick={handleEdit}>
-                        {action.label}
-                      </DropdownMenuItem>
-                    );
-                  } else if (action.action === "delete") {
-                    return (
-                      <DropdownMenuItem
-                        key={index}
-                        onClick={handleDeleteClick}
-                        className={action.className}
-                      >
-                        {action.label}
-                      </DropdownMenuItem>
-                    );
-                  } else {
-                    return (
-                      <DropdownMenuItem
-                        key={index}
-                        onClick={() => handleStatusClick(action)}
-                        className={action.className}
-                      >
-                        {action.label}
-                      </DropdownMenuItem>
-                    );
-                  }
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <AlertDialog
-              open={showDeleteDialog}
-              onOpenChange={setShowDeleteDialog}
-            >
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Bạn có chắc chắn muốn xóa địa điểm "
-                    <strong>{row.original.name}</strong>" không? Hành động này
-                    không thể hoàn tác.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Hủy</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteConfirm}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    Xóa
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
-            <AlertDialog
-              open={showStatusDialog}
-              onOpenChange={setShowStatusDialog}
-            >
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Xác nhận thay đổi trạng thái
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Bạn có chắc chắn muốn thực hiện hành động "
-                    <strong>{statusAction}</strong>" cho địa điểm "
-                    <strong>{row.original.name}</strong>" không?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Hủy</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleStatusConfirm}>
-                    Xác nhận
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </>
-        );
-      },
+      cell: ({ row }) => <VenueActionsCell row={row} />,
     },
   ];
+
+
+
 
   const { data, isLoading, isFetching } = useSearchVenuesForAdminQuery({
     pageNo: page - 1,
@@ -762,3 +542,219 @@ export default function VenuePage() {
     </VenueTableContext.Provider>
   );
 }
+
+function VenueActionsCell({ row }: { row: any }) {
+        const { setVenueIdEdit, setMode, setIsDialogOpen } =
+          useContext(VenueTableContext);
+        const [openDropdown, setOpenDropdown] = useState<boolean>(false);
+        const [showDeleteDialog, setShowDeleteDialog] =
+          useState<boolean>(false);
+        const [showStatusDialog, setShowStatusDialog] =
+          useState<boolean>(false);
+        const [newStatus, setNewStatus] = useState<VenueStatus>("ENABLE");
+        const [statusAction, setStatusAction] = useState<string>("");
+        const deleteVenueMutation = useDeleteVenueMutation();
+        const updateVenueStatusMutation = useUpdateVenueStatusMutation();
+
+        const currentStatus = row.original.status;
+
+        // No actions for DELETED and REJECTED venues
+        if (currentStatus === "DELETED" || currentStatus === "REJECTED") {
+          return null;
+        }
+
+        // Define available actions based on current status
+        const getAvailableActions = () => {
+          const actions = [];
+          switch (currentStatus) {
+            case "PENDING":
+              actions.push({
+                label: "Duyệt sân",
+                action: "approve",
+                status: "ENABLE" as VenueStatus,
+                className: "text-green-600",
+              });
+              actions.push({
+                label: "Từ chối sân",
+                action: "reject",
+                status: "REJECTED" as VenueStatus,
+                className: "text-red-600",
+              });
+              break;
+            case "UNPAID":
+              actions.push({
+                label: "Đã thanh toán",
+                action: "disable",
+                status: "UNABLE" as VenueStatus,
+                className: "text-orange-600",
+              });
+              break;
+            case "ENABLE":
+            case "UNABLE":
+              actions.push({
+                label: "Khóa sân",
+                action: "lock",
+                status: "LOCK" as VenueStatus,
+                className: "text-red-600",
+              });
+              break;
+            case "LOCK":
+              actions.push({
+                label: "Mở khóa sân",
+                action: "unlock",
+                status: "UNABLE" as VenueStatus,
+                className: "text-blue-600",
+              });
+              break;
+            default:
+              break;
+          }
+
+          return actions;
+        };
+
+        const availableActions = getAvailableActions();
+
+        const handleEdit = () => {
+          setVenueIdEdit(row.original.id);
+          setMode("edit");
+          setIsDialogOpen(true);
+          setOpenDropdown(false);
+        };
+
+        const handleDeleteClick = () => {
+          setShowDeleteDialog(true);
+          setOpenDropdown(false);
+        };
+
+        const handleStatusClick = (action: any) => {
+          setNewStatus(action.status);
+          setStatusAction(action.label);
+          setShowStatusDialog(true);
+          setOpenDropdown(false);
+        };
+
+        const handleDeleteConfirm = () => {
+          deleteVenueMutation.mutate(row.original.id);
+          setShowDeleteDialog(false);
+        };
+
+        const handleStatusConfirm = () => {
+          updateVenueStatusMutation.mutate({
+            id: row.original.id,
+            status: newStatus,
+          });
+          setShowStatusDialog(false);
+        };
+
+        if (
+          availableActions.length === 1 &&
+          availableActions[0].action === "edit"
+        ) {
+          return (
+            <Button
+              variant="ghost"
+              className="h-8 w-8 p-0"
+              onClick={handleEdit}
+            >
+              <span className="sr-only">Chỉnh sửa</span>
+              <MoreHorizontal />
+            </Button>
+          );
+        }
+
+        return (
+          <>
+            <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {availableActions.map((action, index) => {
+                  if (action.action === "edit") {
+                    return (
+                      <DropdownMenuItem key={index} onClick={handleEdit}>
+                        {action.label}
+                      </DropdownMenuItem>
+                    );
+                  } else if (action.action === "delete") {
+                    return (
+                      <DropdownMenuItem
+                        key={index}
+                        onClick={handleDeleteClick}
+                        className={action.className}
+                      >
+                        {action.label}
+                      </DropdownMenuItem>
+                    );
+                  } else {
+                    return (
+                      <DropdownMenuItem
+                        key={index}
+                        onClick={() => handleStatusClick(action)}
+                        className={action.className}
+                      >
+                        {action.label}
+                      </DropdownMenuItem>
+                    );
+                  }
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <AlertDialog
+              open={showDeleteDialog}
+              onOpenChange={setShowDeleteDialog}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Bạn có chắc chắn muốn xóa địa điểm &quot;
+                    <strong>{row.original.name}</strong>&quot; không? Hành động này
+                    không thể hoàn tác.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteConfirm}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Xóa
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog
+              open={showStatusDialog}
+              onOpenChange={setShowStatusDialog}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Xác nhận thay đổi trạng thái
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Bạn có chắc chắn muốn thực hiện hành động &quot;
+                    <strong>{statusAction}</strong>&quot; cho địa điểm &quot;
+                    <strong>{row.original.name}</strong>&quot; không?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleStatusConfirm}>
+                    Xác nhận
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
+        );
+      }

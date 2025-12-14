@@ -7,7 +7,7 @@ export default function Search() {
       <div className=" py-16 max-w-7xl mr-auto ml-auto ">
         <div className= " text-white">
           <div className="pb-8 text-[28px] font-bold ">
-            1,004 Việc làm IT cho Developer "Chất"
+            1,004 Việc làm IT cho Developer &quot;Chất&quot;
           </div>
           <div className=" h-[56px]">
             <OptionSearch/>

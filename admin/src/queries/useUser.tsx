@@ -18,11 +18,11 @@ export const useGetAllUserQuery = (
   });
 };
 
-// export const useGetByIdQuery = (id: string, enabled: boolean) => {
-//   return useQuery({
-//     queryKey: ["userById", id],
-//     queryFn: () => userApiRequest.sGetById(id),
-//     staleTime: 10 * 1000,
-//     enabled,
-//   });
-// };
+export const useGetByIdQuery = (id: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ["userById", id],
+    queryFn: () => userApiRequest.sGetById(id),
+    staleTime: 10 * 1000,
+    enabled,
+  });
+};

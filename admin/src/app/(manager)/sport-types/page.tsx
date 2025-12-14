@@ -197,84 +197,12 @@ export default function SportTypePage() {
     {
       id: "actions",
       enableHiding: false,
-      cell: ({ row }) => {
-        const { setSportTypeIdEdit, setMode, setIsDialogOpen } = useContext(
-          SportTypeTableContext
-        );
-        const [openDropdown, setOpenDropdown] = useState<boolean>(false);
-        const [showDeleteDialog, setShowDeleteDialog] =
-          useState<boolean>(false);
-
-        const handleEdit = () => {
-          setSportTypeIdEdit(row.original.id);
-          setMode("edit");
-          setIsDialogOpen(true);
-          setOpenDropdown(false);
-        };
-
-        const handleDeleteClick = () => {
-          setShowDeleteDialog(true);
-          setOpenDropdown(false);
-        };
-
-        const handleDeleteConfirm = () => {
-          deleteSportTypeMutation.mutate(row.original.id);
-          setShowDeleteDialog(false);
-        };
-
-        return (
-          <>
-            <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleEdit}>
-                  Chỉnh sửa
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleDeleteClick}
-                  className="text-red-600"
-                >
-                  Xóa
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <AlertDialog
-              open={showDeleteDialog}
-              onOpenChange={setShowDeleteDialog}
-            >
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Bạn có chắc chắn muốn xóa môn thể thao "
-                    <strong>{row.original.name}</strong>" không? Hành động này
-                    không thể hoàn tác.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Hủy</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteConfirm}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    Xóa
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </>
-        );
-      },
+      cell: ({ row }) => <SportTypeActionsCell row={row} />,
     },
   ];
+
+
+
 
   const { data, isLoading, isFetching } = useGetAllSportTypesQuery({
     pageNo: page - 1,
@@ -489,5 +417,74 @@ export default function SportTypePage() {
         <SportTypeFormDialog />
       </div>
     </SportTypeTableContext.Provider>
+  );
+}
+
+function SportTypeActionsCell({ row }: { row: any }) {
+  const { setSportTypeIdEdit, setMode, setIsDialogOpen } = useContext(
+    SportTypeTableContext
+  );
+  const [openDropdown, setOpenDropdown] = useState<boolean>(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
+  const deleteSportTypeMutation = useDeleteSportTypeMutation();
+
+  const handleEdit = () => {
+    setSportTypeIdEdit(row.original.id);
+    setMode("edit");
+    setIsDialogOpen(true);
+    setOpenDropdown(false);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+    setOpenDropdown(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    deleteSportTypeMutation.mutate(row.original.id);
+    setShowDeleteDialog(false);
+  };
+
+  return (
+    <>
+      <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleEdit}>Chỉnh sửa</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleDeleteClick} className="text-red-600">
+            Xóa
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa môn thể thao &quot;
+              <strong>{row.original.name}</strong>&quot; không? Hành động này
+              không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
