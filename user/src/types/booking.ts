@@ -64,6 +64,7 @@ export type BookingHistory = {
   imageUrl?: string | null;
   detail: BookingDetail;
   createdAt: string; // ISO timestamp
+  isReview: boolean;
 };
 
 export type BookingDetail = {

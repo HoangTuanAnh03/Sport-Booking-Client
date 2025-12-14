@@ -30,7 +30,7 @@ export default function RootLayout({
           <AppProvider>
             <Toaster />
             <Header />
-            {children}
+            <div className="pt-16">{children}</div>
           </AppProvider>
         </ThemeProvider>
       </body>

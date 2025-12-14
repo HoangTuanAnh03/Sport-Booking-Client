@@ -12,3 +12,9 @@ export type Review = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type CreateReviewRequest = {
+  rating: number; // 1-5
+  comment: string; // max 1000 characters
+  venueId: number;
+};

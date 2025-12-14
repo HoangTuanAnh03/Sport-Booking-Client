@@ -26,6 +26,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -41,14 +50,6 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -58,6 +59,9 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import reviewApiRequest from "@/apiRequests/review";
+import { CreateReviewRequest } from "@/types/review";
+import { toast } from "@/hooks/use-toast";
 
 // Booking type definition based on the API response
 interface BookingTimeSlot {
@@ -99,7 +103,9 @@ interface Booking {
   customerPhoneNumber: string;
   venueName: string;
   venueAddress: string;
+  venueId: number;
   detail: BookingDetail;
+  isReview: boolean;
 }
 
 {
@@ -165,6 +171,14 @@ export default function BookingHistoryPage() {
   const [dateFilter, setDateFilter] = useState<Date | null>(null);
   const [sortBy, setSortBy] = useState<string>("newest");
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
+  
+  // Review dialog state
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   // Get current date for calendar defaultMonth
   const now = new Date();
@@ -307,6 +321,84 @@ export default function BookingHistoryPage() {
     setStatusFilter(null);
     setDateFilter(null);
     setSortBy("newest");
+  };
+
+  // Open review dialog
+  const openReviewDialog = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setReviewRating(0);
+    setHoveredRating(0);
+    setReviewComment("");
+    setIsReviewDialogOpen(true);
+  };
+
+  // Close review dialog
+  const closeReviewDialog = () => {
+    setIsReviewDialogOpen(false);
+    setSelectedBooking(null);
+    setReviewRating(0);
+    setHoveredRating(0);
+    setReviewComment("");
+  };
+
+  // Submit review
+  const handleSubmitReview = async () => {
+    if (!selectedBooking) return;
+    
+    if (reviewRating === 0) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng chọn số sao đánh giá",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!reviewComment.trim()) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập nội dung đánh giá",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (reviewComment.length > 1000) {
+      toast({
+        title: "Lỗi",
+        description: "Nội dung đánh giá không được vượt quá 1000 ký tự",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    
+    try {
+      const payload: CreateReviewRequest = {
+        rating: reviewRating,
+        comment: reviewComment.trim(),
+        venueId: selectedBooking.venueId,
+      };
+      
+      await reviewApiRequest.sCreateReview(payload);
+      
+      toast({
+        title: "Thành công",
+        description: "Đánh giá của bạn đã được gửi thành công!",
+      });
+      closeReviewDialog();
+      refetch(); // Refresh booking list to update isReview status
+    } catch (error: any) {
+      console.error("Error submitting review:", error);
+      toast({
+        title: "Lỗi",
+        description: error?.message || "Không thể gửi đánh giá. Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingReview(false);
+    }
   };
 
   // Empty state component with green theme
@@ -528,9 +620,6 @@ export default function BookingHistoryPage() {
           <EmptyState />
         ) : (
           filteredBookings.map((booking) => {
-            const canReview =
-              booking.status === "COMPLETED" && hasAllTimeSlotsPassed(booking);
-
             return (
               <Card
                 key={booking.id}
@@ -611,17 +700,15 @@ export default function BookingHistoryPage() {
                         </Tooltip>
                       </TooltipProvider>
 
-                      {/* Show review button for completed bookings where all slots have passed */}
-                      {canReview && (
+                      {/* Show review button for completed bookings if isReview is true */}
+                      {booking.isReview && (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
                                 variant="default"
                                 size="sm"
-                                onClick={() =>
-                                  router.push(`/booking/${booking.id}/review`)
-                                }
+                                onClick={() => openReviewDialog(booking)}
                                 className="bg-amber-500 hover:bg-amber-600 text-white"
                               >
                                 <Star className="h-4 w-4 mr-1" />
@@ -694,6 +781,93 @@ export default function BookingHistoryPage() {
           </Button>
         </div>
       )}
+
+      {/* Review Dialog */}
+      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-green-800">Đánh giá sân</DialogTitle>
+            <DialogDescription>
+              {selectedBooking && (
+                <span className="font-medium text-green-700">
+                  {selectedBooking.venueName}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Star Rating */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Đánh giá của bạn <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    onMouseEnter={() => setHoveredRating(star)}
+                    onMouseLeave={() => setHoveredRating(0)}
+                    className="transition-transform hover:scale-110 focus:outline-none"
+                  >
+                    <Star
+                      className={`h-8 w-8 ${
+                        star <= (hoveredRating || reviewRating)
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  </button>
+                ))}
+                {reviewRating > 0 && (
+                  <span className="ml-2 text-sm text-gray-600">
+                    {reviewRating} sao
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Comment */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Nhận xét <span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                placeholder="Chia sẻ trải nghiệm của bạn về sân..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                className="min-h-[120px] resize-none focus:ring-green-500 focus:border-green-500"
+                maxLength={1000}
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Tối đa 1000 ký tự</span>
+                <span>{reviewComment.length}/1000</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={closeReviewDialog}
+              disabled={isSubmittingReview}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmitReview}
+              disabled={isSubmittingReview || reviewRating === 0 || !reviewComment.trim()}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isSubmittingReview ? "Đang gửi..." : "Gửi đánh giá"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

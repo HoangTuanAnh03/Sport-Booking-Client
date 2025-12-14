@@ -56,7 +56,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="border-b sticky">
+    <header className="border-b fixed top-0 left-0 right-0 z-50 bg-background">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center">
           <Link href="/" className="text-xl font-bold">
