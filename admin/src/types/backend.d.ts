@@ -14,4 +14,6 @@ declare global {
     totalPages: number;
     totalElements: number;
   }
+
+  type PagingResponse<T> = IModelPaginate<T>;
 }

@@ -15,7 +15,7 @@ import { NotificationDropdown } from "@/app/(manage)/components/notification-dro
 
 // Mapping routes to breadcrumb titles
 const routeConfig: Record<string, { parent: string; title: string }> = {
-  "/venues": { parent: "Quản lý", title: "Sân thể thao" },
+  "/venues": { parent: "Quản lý", title: "Địa điểm" },
   "/bookings": { parent: "Quản lý", title: "Đặt sân" },
   "/slots": { parent: "Quản lý", title: "Khung giờ" },
   "/payment": { parent: "Quản lý", title: "Thanh toán" },
@@ -25,7 +25,7 @@ export function AppHeader() {
   const pathname = usePathname();
 
   // Get the current route config or use default
-  const currentRoute = routeConfig[pathname] || {
+  const currentRoute = routeConfig["/" + pathname.split("/")[1]] || {
     parent: "Trang chủ",
     title: pathname.replace("/", "") || "Dashboard",
   };

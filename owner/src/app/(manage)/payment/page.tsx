@@ -111,7 +111,7 @@ export default function PaymentPage() {
     );
   }
 
-  const getStatusBadge = (status: string, isPaid: boolean) => {
+  const getStatusBadge = (status: string, isPaid: boolean, noPayment: boolean) => {
     if (isPaid) {
       return (
         <Badge className="bg-green-500 hover:bg-green-600">
@@ -119,6 +119,10 @@ export default function PaymentPage() {
           Đã thanh toán
         </Badge>
       );
+    }
+
+    if (noPayment) {
+      return
     }
 
     return (
@@ -223,7 +227,7 @@ export default function PaymentPage() {
                     className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     <FileText className="h-4 w-4 mr-2" />
-                    Xem lại & thanh toán
+                    Thanh toán
                   </Button>
                 </div>
               </div>
@@ -274,7 +278,7 @@ export default function PaymentPage() {
                           </CardTitle>
                         </div>
                       </div>
-                      {getStatusBadge(venue.status, venue.isPaidThisMonth)}
+                      {getStatusBadge(venue.status, venue.isPaidThisMonth, venue.totalAmountToPay === 0)}
                     </div>
                     <div className="space-y-2 text-sm text-slate-600">
                       <div className="flex items-start gap-2">

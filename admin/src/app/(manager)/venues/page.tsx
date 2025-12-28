@@ -551,7 +551,7 @@ function VenueActionsCell({ row }: { row: any }) {
           useState<boolean>(false);
         const [showStatusDialog, setShowStatusDialog] =
           useState<boolean>(false);
-        const [newStatus, setNewStatus] = useState<VenueStatus>("ENABLE");
+        const [newStatus, setNewStatus] = useState<VenueStatus>("UNABLE");
         const [statusAction, setStatusAction] = useState<string>("");
         const deleteVenueMutation = useDeleteVenueMutation();
         const updateVenueStatusMutation = useUpdateVenueStatusMutation();
@@ -571,7 +571,7 @@ function VenueActionsCell({ row }: { row: any }) {
               actions.push({
                 label: "Duyệt sân",
                 action: "approve",
-                status: "ENABLE" as VenueStatus,
+                status: "UNABLE" as VenueStatus,
                 className: "text-green-600",
               });
               actions.push({

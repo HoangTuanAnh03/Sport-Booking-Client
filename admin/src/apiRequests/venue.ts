@@ -11,6 +11,7 @@ import {
   VenueSingleResponse,
   VenueAdminSearchParams,
 } from "@/types/venue";
+import envConfig from "@/config";
 
 const venueApiRequest = {
   // GET /venues/admin/search - Search venues for admin with pagination and filters
@@ -39,42 +40,42 @@ const venueApiRequest = {
       : "/venues/admin/search";
 
     return http.get<IModelPaginate<VenueAdminResponse>>(url, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 
   // GET /venues/{id} - Get venue detail by ID
   sGetVenueById: (id: number) => {
     return http.get<IBackendRes<VenueResponse>>(`/venues/${id}`, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 
   // POST /venues - Create new venue
   sCreateVenue: (body: CreateVenueBodyType) => {
     return http.post<IBackendRes<VenueResponse>>("/venues", body, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 
   // PUT /venues/{id} - Update venue
   sUpdateVenue: (id: number, body: UpdateVenueBodyType) => {
     return http.put<IBackendRes<VenueResponse>>(`/venues/${id}`, body, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 
   // PUT /venues/status - Update venue status
   sUpdateVenueStatus: (body: UpdateVenueStatusBodyType) => {
     return http.put<null>("/venues/status", body, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 
   // DELETE /venues/{id} - Delete venue
   sDeleteVenue: (id: number) => {
     return http.delete<null>(`/venues/${id}`, undefined, {
-      baseUrl: "http://localhost:8090",
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8090",
     });
   },
 };
