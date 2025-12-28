@@ -52,3 +52,13 @@ export const useGetPaymentHistoryQuery = (pageNo: number = 0, pageSize: number =
     },
   });
 };
+
+export const useCancelPaymentMutation = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (orderCode: string) => paymentApiRequest.sCancelPayment(orderCode),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["payment", "owner", "venues"] });
+        },
+    });
+};

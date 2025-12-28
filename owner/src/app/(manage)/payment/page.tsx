@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useGetOwnerVenuePaymentsQuery, useCreatePaymentMutation } from "@/queries/usePayment";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useGetOwnerVenuePaymentsQuery, useCreatePaymentMutation, useCancelPaymentMutation } from "@/queries/usePayment";
 import {
   Card,
   CardContent,
@@ -38,10 +38,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PaymentPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: payments, isLoading, error } = useGetOwnerVenuePaymentsQuery();
   const createPaymentMutation = useCreatePaymentMutation();
+  const cancelPaymentMutation = useCancelPaymentMutation();
   const [selectedVenues, setSelectedVenues] = useState<Set<number>>(new Set());
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  useEffect(() => {
+    const status = searchParams.get("status");
+    const code = searchParams.get("code");
+    const cancel = searchParams.get("cancel");
+    const orderCode = searchParams.get("orderCode");
+
+    if (status === "CANCELLED" && code === "00" && cancel === "true" && orderCode) {
+      cancelPaymentMutation.mutate(orderCode, {
+        onSuccess: () => {
+          // Clear URL parameters after successful cancellation handling
+          router.replace("/payment");
+        }
+      });
+    }
+  }, []);
 
   const handleSelectVenue = (venueId: number, checked: boolean) => {
     const newSelected = new Set(selectedVenues);

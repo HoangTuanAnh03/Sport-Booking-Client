@@ -22,6 +22,7 @@ const routeConfig: Record<string, { parent: string; title: string }> = {
   "/users": { parent: "Quản lý", title: "Người dùng" },
   "/venues": { parent: "Quản lý", title: "Địa điểm" },
   "/sport-types": { parent: "Quản lý", title: "Loại thể thao" },
+  "/payments": { parent: "Quản lý", title: "Thanh toán" },
 };
 
 export function AppHeader() {

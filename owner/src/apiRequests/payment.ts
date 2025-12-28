@@ -18,6 +18,10 @@ const paymentApiRequest = {
         baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8888",
       }
     ),
+  sCancelPayment: (orderCode: string) =>
+    http.post<IBackendRes<null>>(`/payment/cancel/${orderCode}`, {}, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8888",
+    }),
 };
 
 export default paymentApiRequest;

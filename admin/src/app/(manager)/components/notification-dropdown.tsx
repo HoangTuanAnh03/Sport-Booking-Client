@@ -93,6 +93,9 @@ export function NotificationDropdown() {
         // Invalidate bookings query to refresh booking list
         queryClient.invalidateQueries({ queryKey: ["bookings"] });
         
+        // Invalidate payment history query
+        queryClient.invalidateQueries({ queryKey: ["payment-history"] });
+        
         // Refetch unread count to update the badge
         queryClient.refetchQueries({ queryKey: ["notifications", "unread-count"] });
       })
