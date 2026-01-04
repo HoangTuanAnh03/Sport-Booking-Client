@@ -1,5 +1,6 @@
 import EditForm from "@/app/users/password/edit/form";
 import Image from "next/image";
+import { Suspense } from "react";
 
 
 export default function NewPasswordPage() {
@@ -19,7 +20,11 @@ export default function NewPasswordPage() {
         <div className="flex justify-between w-full gap-[10%] ">
           <div className="flex-[4_4_0%]">
             <div className="text-3xl font-bold">Đặt lại mật khẩu</div>
-            <div className="mt-6"><EditForm /></div>
+            <div className="mt-6">
+              <Suspense fallback={<div>Loading...</div>}>
+                <EditForm />
+              </Suspense>
+            </div>
           </div>
           <div className="flex-[5_5_0%] ">
             <div className="flex w-full justify-center h-full items-center">

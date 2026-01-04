@@ -5,7 +5,9 @@ import {
 } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-export default function RefreshTokenPage() {
+import { Suspense } from "react";
+
+function RefreshTokenContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPathname = searchParams.get("redirect");
@@ -21,4 +23,12 @@ export default function RefreshTokenPage() {
     }
   }, [router, refreshToken, redirectPathname]);
   return <div>Refresh Token ...</div>;
+}
+
+export default function RefreshTokenPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RefreshTokenContent />
+    </Suspense>
+  );
 }

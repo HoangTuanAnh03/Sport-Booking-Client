@@ -36,7 +36,9 @@ const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
-export default function VerifyOTPPage() {
+import { Suspense } from "react";
+
+function VerifyOTPContent() {
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -369,5 +371,13 @@ export default function VerifyOTPPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyOTPContent />
+    </Suspense>
   );
 }

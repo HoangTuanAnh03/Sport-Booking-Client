@@ -20,18 +20,22 @@ import { useForm } from "react-hook-form";
 import authApiRequest from "@/apiRequests/auth";
 import { toast } from "@/hooks/use-toast";
 import { decodeJWT, getAccessTokenFormLocalStorage } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const EditForm = () => {
   const router = useRouter();
-  const authCodeRegex = /code=([^&]+)/;
-  const isMatch = window.location.href.match(authCodeRegex);
-  const authCode = isMatch ? isMatch[1] : "";
-  console.log("🚀 ~ EditForm ~ authCode:", authCode);
+  const searchParams = useSearchParams();
+  const [authCode, setAuthCode] = useState("");
 
-  if (!isMatch) {
-    router.push("/login");
-  }
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (!code) {
+      router.push("/login");
+    } else {
+      setAuthCode(code);
+    }
+  }, [searchParams, router]);
 
   const form = useForm<EditPasswordBodyType>({
     resolver: zodResolver(EditPasswordBody),

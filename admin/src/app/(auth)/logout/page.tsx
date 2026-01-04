@@ -3,7 +3,9 @@ import { getRefreshTokenFormLocalStorage } from "@/lib/utils";
 import { useLogoutMutation } from "@/queries/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-export default function Logout() {
+import { Suspense } from "react";
+
+function LogoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { mutateAsync } = useLogoutMutation();
@@ -29,4 +31,12 @@ export default function Logout() {
     });
   }, [mutateAsync, router, refreshToken, accessToken]);
   return <div>Logout</div>;
+}
+
+export default function Logout() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LogoutContent />
+    </Suspense>
+  );
 }
