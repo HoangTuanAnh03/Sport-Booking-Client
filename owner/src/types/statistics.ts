@@ -1,46 +1,83 @@
-// Statistics Types
+// Owner Statistics Types
+
+// Filter types
+export type OwnerFilterType = "YESTERDAY" | "TODAY" | "LAST_7_DAYS" | "LAST_30_DAYS" | "THIS_MONTH" | "LAST_MONTH";
+
+// Online Statistics
+export interface OnlineUsersByVenue {
+  venueId: number;
+  venueName: string;
+  onlineUsersCount: number;
+}
 
 export interface OnlineStatistics {
   totalOnlineUsers: number;
+  onlineUsersByVenue: OnlineUsersByVenue[];
 }
 
-export interface PaymentStatistics {
-  paidVenueCount: number;
-  paidAmount: number;
-  unpaidVenueCount: number;
-  pendingAmount: number;
-}
-
-export interface SportTypeStatistics {
-  sportTypeId: number;
-  sportTypeName: string;
-  totalCourts: number;
-  venueCount: number;
-}
-
-export interface SystemStatistics {
-  totalVenues: number;
-  totalActiveVenues: number;
-  totalUsers: number;
-  totalSportTypes: number;
-  paymentStatistics: PaymentStatistics;
-  sportTypeStatistics: SportTypeStatistics[];
-}
-
-export interface TopVenue {
+// Venue Breakdown Item (used in revenue and order statistics)
+export interface VenueBreakdownItem {
   venueId: number;
   venueName: string;
-  venueAddress: string;
   venueAvatar: string;
+  revenue?: number; // For revenue statistics
+  orderCount?: number; // For order statistics
+}
+
+// Period Revenue Item
+export interface PeriodRevenue {
+  periodLabel: string; // Date label like "2024-01-01"
+  revenue: number;
+  venueBreakdown: VenueBreakdownItem[];
+}
+
+// Revenue Statistics
+export interface RevenueStatistics {
+  filterType: string;
   totalRevenue: number;
-  bookingCount: number;
+  venueRevenues: VenueBreakdownItem[];
+  periodRevenues: PeriodRevenue[];
+}
+
+// Period Order Item
+export interface PeriodOrder {
+  periodLabel: string;
+  orderCount: number;
+  venueBreakdown: VenueBreakdownItem[];
+}
+
+// Order Statistics
+export interface OrderStatistics {
+  filterType: string;
+  totalOrders: number;
+  venueOrders: VenueBreakdownItem[];
+  periodOrders: PeriodOrder[];
+}
+
+// Top Field Item
+export interface TopField {
+  fieldId: number;
+  fieldName: string;
+  venueId: number;
+  venueName: string;
+  totalRevenue: number;
   rank: number;
 }
 
-export type FilterType = "TODAY" | "THIS_MONTH";
+// Dashboard Statistics
+export interface DashboardStatistics {
+  totalVenues: number;
+  totalCourts: number;
+  averageRating: number;
+  bookingSuccessRate: number;
+  revenueStatistics: RevenueStatistics;
+  topFieldsByRevenue: TopField[];
+  orderStatistics: OrderStatistics;
+}
 
-export interface TopVenuesStatistics {
-  filterType: FilterType;
-  topVenuesByRevenue: TopVenue[];
-  topVenuesByBookingCount: TopVenue[];
+// Dashboard Query Params
+export interface DashboardQueryParams {
+  revenueFilterType?: OwnerFilterType;
+  topFieldsFilterType?: OwnerFilterType;
+  orderFilterType?: OwnerFilterType;
 }

@@ -24,12 +24,18 @@ import {
 } from "@/components/ui/chart";
 import {
   useGetOnlineStatisticsQuery,
-  useGetSystemStatisticsQuery,
-  useGetTopVenuesQuery,
+  useGetDashboardStatisticsQuery,
 } from "@/queries/useStatistics";
-import { FilterType } from "@/types/statistics";
+import { OwnerFilterType } from "@/types/statistics";
 import { useState } from "react";
-import { Users, Building2, UserCheck, Dumbbell, Loader2 } from "lucide-react";
+import {
+  Users,
+  Building2,
+  Star,
+  CheckCircle2,
+  Loader2,
+  MapPin,
+} from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -39,31 +45,25 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  LineChart,
+  Line,
+  Legend,
+  Tooltip,
 } from "recharts";
 
 // Colors for charts
 const COLORS = ["#22c55e", "#ef4444", "#3b82f6", "#f59e0b", "#8b5cf6"];
+const VENUE_COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 // Chart configs
-const paymentChartConfig = {
-  paid: {
-    label: "Đã thanh toán",
+const bookingSuccessChartConfig = {
+  success: {
+    label: "Thành công",
     color: "#22c55e",
   },
-  unpaid: {
-    label: "Chưa thanh toán",
+  failed: {
+    label: "Thất bại",
     color: "#ef4444",
-  },
-} satisfies ChartConfig;
-
-const sportTypeChartConfig = {
-  courts: {
-    label: "Số sân",
-    color: "#3b82f6",
-  },
-  venues: {
-    label: "Số venue",
-    color: "#22c55e",
   },
 } satisfies ChartConfig;
 
@@ -74,22 +74,29 @@ const revenueChartConfig = {
   },
 } satisfies ChartConfig;
 
-const bookingsChartConfig = {
-  bookings: {
-    label: "Số đơn đặt",
-    color: "#8b5cf6",
+const topFieldsChartConfig = {
+  revenue: {
+    label: "Doanh thu",
+    color: "#3b82f6",
   },
 } satisfies ChartConfig;
 
 export default function DashboardPage() {
-  const [filterType, setFilterType] = useState<FilterType>("THIS_MONTH");
+  const [revenueFilter, setRevenueFilter] =
+    useState<OwnerFilterType>("LAST_7_DAYS");
+  const [topFieldsFilter, setTopFieldsFilter] =
+    useState<OwnerFilterType>("YESTERDAY");
+  const [orderFilter, setOrderFilter] =
+    useState<OwnerFilterType>("LAST_7_DAYS");
 
   const { data: onlineStats, isLoading: isLoadingOnline } =
     useGetOnlineStatisticsQuery();
-  const { data: systemStats, isLoading: isLoadingSystem } =
-    useGetSystemStatisticsQuery();
-  const { data: topVenues, isLoading: isLoadingTopVenues } =
-    useGetTopVenuesQuery(filterType);
+  const { data: dashboardStats, isLoading: isLoadingDashboard } =
+    useGetDashboardStatisticsQuery(
+      revenueFilter,
+      topFieldsFilter,
+      orderFilter
+    );
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -102,59 +109,77 @@ export default function DashboardPage() {
     return new Intl.NumberFormat("vi-VN").format(value);
   };
 
-  // Prepare payment pie chart data
-  const paymentChartData = systemStats?.paymentStatistics
+  const formatCompactNumber = (value: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(value);
+  };
+
+  // Prepare booking success rate pie chart data
+  const bookingSuccessData = dashboardStats?.bookingSuccessRate
     ? [
         {
-          name: "paid",
-          value: systemStats.paymentStatistics.paidVenueCount,
-          amount: systemStats.paymentStatistics.paidAmount,
+          name: "success",
+          value: dashboardStats.bookingSuccessRate,
           fill: "#22c55e",
         },
         {
-          name: "unpaid",
-          value: systemStats.paymentStatistics.unpaidVenueCount,
-          amount: systemStats.paymentStatistics.pendingAmount,
+          name: "failed",
+          value: 100 - dashboardStats.bookingSuccessRate,
           fill: "#ef4444",
         },
       ]
     : [];
 
-  // Prepare sport type bar chart data
-  const sportTypeChartData =
-    systemStats?.sportTypeStatistics?.map((stat) => ({
-      name: stat.sportTypeName,
-      courts: stat.totalCourts,
-      venues: stat.venueCount,
-    })) || [];
+  // Prepare period revenue data for line chart
+  const periodRevenueData =
+    dashboardStats?.revenueStatistics?.periodRevenues?.map((period) => {
+      const dataPoint: any = {
+        periodLabel: period.periodLabel,
+        total: period.revenue,
+      };
+      // Add each venue's revenue as a separate key
+      period.venueBreakdown.forEach((venue) => {
+        dataPoint[`venue_${venue.venueId}`] = venue.revenue || 0;
+      });
+      return dataPoint;
+    }) || [];
 
-  // Prepare top venues by revenue data
-  const topRevenueData =
-    topVenues?.topVenuesByRevenue?.slice(0, 5).map((venue, index) => ({
+  // Prepare venue revenue data for bar chart
+  const venueRevenueData =
+    dashboardStats?.revenueStatistics?.venueRevenues?.map((venue, index) => ({
       name:
         venue.venueName.length > 15
           ? venue.venueName.substring(0, 15) + "..."
           : venue.venueName,
       fullName: venue.venueName,
-      revenue: venue.totalRevenue,
-      bookings: venue.bookingCount,
-      fill: COLORS[index % COLORS.length],
+      revenue: venue.revenue || 0,
+      fill: VENUE_COLORS[index % VENUE_COLORS.length],
     })) || [];
 
-  // Prepare top venues by booking count data
-  const topBookingsData =
-    topVenues?.topVenuesByBookingCount?.slice(0, 5).map((venue, index) => ({
+  // Prepare top fields data
+  const topFieldsData =
+    dashboardStats?.topFieldsByRevenue?.slice(0, 5).map((field, index) => ({
       name:
-        venue.venueName.length > 15
-          ? venue.venueName.substring(0, 15) + "..."
-          : venue.venueName,
-      fullName: venue.venueName,
-      revenue: venue.totalRevenue,
-      bookings: venue.bookingCount,
+        field.fieldName.length > 12
+          ? field.fieldName.substring(0, 12) + "..."
+          : field.fieldName,
+      fullName: `${field.fieldName} - ${field.venueName}`,
+      revenue: field.totalRevenue,
+      venueName: field.venueName,
       fill: COLORS[index % COLORS.length],
     })) || [];
 
-  if (isLoadingSystem) {
+  // Get unique venues for line chart legend
+  const uniqueVenues =
+    dashboardStats?.revenueStatistics?.venueRevenues?.map((venue, index) => ({
+      venueId: venue.venueId,
+      venueName: venue.venueName,
+      color: VENUE_COLORS[index % VENUE_COLORS.length],
+    })) || [];
+
+  if (isLoadingDashboard) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -163,18 +188,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Bảng điều khiển</h2>
-      </div>
-
+    <div className="flex-1 space-y-4 p-4 md:p-4 pt-4">
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Online Users Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Người dùng online
+              Lượt truy cập đồng thời
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -193,65 +214,62 @@ export default function DashboardPage() {
         {/* Total Venues Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng số sân</CardTitle>
+            <CardTitle className="text-sm font-medium">Số địa điểm</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatNumber(dashboardStats?.totalVenues || 0)}
+            </div>
+            <p className="text-xs text-muted-foreground">Địa điểm</p>
+          </CardContent>
+        </Card>
+
+        {/* Total Courts Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Số sân</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatNumber(systemStats?.totalVenues || 0)}
+              {formatNumber(dashboardStats?.totalCourts || 0)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {formatNumber(systemStats?.totalActiveVenues || 0)} sân đang hoạt
-              động
-            </p>
+            <p className="text-xs text-muted-foreground">Sân thể thao</p>
           </CardContent>
         </Card>
 
-        {/* Total Users Card */}
+        {/* Average Rating Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Tổng người dùng
+              Đánh giá trung bình
             </CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
+            <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatNumber(systemStats?.totalUsers || 0)}
+              {dashboardStats?.averageRating?.toFixed(1) || "0.0"}
             </div>
-            <p className="text-xs text-muted-foreground">Trong hệ thống</p>
-          </CardContent>
-        </Card>
-
-        {/* Sport Types Card */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Loại thể thao</CardTitle>
-            <Dumbbell className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatNumber(systemStats?.totalSportTypes || 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">Thể loại</p>
+            <p className="text-xs text-muted-foreground">Trên 5 sao</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts Row 1: Payment Pie Chart & Sport Type Bar Chart */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Payment Statistics Pie Chart */}
+      {/* Charts Row 1: Booking Success Rate & Period Revenue */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Booking Success Rate Pie Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Tỉ lệ thanh toán giữa Owner và Admin</CardTitle>
+            <CardTitle>Tỉ lệ đặt lịch thành công</CardTitle>
             <CardDescription>
-              Thống kê venue đã thanh toán và chưa thanh toán
+              Thống kê tỷ lệ đặt lịch thành công và thất bại
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {paymentChartData.length > 0 ? (
+            {bookingSuccessData.length > 0 ? (
               <ChartContainer
-                config={paymentChartConfig}
+                config={bookingSuccessChartConfig}
                 className="mx-auto aspect-square h-[300px]"
               >
                 <PieChart>
@@ -261,13 +279,10 @@ export default function DashboardPage() {
                         formatter={(value, name) => (
                           <div className="flex items-center gap-2">
                             <span>
-                              {name === "paid"
-                                ? "Đã thanh toán"
-                                : "Chưa thanh toán"}
-                              :
+                              {name === "success" ? "Thành công" : "Thất bại"}:
                             </span>
                             <span className="font-bold">
-                              {String(value)} venue
+                              {Number(value).toFixed(1)}%
                             </span>
                           </div>
                         )}
@@ -275,25 +290,23 @@ export default function DashboardPage() {
                     }
                   />
                   <Pie
-                    data={paymentChartData}
+                    data={bookingSuccessData}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    label={({ name, percent }) =>
-                      `${name === "paid" ? "Đã TT" : "Chưa TT"}: ${(
-                        percent * 100
-                      ).toFixed(0)}%`
-                    }
+                    // label={({ name, percent }) =>
+                    //   `${name === "success" ? "Thành công" : "Thất bại"}: ${(
+                    //     percent * 100
+                    //   ).toFixed(1)}%`
+                    // }
                   >
-                    {paymentChartData.map((entry, index) => (
+                    {bookingSuccessData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <ChartLegend
-                    content={<ChartLegendContent nameKey="name" />}
-                  />
+                  <ChartLegend content={<ChartLegendContent nameKey="name" />} />
                 </PieChart>
               </ChartContainer>
             ) : (
@@ -304,42 +317,121 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Sport Type Statistics Bar Chart */}
+        {/* Period Revenue with Filter */}
         <Card>
-          <CardHeader>
-            <CardTitle>Số sân theo thể loại</CardTitle>
-            <CardDescription>
-              Thống kê số sân và venue theo từng môn thể thao
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <div className="space-y-1">
+              <CardTitle>Doanh thu theo thời gian</CardTitle>
+              <CardDescription>
+                Theo dõi doanh thu của từng venue
+              </CardDescription>
+            </div>
+            <Select
+              value={revenueFilter}
+              onValueChange={(value: OwnerFilterType) =>
+                setRevenueFilter(value)
+              }
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Thời gian" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="LAST_7_DAYS">7 ngày</SelectItem>
+                <SelectItem value="LAST_30_DAYS">30 ngày</SelectItem>
+              </SelectContent>
+            </Select>
           </CardHeader>
           <CardContent>
-            {sportTypeChartData.length > 0 ? (
+            {periodRevenueData.length > 0 ? (
               <ChartContainer
-                config={sportTypeChartConfig}
+                config={revenueChartConfig}
                 className="h-[300px] w-full"
               >
-                <BarChart data={sportTypeChartData} accessibilityLayer>
-                  <CartesianGrid vertical={false} />
+                <LineChart data={periodRevenueData} accessibilityLayer>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis
-                    dataKey="name"
+                    dataKey="periodLabel"
                     tickLine={false}
-                    tickMargin={10}
                     axisLine={false}
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getDate()}/${date.getMonth() + 1}`;
+                    }}
                   />
-                  <YAxis tickLine={false} axisLine={false} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <ChartLegend content={<ChartLegendContent />} />
-                  <Bar
-                    dataKey="courts"
-                    fill="var(--color-courts)"
-                    radius={[4, 4, 0, 0]}
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={formatCompactNumber}
                   />
-                  <Bar
-                    dataKey="venues"
-                    fill="var(--color-venues)"
-                    radius={[4, 4, 0, 0]}
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid gap-1">
+                              <div className="font-medium text-xs">
+                                {payload[0].payload.periodLabel}
+                              </div>
+                              {payload.map((entry: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center gap-2 text-[10px]"
+                                >
+                                  <div
+                                    className="h-1.5 w-1.5 rounded-full"
+                                    style={{ backgroundColor: entry.color }}
+                                  />
+                                  <span className="flex-1 truncate max-w-[80px]">
+                                    {entry.dataKey === "total"
+                                      ? "Tổng"
+                                      : uniqueVenues.find(
+                                          (v) =>
+                                            `venue_${v.venueId}` ===
+                                            entry.dataKey
+                                        )?.venueName || entry.dataKey}
+                                  </span>
+                                  <span className="font-bold">
+                                    {formatCurrency(entry.value)}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
                   />
-                </BarChart>
+                  {uniqueVenues.map((venue) => (
+                    <Line
+                      key={venue.venueId}
+                      type="monotone"
+                      dataKey={`venue_${venue.venueId}`}
+                      stroke={venue.color}
+                      strokeWidth={2}
+                      dot={false}
+                      name={venue.venueName}
+                    />
+                  ))}
+                  <Legend
+                    content={({ payload }) => (
+                      <div className="flex flex-wrap gap-2 justify-center mt-2">
+                        {payload?.map((entry: any, index: number) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-1 text-[10px]"
+                          >
+                            <div
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: entry.color }}
+                            />
+                            <span className="truncate max-w-[60px]">{entry.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  />
+                </LineChart>
               </ChartContainer>
             ) : (
               <div className="flex items-center justify-center h-[300px] text-muted-foreground">
@@ -350,48 +442,25 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Filter for Top Venues */}
-      <div className="flex items-center gap-4">
-        <h3 className="text-xl font-semibold">Top Venue</h3>
-        <Select
-          value={filterType}
-          onValueChange={(value: FilterType) => setFilterType(value)}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Chọn thời gian" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="TODAY">Hôm nay</SelectItem>
-            <SelectItem value="THIS_MONTH">Tháng này</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Charts Row 2: Top Venues */}
+      {/* Charts Row 3: Venue Revenue & Top Fields */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Top 5 Venues by Revenue */}
+        {/* Venue Revenue Bar Chart */}
         <Card>
-          <CardHeader>
-            <CardTitle>
-              Top 5 Venue doanh thu cao nhất
-              {filterType === "TODAY" ? " (Hôm nay)" : " (Tháng này)"}
-            </CardTitle>
-            <CardDescription>
-              Xếp hạng venue theo tổng doanh thu
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <div className="space-y-1">
+              <CardTitle>Doanh thu theo venue</CardTitle>
+              <CardDescription>So sánh doanh thu giữa các venue</CardDescription>
+            </div>
           </CardHeader>
           <CardContent>
-            {isLoadingTopVenues ? (
-              <div className="flex items-center justify-center h-[350px]">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : topRevenueData.length > 0 ? (
+            {venueRevenueData.length > 0 ? (
               <ChartContainer
                 config={revenueChartConfig}
                 className="h-[350px] w-full"
               >
                 <BarChart
-                  data={topRevenueData}
+                  key={revenueFilter}
+                  data={venueRevenueData}
                   layout="vertical"
                   margin={{ left: 10, right: 10 }}
                   accessibilityLayer
@@ -401,9 +470,7 @@ export default function DashboardPage() {
                     type="number"
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) =>
-                      `${(value / 1000000).toFixed(0)}M`
-                    }
+                    tickFormatter={formatCompactNumber}
                   />
                   <YAxis
                     type="category"
@@ -428,7 +495,7 @@ export default function DashboardPage() {
                     }
                   />
                   <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
-                    {topRevenueData.map((entry, index) => (
+                    {venueRevenueData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
@@ -442,41 +509,56 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Top 5 Venues by Booking Count */}
+        {/* Top 5 Fields by Revenue */}
         <Card>
-          <CardHeader>
-            <CardTitle>
-              Top 5 Venue nhiều đơn đặt nhất
-              {filterType === "TODAY" ? " (Hôm nay)" : " (Tháng này)"}
-            </CardTitle>
-            <CardDescription>
-              Xếp hạng venue theo số lượng đơn đặt
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <div className="space-y-1">
+              <CardTitle>Top 5 sân doanh thu cao nhất</CardTitle>
+              <CardDescription>
+                Xếp hạng sân theo tổng doanh thu
+              </CardDescription>
+            </div>
+            <Select
+              value={topFieldsFilter}
+              onValueChange={(value: OwnerFilterType) =>
+                setTopFieldsFilter(value)
+              }
+            >
+              <SelectTrigger className="w-[130px]">
+                <SelectValue placeholder="Chọn thời gian" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="YESTERDAY">Hôm qua</SelectItem>
+                <SelectItem value="TODAY">Hôm nay</SelectItem>
+              </SelectContent>
+            </Select>
           </CardHeader>
           <CardContent>
-            {isLoadingTopVenues ? (
-              <div className="flex items-center justify-center h-[350px]">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : topBookingsData.length > 0 ? (
+            {topFieldsData.length > 0 ? (
               <ChartContainer
-                config={bookingsChartConfig}
+                config={topFieldsChartConfig}
                 className="h-[350px] w-full"
               >
                 <BarChart
-                  data={topBookingsData}
+                  key={topFieldsFilter}
+                  data={topFieldsData}
                   layout="vertical"
                   margin={{ left: 10, right: 10 }}
                   accessibilityLayer
                 >
                   <CartesianGrid horizontal={false} />
-                  <XAxis type="number" tickLine={false} axisLine={false} />
+                  <XAxis
+                    type="number"
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={formatCompactNumber}
+                  />
                   <YAxis
                     type="category"
                     dataKey="name"
                     tickLine={false}
                     axisLine={false}
-                    width={100}
+                    width={90}
                     tick={{ fontSize: 11 }}
                   />
                   <ChartTooltip
@@ -484,7 +566,7 @@ export default function DashboardPage() {
                       <ChartTooltipContent
                         formatter={(value) => (
                           <span className="font-bold">
-                            {formatNumber(value as number)} đơn
+                            {formatCurrency(value as number)}
                           </span>
                         )}
                         labelFormatter={(label, payload) =>
@@ -493,8 +575,8 @@ export default function DashboardPage() {
                       />
                     }
                   />
-                  <Bar dataKey="bookings" radius={[0, 4, 4, 0]}>
-                    {topBookingsData.map((entry, index) => (
+                  <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
+                    {topFieldsData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>

@@ -1,10 +1,10 @@
 import statisticsApiRequest from "@/apiRequests/statistics";
 import { useQuery } from "@tanstack/react-query";
-import { FilterType } from "@/types/statistics";
+import { DashboardQueryParams, OwnerFilterType } from "@/types/statistics";
 
 export const useGetOnlineStatisticsQuery = () => {
   return useQuery({
-    queryKey: ["statistics", "online"],
+    queryKey: ["statistics", "owner", "online"],
     queryFn: async () => {
       const response = await statisticsApiRequest.sGetOnlineStatistics();
       return response.payload?.data;
@@ -13,21 +13,29 @@ export const useGetOnlineStatisticsQuery = () => {
   });
 };
 
-export const useGetSystemStatisticsQuery = () => {
+export const useGetDashboardStatisticsQuery = (
+  revenueFilter?: OwnerFilterType,
+  topFieldsFilter?: OwnerFilterType,
+  orderFilter?: OwnerFilterType
+) => {
   return useQuery({
-    queryKey: ["statistics", "system"],
+    queryKey: [
+      "statistics",
+      "owner",
+      "dashboard",
+      revenueFilter,
+      topFieldsFilter,
+      orderFilter,
+    ],
     queryFn: async () => {
-      const response = await statisticsApiRequest.sGetSystemStatistics();
-      return response.payload?.data;
-    },
-  });
-};
-
-export const useGetTopVenuesQuery = (filterType?: FilterType) => {
-  return useQuery({
-    queryKey: ["statistics", "top-venues", filterType],
-    queryFn: async () => {
-      const response = await statisticsApiRequest.sGetTopVenues(filterType);
+      const params: DashboardQueryParams = {
+        revenueFilterType: revenueFilter,
+        topFieldsFilterType: topFieldsFilter,
+        orderFilterType: orderFilter,
+      };
+      const response = await statisticsApiRequest.sGetDashboardStatistics(
+        params
+      );
       return response.payload?.data;
     },
   });

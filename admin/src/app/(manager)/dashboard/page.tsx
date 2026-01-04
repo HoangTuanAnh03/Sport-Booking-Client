@@ -62,7 +62,7 @@ const sportTypeChartConfig = {
     color: "#3b82f6",
   },
   venues: {
-    label: "Số venue",
+    label: "Số địa điểm",
     color: "#22c55e",
   },
 } satisfies ChartConfig;
@@ -205,7 +205,7 @@ export default function DashboardPage() {
         {/* Total Venues Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng số sân</CardTitle>
+            <CardTitle className="text-sm font-medium">Tổng địa điểm</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -213,7 +213,7 @@ export default function DashboardPage() {
               {formatNumber(systemStats?.totalVenues || 0)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {formatNumber(systemStats?.totalActiveVenues || 0)} sân đang hoạt
+              {formatNumber(systemStats?.totalActiveVenues || 0)} địa điểm đang hoạt
               động
             </p>
           </CardContent>
@@ -255,9 +255,9 @@ export default function DashboardPage() {
         {/* Payment Statistics Pie Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Tỉ lệ thanh toán giữa Owner và Admin</CardTitle>
+            <CardTitle>Tỉ lệ thanh toán</CardTitle>
             <CardDescription>
-              Thống kê venue đã thanh toán và chưa thanh toán
+              Thống kê địa điểm đã thanh toán và chưa thanh toán
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -293,11 +293,11 @@ export default function DashboardPage() {
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    label={({ name, percent }) =>
-                      `${name === "paid" ? "Đã TT" : "Chưa TT"}: ${(
-                        percent * 100
-                      ).toFixed(0)}%`
-                    }
+                    // label={({ name, percent }) =>
+                    //   `${name === "paid" ? "Đã TT" : "Chưa TT"}: ${(
+                    //     percent * 100
+                    //   ).toFixed(0)}%`
+                    // }
                   >
                     {paymentChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -321,7 +321,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle>Số sân theo thể loại</CardTitle>
             <CardDescription>
-              Thống kê số sân và venue theo từng môn thể thao
+              Thống kê số sân và địa điểm theo từng môn thể thao
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -368,9 +368,9 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div className="space-y-1">
-              <CardTitle>Top 5 Venue doanh thu cao nhất</CardTitle>
+              <CardTitle>Top 5 địa điểm doanh thu cao nhất</CardTitle>
               <CardDescription>
-                Xếp hạng venue theo tổng doanh thu
+                Xếp hạng địa điểm theo tổng doanh thu
               </CardDescription>
             </div>
             <Select
@@ -451,9 +451,9 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div className="space-y-1">
-              <CardTitle>Top 5 Venue nhiều đơn đặt nhất</CardTitle>
+              <CardTitle>Top 5 địa điểm nhiều đơn đặt nhất</CardTitle>
               <CardDescription>
-                Xếp hạng venue theo số lượng đơn đặt
+                Xếp hạng địa điểm theo số lượng đơn đặt
               </CardDescription>
             </div>
             <Select
