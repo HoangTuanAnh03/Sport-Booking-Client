@@ -82,17 +82,14 @@ const bookingsChartConfig = {
 } satisfies ChartConfig;
 
 export default function DashboardPage() {
-  const [revenueFilter, setRevenueFilter] = useState<FilterType>("THIS_MONTH");
-  const [bookingsFilter, setBookingsFilter] = useState<FilterType>("THIS_MONTH");
+  const [filterType, setFilterType] = useState<FilterType>("THIS_MONTH");
 
   const { data: onlineStats, isLoading: isLoadingOnline } =
     useGetOnlineStatisticsQuery();
   const { data: systemStats, isLoading: isLoadingSystem } =
     useGetSystemStatisticsQuery();
-  const { data: topRevenueStats, isLoading: isLoadingTopRevenue } =
-    useGetTopVenuesQuery(revenueFilter);
-  const { data: topBookingsStats, isLoading: isLoadingTopBookings } =
-    useGetTopVenuesQuery(bookingsFilter);
+  const { data: topVenues, isLoading: isLoadingTopVenues } =
+    useGetTopVenuesQuery(filterType);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -103,13 +100,6 @@ export default function DashboardPage() {
 
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat("vi-VN").format(value);
-  };
-
-  const formatCompactNumber = (value: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      notation: "compact",
-      maximumFractionDigits: 1,
-    }).format(value);
   };
 
   // Prepare payment pie chart data
@@ -140,7 +130,7 @@ export default function DashboardPage() {
 
   // Prepare top venues by revenue data
   const topRevenueData =
-    topRevenueStats?.topVenuesByRevenue?.slice(0, 5).map((venue, index) => ({
+    topVenues?.topVenuesByRevenue?.slice(0, 5).map((venue, index) => ({
       name:
         venue.venueName.length > 15
           ? venue.venueName.substring(0, 15) + "..."
@@ -153,18 +143,16 @@ export default function DashboardPage() {
 
   // Prepare top venues by booking count data
   const topBookingsData =
-    topBookingsStats?.topVenuesByBookingCount?.slice(0, 5).map(
-      (venue, index) => ({
-        name:
-          venue.venueName.length > 15
-            ? venue.venueName.substring(0, 15) + "..."
-            : venue.venueName,
-        fullName: venue.venueName,
-        revenue: venue.totalRevenue,
-        bookings: venue.bookingCount,
-        fill: COLORS[index % COLORS.length],
-      })
-    ) || [];
+    topVenues?.topVenuesByBookingCount?.slice(0, 5).map((venue, index) => ({
+      name:
+        venue.venueName.length > 15
+          ? venue.venueName.substring(0, 15) + "..."
+          : venue.venueName,
+      fullName: venue.venueName,
+      revenue: venue.totalRevenue,
+      bookings: venue.bookingCount,
+      fill: COLORS[index % COLORS.length],
+    })) || [];
 
   if (isLoadingSystem) {
     return (
@@ -175,10 +163,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-4 pt-4">
-      {/* <div className="flex items-center justify-between">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Bảng điều khiển</h2>
-      </div> */}
+      </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -362,32 +350,38 @@ export default function DashboardPage() {
         </Card>
       </div>
 
+      {/* Filter for Top Venues */}
+      <div className="flex items-center gap-4">
+        <h3 className="text-xl font-semibold">Top Venue</h3>
+        <Select
+          value={filterType}
+          onValueChange={(value: FilterType) => setFilterType(value)}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Chọn thời gian" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="TODAY">Hôm nay</SelectItem>
+            <SelectItem value="THIS_MONTH">Tháng này</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Charts Row 2: Top Venues */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Top 5 Venues by Revenue */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <div className="space-y-1">
-              <CardTitle>Top 5 Venue doanh thu cao nhất</CardTitle>
-              <CardDescription>
-                Xếp hạng venue theo tổng doanh thu
-              </CardDescription>
-            </div>
-            <Select
-              value={revenueFilter}
-              onValueChange={(value: FilterType) => setRevenueFilter(value)}
-            >
-              <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="Chọn thời gian" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="TODAY">Hôm nay</SelectItem>
-                <SelectItem value="THIS_MONTH">Tháng này</SelectItem>
-              </SelectContent>
-            </Select>
+          <CardHeader>
+            <CardTitle>
+              Top 5 Venue doanh thu cao nhất
+              {filterType === "TODAY" ? " (Hôm nay)" : " (Tháng này)"}
+            </CardTitle>
+            <CardDescription>
+              Xếp hạng venue theo tổng doanh thu
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoadingTopRevenue ? (
+            {isLoadingTopVenues ? (
               <div className="flex items-center justify-center h-[350px]">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
@@ -397,7 +391,6 @@ export default function DashboardPage() {
                 className="h-[350px] w-full"
               >
                 <BarChart
-                  key={revenueFilter}
                   data={topRevenueData}
                   layout="vertical"
                   margin={{ left: 10, right: 10 }}
@@ -408,7 +401,9 @@ export default function DashboardPage() {
                     type="number"
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={formatCompactNumber}
+                    tickFormatter={(value) =>
+                      `${(value / 1000000).toFixed(0)}M`
+                    }
                   />
                   <YAxis
                     type="category"
@@ -449,28 +444,17 @@ export default function DashboardPage() {
 
         {/* Top 5 Venues by Booking Count */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <div className="space-y-1">
-              <CardTitle>Top 5 Venue nhiều đơn đặt nhất</CardTitle>
-              <CardDescription>
-                Xếp hạng venue theo số lượng đơn đặt
-              </CardDescription>
-            </div>
-            <Select
-              value={bookingsFilter}
-              onValueChange={(value: FilterType) => setBookingsFilter(value)}
-            >
-              <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="Chọn thời gian" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="TODAY">Hôm nay</SelectItem>
-                <SelectItem value="THIS_MONTH">Tháng này</SelectItem>
-              </SelectContent>
-            </Select>
+          <CardHeader>
+            <CardTitle>
+              Top 5 Venue nhiều đơn đặt nhất
+              {filterType === "TODAY" ? " (Hôm nay)" : " (Tháng này)"}
+            </CardTitle>
+            <CardDescription>
+              Xếp hạng venue theo số lượng đơn đặt
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoadingTopBookings ? (
+            {isLoadingTopVenues ? (
               <div className="flex items-center justify-center h-[350px]">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
@@ -480,7 +464,6 @@ export default function DashboardPage() {
                 className="h-[350px] w-full"
               >
                 <BarChart
-                  key={bookingsFilter}
                   data={topBookingsData}
                   layout="vertical"
                   margin={{ left: 10, right: 10 }}

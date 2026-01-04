@@ -1,6 +1,6 @@
+import statisticsApiRequest from "@/apiRequests/statistics";
 import { useQuery } from "@tanstack/react-query";
 import { FilterType } from "@/types/statistics";
-import statisticsApiRequest from "@/apiRequests/statistics";
 
 export const useGetOnlineStatisticsQuery = () => {
   return useQuery({
