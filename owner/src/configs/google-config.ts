@@ -1,6 +1,7 @@
+import envConfig from "@/config";
+
 export const OAuthConfig = {
-  clientId:
-    "286299218562-ur2avuo3vhf2hbsbuga3pkr27ejqhf67.apps.googleusercontent.com",
-  redirectUri: "http://localhost:3000/authenticate",
-  authUri: "https://accounts.google.com/o/oauth2/auth",
+  clientId: envConfig.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+  redirectUri: envConfig.NEXT_PUBLIC_GOOGLE_REDIRECT_URI,
+  authUri: envConfig.NEXT_PUBLIC_GOOGLE_AUTH_URI,
 };

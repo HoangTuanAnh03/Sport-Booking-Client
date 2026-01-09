@@ -135,7 +135,7 @@ export default function VenueDetailPage() {
             <Switch
               checked={isVenueActive}
               onCheckedChange={handleStatusChange}
-              disabled={venue.status !== "UNABLE"}
+              disabled={venue.status !== "ENABLE" && venue.status !== "UNABLE"}
               className="h-6"
             />
           </div>

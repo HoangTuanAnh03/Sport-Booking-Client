@@ -22,61 +22,72 @@ import { CreateFieldRequest } from "@/types/field";
 import { useCreateFieldMutation } from "@/queries/useField";
 
 // Define the schema for field validation
-const fieldSchema = z.object({
-  name: z.string().min(1, "Tên cụm sân không được để trống"),
-  sportTypeId: z.number().min(1, "Vui lòng chọn loại môn thể thao"),
-  monthLimit: z.number().min(1, "Giới hạn tháng phải lớn hơn 0"),
-  minBookingMinutes: z
-    .number()
-    .min(30, "Thời gian đặt tối thiểu phải ít nhất 30 phút"),
-  status: z.enum(["ENABLE", "UNABLE"]),
-  openingHours: z
-    .array(
-      z
-        .object({
+const fieldSchema = z
+  .object({
+    name: z.string().min(1, "Tên cụm sân không được để trống"),
+    sportTypeId: z.number().min(1, "Vui lòng chọn loại môn thể thao"),
+    monthLimit: z.number().min(1, "Giới hạn tháng phải lớn hơn 0"),
+    minBookingMinutes: z
+      .number()
+      .min(30, "Thời gian đặt tối thiểu phải ít nhất 30 phút"),
+    status: z.enum(["ENABLE", "UNABLE"]),
+    openingHours: z
+      .array(
+        z.object({
           dayOfWeek: z.string(),
           openTime: z.string().min(1, "Giờ mở cửa không được để trống"),
           closeTime: z.string().min(1, "Giờ đóng cửa không được để trống"),
         })
-        .superRefine((hour: any, ctx: any) => {
-          // Validate time sequence (openTime before closeTime)
-          const [openHours, openMinutes] = hour.openTime.split(":").map(Number);
-          const [closeHours, closeMinutes] = hour.closeTime
-            .split(":")
-            .map(Number);
-          const openTimeInMinutes = openHours * 60 + openMinutes;
-          const closeTimeInMinutes = closeHours * 60 + closeMinutes;
+      )
+      .min(1, "Cần có ít nhất một khung giờ mở cửa"),
+  })
+  .superRefine((data, ctx) => {
+    data.openingHours.forEach((hour, index) => {
+      // Skip validation if times are not set
+      if (!hour.openTime || !hour.closeTime) return;
 
-          if (openTimeInMinutes >= closeTimeInMinutes) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Giờ mở cửa phải trước giờ đóng cửa",
-              path: ["closeTime"],
-            });
-          }
+      const [openHours, openMinutes] = hour.openTime.split(":").map(Number);
+      const [closeHours, closeMinutes] = hour.closeTime.split(":").map(Number);
+      const openTimeInMinutes = openHours * 60 + openMinutes;
+      const closeTimeInMinutes = closeHours * 60 + closeMinutes;
 
-          // Validate reasonable ranges (00:00 to 23:59)
-          if (openTimeInMinutes < 0 || openTimeInMinutes > 1439) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Giờ phải trong khoảng từ 00:00 đến 23:59",
-              path: ["openTime"],
-            });
-          }
+      // Validate time sequence
+      if (openTimeInMinutes >= closeTimeInMinutes) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Giờ mở cửa phải trước giờ đóng cửa",
+          path: ["openingHours", index, "closeTime"],
+        });
+      } else {
+        // Validate that duration is divisible by minBookingMinutes
+        const duration = closeTimeInMinutes - openTimeInMinutes;
+        if (duration % data.minBookingMinutes !== 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Tổng thời gian hoạt động (${duration} phút) phải chia hết cho thời gian đặt tối thiểu (${data.minBookingMinutes} phút)`,
+            path: ["openingHours", index, "closeTime"],
+          });
+        }
+      }
 
-          if (closeTimeInMinutes < 0 || closeTimeInMinutes > 1439) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Giờ phải trong khoảng từ 00:00 đến 23:59",
-              path: ["closeTime"],
-            });
-          }
-          if (openTimeInMinutes >= closeTimeInMinutes) {
-          }
-        })
-    )
-    .min(1, "Cần có ít nhất một khung giờ mở cửa"),
-});
+      // Validate reasonable ranges (00:00 to 23:59)
+      if (openTimeInMinutes < 0 || openTimeInMinutes > 1439) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Giờ phải trong khoảng từ 00:00 đến 23:59",
+          path: ["openingHours", index, "openTime"],
+        });
+      }
+
+      if (closeTimeInMinutes < 0 || closeTimeInMinutes > 1439) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Giờ phải trong khoảng từ 00:00 đến 23:59",
+          path: ["openingHours", index, "closeTime"],
+        });
+      }
+    });
+  });
 
 type FieldFormData = z.infer<typeof fieldSchema>;
 

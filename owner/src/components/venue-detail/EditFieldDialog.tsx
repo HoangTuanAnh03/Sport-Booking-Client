@@ -21,20 +21,26 @@ import { FieldOwnerResponse, UpdateFieldRequest } from "@/types/field";
 import { useUpdateFieldMutation } from "@/queries/useField";
 import { useGetAllSportTypesQuery } from "@/queries/useSportType";
 
-// Define the schema for field validation
-const fieldSchema = z.object({
-  name: z.string().min(1, "Tên cụm sân không được để trống"),
-  monthLimit: z.number().min(1, "Giới hạn tháng phải lớn hơn 0"),
-  status: z.enum(["ENABLE", "UNABLE"]), // Update to match Switch component options
-  openingHours: z.array(
-    z
-      .object({
-        dayOfWeek: z.string(),
-        openTime: z.string().min(1, "Giờ mở cửa không được để trống"),
-        closeTime: z.string().min(1, "Giờ đóng cửa không được để trống"),
-      })
-      .superRefine((hour: any, ctx: any) => {
-        // Validate time sequence (openTime before closeTime)
+// Define the schema factory for field validation
+const createFieldSchema = (minBookingMinutes: number) =>
+  z
+    .object({
+      name: z.string().min(1, "Tên cụm sân không được để trống"),
+      monthLimit: z.number().min(1, "Giới hạn tháng phải lớn hơn 0"),
+      status: z.enum(["ENABLE", "UNABLE"]), // Update to match Switch component options
+      openingHours: z.array(
+        z.object({
+          dayOfWeek: z.string(),
+          openTime: z.string().min(1, "Giờ mở cửa không được để trống"),
+          closeTime: z.string().min(1, "Giờ đóng cửa không được để trống"),
+        })
+      ),
+    })
+    .superRefine((data, ctx) => {
+      data.openingHours.forEach((hour, index) => {
+        // Skip validation if times are not set
+        if (!hour.openTime || !hour.closeTime) return;
+
         const [openHours, openMinutes] = hour.openTime.split(":").map(Number);
         const [closeHours, closeMinutes] = hour.closeTime
           .split(":")
@@ -42,12 +48,23 @@ const fieldSchema = z.object({
         const openTimeInMinutes = openHours * 60 + openMinutes;
         const closeTimeInMinutes = closeHours * 60 + closeMinutes;
 
+        // Validate time sequence
         if (openTimeInMinutes >= closeTimeInMinutes) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Giờ mở cửa phải trước giờ đóng cửa",
-            path: ["closeTime"],
+            path: ["openingHours", index, "closeTime"],
           });
+        } else {
+          // Validate that duration is divisible by minBookingMinutes
+          const duration = closeTimeInMinutes - openTimeInMinutes;
+          if (duration % minBookingMinutes !== 0) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Tổng thời gian hoạt động (${duration} phút) phải chia hết cho thời gian đặt tối thiểu (${minBookingMinutes} phút)`,
+              path: ["openingHours", index, "closeTime"],
+            });
+          }
         }
 
         // Validate reasonable ranges (00:00 to 23:59)
@@ -55,7 +72,7 @@ const fieldSchema = z.object({
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Giờ phải trong khoảng từ 00:00 đến 23:59",
-            path: ["openTime"],
+            path: ["openingHours", index, "openTime"],
           });
         }
 
@@ -63,14 +80,13 @@ const fieldSchema = z.object({
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Giờ phải trong khoảng từ 00:00 đến 23:59",
-            path: ["closeTime"],
+            path: ["openingHours", index, "closeTime"],
           });
         }
-      })
-  ),
-});
+      });
+    });
 
-type FieldFormData = z.infer<typeof fieldSchema>;
+type FieldFormData = z.infer<ReturnType<typeof createFieldSchema>>;
 
 interface EditFieldDialogProps {
   field: FieldOwnerResponse;
@@ -102,7 +118,7 @@ export function EditFieldDialog({
     watch, // Add watch to monitor form values
     setValue, // Add setValue to update form values
   } = useForm<FieldFormData>({
-    resolver: zodResolver(fieldSchema),
+    resolver: zodResolver(createFieldSchema(field.minBookingMinutes)),
     mode: "onChange", // Add this to trigger validation on change
     defaultValues: {
       name: field.name,
