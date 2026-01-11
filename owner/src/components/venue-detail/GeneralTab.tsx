@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { BuildingIcon, PencilIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { InlineEditVenueForm } from "@/components/InlineEditVenueForm";
 import { VenueDetail } from "@/types/venue";
+import { useGetFieldsByVenueIdQuery } from "@/queries/useField";
 
 interface GeneralTabProps {
   venue: VenueDetail;
@@ -20,6 +21,11 @@ interface GeneralTabProps {
 
 export function GeneralTab({ venue, onVenueUpdated }: GeneralTabProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const { data: fields } = useGetFieldsByVenueIdQuery(venue.id);
+
+  const totalCourts = useMemo(() => {
+    return fields?.reduce((acc, field) => acc + (field.courts?.length || 0), 0) || 0;
+  }, [fields]);
 
   return (
     <div className="space-y-6">
@@ -49,7 +55,7 @@ export function GeneralTab({ venue, onVenueUpdated }: GeneralTabProps) {
               </div>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-green-500">
                 {venue.categories.reduce(
                   (total, cat) => total + cat.numberOfServices,
                   0
@@ -64,7 +70,9 @@ export function GeneralTab({ venue, onVenueUpdated }: GeneralTabProps) {
               <div className="text-sm text-muted-foreground">Hình ảnh</div>
             </div>
             <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">0</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {totalCourts}
+              </div>
               <div className="text-sm text-muted-foreground">Sân thể thao</div>
             </div>
           </div>

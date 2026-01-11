@@ -49,7 +49,12 @@ export function NotificationDropdown() {
 
     console.log("Initializing Centrifugo connection for user:", userId);
 
-    const centrifuge = new Centrifuge(envConfig.NEXT_PUBLIC_CENTRIFUGO_URL, {});
+    const centrifuge = new Centrifuge(envConfig.NEXT_PUBLIC_CENTRIFUGO_URL, {
+      getToken: async () => {
+        const token = getAccessTokenFormLocalStorage();
+        return token || "";
+      },
+    });
     centrifugeRef.current = centrifuge;
 
     centrifuge

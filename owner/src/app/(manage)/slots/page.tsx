@@ -24,6 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import SlotsTable from "./SlotsTable";
 import { Centrifuge } from "centrifuge";
 import envConfig from "@/config";
+import { getAccessTokenFormLocalStorage } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 const SlotsPage = () => {
@@ -66,8 +67,7 @@ const SlotsPage = () => {
 
     const centrifuge = new Centrifuge(envConfig.NEXT_PUBLIC_CENTRIFUGO_URL, {
       getToken: async () => {
-        // Get access token from localStorage
-        const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+        const token = getAccessTokenFormLocalStorage();
         return token || "";
       }
     });

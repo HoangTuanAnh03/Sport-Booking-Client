@@ -15,7 +15,7 @@ import {
 import { ChevronDownIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Hold from "@/app/booking/[id]/Hold";
-import { formatDateToYMD } from "@/lib/utils";
+import { formatDateToYMD, getAccessTokenFormLocalStorage } from "@/lib/utils";
 import { Centrifuge } from "centrifuge";
 import envConfig from "@/config";
 import { useQueryClient } from "@tanstack/react-query";
@@ -54,6 +54,10 @@ export default function BookingPage() {
     console.log("Initializing Centrifugo for court slots:", { fieldId: id, date: formattedDate });
 
     const centrifuge = new Centrifuge(envConfig.NEXT_PUBLIC_CENTRIFUGO_URL, {
+      getToken: async () => {
+        const token = getAccessTokenFormLocalStorage();
+        return token || "";
+      },
     });
     centrifugeRef.current = centrifuge;
 
