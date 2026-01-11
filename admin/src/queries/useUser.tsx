@@ -1,5 +1,5 @@
 import userApiRequest from "@/apiRequests/users";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useGetAllUserQuery = (
   params?: {
@@ -26,3 +26,24 @@ export const useGetByIdQuery = (id: string, enabled: boolean) => {
     enabled,
   });
 };
+
+export const useUpRoleMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => userApiRequest.sUpRole(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+};
+
+export const useDeleteUserMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => userApiRequest.sDelete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+};
+

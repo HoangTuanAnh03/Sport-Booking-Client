@@ -222,6 +222,7 @@ export default function Home() {
                         <Button
                           variant="outline"
                           size="sm"
+                          disabled={venue.status !== "ENABLE"}
                           onClick={(e) => {
                             e.preventDefault();
                             if (accessToken) {

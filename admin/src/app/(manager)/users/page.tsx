@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal, SlidersHorizontal } from "lucide-react";
+import { ArrowUpDown, Loader2, MoreHorizontal, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,11 +36,22 @@ import {
 } from "@/components/ui/table";
 import { User, UserResponse } from "@/types/user";
 import { useContext, useState } from "react";
-import { useGetAllUserQuery } from "@/queries/useUser";
+import { useDeleteUserMutation, useGetAllUserQuery, useUpRoleMutation } from "@/queries/useUser";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FooterPaginationState } from "@/app/(manager)/components/footer-pagination-state";
 import { useDebounce } from "@/hooks/use-debound";
-// import DetailForm from "@/app/(manager)/users/detail-form";
+import { useToast } from "@/hooks/use-toast";
+import { handleErrorApi } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const UserTableContext = React.createContext<{
   userIdEdit: string | undefined;
@@ -429,25 +440,129 @@ export default function UserPage() {
 function UserActionsCell({ row }: { row: any }) {
   const { setUserIdEdit } = useContext(UserTableContext);
   const [openDropdown, setOpenDropdown] = useState<boolean>(false);
+  const [openConfirmDelete, setOpenConfirmDelete] = useState<boolean>(false);
+  const [openConfirmUpRole, setOpenConfirmUpRole] = useState<boolean>(false);
+  const { toast } = useToast();
+  const upRoleMutation = useUpRoleMutation();
+  const deleteUserMutation = useDeleteUserMutation();
 
   const openDetail = () => {
     setUserIdEdit(row.original.id);
     setOpenDropdown(false);
   };
 
+  const handleUpRole = async () => {
+    try {
+      await upRoleMutation.mutateAsync(row.original.id);
+      toast({
+        description: "Nâng quyền người dùng thành công",
+      });
+      setOpenConfirmUpRole(false);
+    } catch (error) {
+      handleErrorApi({
+        error,
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteUserMutation.mutateAsync(row.original.id);
+      toast({
+        description: "Xoá người dùng thành công",
+      });
+      setOpenConfirmDelete(false);
+    } catch (error) {
+      handleErrorApi({
+        error,
+      });
+    }
+  };
+
+  const userRole = row.original.realmRole;
+  const isUser = userRole === "ROLE_USER";
+  const isAdmin = userRole === "ROLE_ADMIN";
+
+  if (isAdmin) return null;
+
   return (
-    <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <MoreHorizontal />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={openDetail}>Chi tiết</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <AlertDialog open={openConfirmDelete} onOpenChange={setOpenConfirmDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn có chắc chắn muốn xoá?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này sẽ xoá tài khoản người dùng "{row.original.name}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteUserMutation.isPending}>Huỷ</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteUserMutation.isPending}
+            >
+              {deleteUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Xác nhận xoá
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={openConfirmUpRole} onOpenChange={setOpenConfirmUpRole}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Nâng quyền người dùng?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn nâng quyền người dùng "{row.original.name}" lên làm Chủ sân (Owner)?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={upRoleMutation.isPending}>Huỷ</AlertDialogCancel>
+            <Button
+              onClick={handleUpRole}
+              disabled={upRoleMutation.isPending}
+            >
+              {upRoleMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Xác nhận nâng quyền
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={openDetail}>Chi tiết</DropdownMenuItem>
+          {isUser && (
+            <DropdownMenuItem
+              className="text-yellow-600 focus:text-yellow-600"
+              onSelect={(e) => {
+                e.preventDefault();
+                setOpenConfirmUpRole(true);
+              }}
+            >
+              Nâng quyền
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem
+            className="text-red-600 focus:text-red-600"
+            onSelect={(e) => {
+              e.preventDefault();
+              setOpenConfirmDelete(true);
+            }}
+          >
+            Xoá người dùng
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }

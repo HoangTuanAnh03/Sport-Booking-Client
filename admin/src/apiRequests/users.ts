@@ -47,6 +47,14 @@ const userApiRequest = {
     http.get<IBackendRes<User>>(`/users/${id}`, {
       baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080",
     }),
+  sUpRole: (id: string) =>
+    http.put<IBackendRes<any>>(`/users/up-role/${id}`, null, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080",
+    }),
+  sDelete: (id: string) =>
+    http.delete<IBackendRes<any>>(`/users/${id}`, null, {
+      baseUrl: envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080",
+    }),
 };
 
 export default userApiRequest;
