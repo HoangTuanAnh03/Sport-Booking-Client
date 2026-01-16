@@ -106,6 +106,7 @@ interface Booking {
   venueId: number;
   detail: BookingDetail;
   isReview: boolean;
+  fieldId: number;
 }
 
 {
@@ -734,7 +735,7 @@ export default function BookingHistoryPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() =>
-                                  router.push(`/booking/${booking.id}/rebook`)
+                                  router.push(`/booking/${booking.fieldId}`)
                                 }
                                 className="border-green-600 text-green-600 hover:bg-green-50"
                               >
