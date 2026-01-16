@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CourtSlots, CourtSlotStatus } from "@/types/field";
+import { CourtSlots, CourtSlotStatus, CourtStatus } from "@/types/field";
 import { useBookingStore } from "@/stores/useBookingStore";
 
 // Utility functions moved outside component to prevent re-creation
@@ -85,7 +85,7 @@ export const Booking = () => {
   );
 
   // Memoized calculations for better performance
-  const courts = useMemo(() => fieldDetails?.courts || [], [fieldDetails]);
+  const courts = useMemo(() => fieldDetails?.courts.filter((court) => court.status === CourtStatus.ENABLE) || [], [fieldDetails]);
 
   const baseTimeLine = useMemo(() => {
     if (!fieldDetails) return [];
