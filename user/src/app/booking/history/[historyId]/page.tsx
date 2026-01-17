@@ -39,6 +39,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import reviewApiRequest from "@/apiRequests/review";
+import { CreateReviewRequest } from "@/types/review";
 
 // Status configuration
 const statusConfig: Record<
@@ -102,6 +113,13 @@ export default function BookingHistoryDetailPage() {
   const cancelBookingMutation = useCancelBooking();
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  // Review state
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -182,6 +200,81 @@ export default function BookingHistoryDetailPage() {
     } finally {
       setIsCancelling(false);
       setShowCancelDialog(false);
+    }
+  };
+
+  // Review handlers
+  const openReviewDialog = () => {
+    setReviewRating(0);
+    setHoveredRating(0);
+    setReviewComment("");
+    setIsReviewDialogOpen(true);
+  };
+
+  const closeReviewDialog = () => {
+    setIsReviewDialogOpen(false);
+    setReviewRating(0);
+    setHoveredRating(0);
+    setReviewComment("");
+  };
+
+  const handleSubmitReview = async () => {
+    if (!booking) return;
+
+    if (reviewRating === 0) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng chọn số sao đánh giá",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!reviewComment.trim()) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập nội dung đánh giá",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (reviewComment.length > 1000) {
+      toast({
+        title: "Lỗi",
+        description: "Nội dung đánh giá không được vượt quá 1000 ký tự",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingReview(true);
+
+    try {
+      const payload: CreateReviewRequest = {
+        rating: reviewRating,
+        comment: reviewComment.trim(),
+        venueId: booking.venueId,
+      };
+
+      await reviewApiRequest.sCreateReview(payload);
+
+      toast({
+        title: "Thành công",
+        description: "Đánh giá của bạn đã được gửi thành công!",
+      });
+      closeReviewDialog();
+      refetch(); // Refresh booking details to update isReview status
+    } catch (error: any) {
+      console.error("Error submitting review:", error);
+      toast({
+        title: "Lỗi",
+        description:
+          error?.message || "Không thể gửi đánh giá. Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -357,8 +450,8 @@ export default function BookingHistoryDetailPage() {
                 )}
                 {canReview && (
                   <Button
-                    onClick={() => router.push(`/booking/${booking.id}/review`)}
-                    className="bg-amber-500 hover:bg-amber-600"
+                    onClick={openReviewDialog}
+                    className="bg-amber-500 hover:bg-amber-600 focus:ring-amber-500"
                   >
                     <Star className="h-4 w-4 mr-2" />
                     Đánh giá
@@ -644,6 +737,95 @@ export default function BookingHistoryDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Review Dialog */}
+      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-green-800">Đánh giá sân</DialogTitle>
+            <DialogDescription>
+              {booking && (
+                <span className="font-medium text-green-700">
+                  {booking.venueName}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Star Rating */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Đánh giá của bạn <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    onMouseEnter={() => setHoveredRating(star)}
+                    onMouseLeave={() => setHoveredRating(0)}
+                    className="transition-transform hover:scale-110 focus:outline-none"
+                  >
+                    <Star
+                      className={`h-8 w-8 ${
+                        star <= (hoveredRating || reviewRating)
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  </button>
+                ))}
+                {reviewRating > 0 && (
+                  <span className="ml-2 text-sm text-gray-600">
+                    {reviewRating} sao
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Comment */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Nhận xét <span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                placeholder="Chia sẻ trải nghiệm của bạn về sân..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                className="min-h-[120px] resize-none focus:ring-green-500 focus:border-green-500"
+                maxLength={1000}
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Tối đa 1000 ký tự</span>
+                <span>{reviewComment.length}/1000</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={closeReviewDialog}
+              disabled={isSubmittingReview}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmitReview}
+              disabled={
+                isSubmittingReview || reviewRating === 0 || !reviewComment.trim()
+              }
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {isSubmittingReview ? "Đang gửi..." : "Gửi đánh giá"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
