@@ -40,6 +40,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useUploadVenueImageMutation } from "@/queries/useVenue";
 import { useBookingStore } from "@/stores/useBookingStore";
 import { ConfirmBookingRequest } from "@/types/booking";
+import { Centrifuge } from "centrifuge";
+import envConfig from "@/config";
+import { getAccessTokenFormLocalStorage } from "@/lib/utils";
 
 const CountdownTimer = ({
   expiryTime,
@@ -112,6 +115,9 @@ export default function ConfirmBookingPage() {
   // State for expired payment dialog
   const [showExpiredDialog, setShowExpiredDialog] = useState(false);
 
+  // State for owner cancel dialog
+  const [showOwnerCancelDialog, setShowOwnerCancelDialog] = useState(false);
+
   // Calculate expiry time based on booking createdAt + 5 minutes
   const [expiryTime, setExpiryTime] = useState<Date | null>(null);
 
@@ -146,6 +152,59 @@ export default function ConfirmBookingPage() {
       }
     }
   }, [bookingData, fieldId, router, toast]);
+
+  // Handle Centrifugo for real-time booking cancellation by owner
+  useEffect(() => {
+    if (!bookingId) return;
+
+    console.log("Initializing Centrifugo for booking cancel check:", { bookingId });
+
+    const centrifuge = new Centrifuge(envConfig.NEXT_PUBLIC_CENTRIFUGO_URL, {
+      getToken: async () => {
+        const token = getAccessTokenFormLocalStorage();
+        return token || "";
+      },
+    });
+
+    centrifuge
+      .on("connecting", function (ctx) {
+        console.log(`Booking cancel WS connecting: ${ctx.code}, ${ctx.reason}`);
+      })
+      .on("connected", function (ctx) {
+        console.log(`Booking cancel WS connected over ${ctx.transport}`);
+      })
+      .on("disconnected", function (ctx) {
+        console.log(`Booking cancel WS disconnected: ${ctx.code}, ${ctx.reason}`);
+      })
+      .connect();
+
+    // Subscribe to booking cancel channel
+    const channel = `booking-cancel:${bookingId}`;
+    const sub = centrifuge.newSubscription(channel);
+
+    sub
+      .on("publication", function (ctx) {
+        console.log(`Booking cancel event received:`, ctx.data);
+        setShowOwnerCancelDialog(true);
+      })
+      .on("subscribing", function (ctx) {
+        console.log(`Subscribing to ${channel}: ${ctx.code}, ${ctx.reason}`);
+      })
+      .on("subscribed", function (ctx) {
+        console.log(`Subscribed to ${channel}`, ctx);
+      })
+      .on("unsubscribed", function (ctx) {
+        console.log(`Unsubscribed from ${channel}: ${ctx.code}, ${ctx.reason}`);
+      })
+      .subscribe();
+
+    // Cleanup on unmount
+    return () => {
+      console.log("Cleaning up booking cancel Centrifugo connection");
+      sub.unsubscribe();
+      centrifuge.disconnect();
+    };
+  }, [bookingId]);
 
   // Handle expiry
   const handleExpiry = () => {
@@ -377,6 +436,35 @@ export default function ConfirmBookingPage() {
               className="w-full bg-gradient-to-r from-green-600 to-green-700"
             >
               Đặt sân lại
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Owner Cancelled Dialog */}
+      <Dialog
+        open={showOwnerCancelDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            router.push("/");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-red-600 gap-2">
+              <FaExclamationTriangle /> Đơn đặt đã bị hủy
+            </DialogTitle>
+            <DialogDescription>
+              Đơn đặt sân này đã bị chủ sân hủy. Vui lòng quay lại trang chủ.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => router.push("/")}
+              className="w-full bg-gradient-to-r from-green-600 to-green-700"
+            >
+              Quay về trang chủ
             </Button>
           </DialogFooter>
         </DialogContent>
