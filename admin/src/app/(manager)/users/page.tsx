@@ -492,7 +492,7 @@ function UserActionsCell({ row }: { row: any }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Bạn có chắc chắn muốn xoá?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này sẽ xoá tài khoản người dùng "{row.original.name}".
+              Hành động này sẽ xoá tài khoản người dùng &quot;{row.original.name}&quot;.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -514,7 +514,7 @@ function UserActionsCell({ row }: { row: any }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Nâng quyền người dùng?</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn nâng quyền người dùng "{row.original.name}" lên làm Chủ sân (Owner)?
+              Bạn có chắc chắn muốn nâng quyền người dùng &quot;{row.original.name}&quot; lên làm Chủ sân (Owner)?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

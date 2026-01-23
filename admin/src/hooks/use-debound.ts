@@ -10,7 +10,7 @@ export function useDebounce( value: string, delay: number = 500) {
         }, delay)
         return () => clearTimeout(handler)
 
-    }, [value])
+    }, [value, delay])
 
     return debounce
 }

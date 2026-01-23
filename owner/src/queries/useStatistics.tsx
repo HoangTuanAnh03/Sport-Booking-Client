@@ -13,6 +13,28 @@ export const useGetOnlineStatisticsQuery = () => {
   });
 };
 
+export const useGetBasicStatisticsQuery = () => {
+  return useQuery({
+    queryKey: ["statistics", "owner", "basic"],
+    queryFn: async () => {
+      const response = await statisticsApiRequest.sGetBasicStatistics();
+      return response.payload?.data;
+    },
+  });
+};
+
+export const useGetDailyRevenueChartQuery = (filterType: OwnerFilterType) => {
+  return useQuery({
+    queryKey: ["statistics", "owner", "daily-revenue-chart", filterType],
+    queryFn: async () => {
+      const response = await statisticsApiRequest.sGetDailyRevenueChart(
+        filterType
+      );
+      return response.payload?.data;
+    },
+  });
+};
+
 export const useGetDashboardStatisticsQuery = (
   revenueFilter?: OwnerFilterType,
   topFieldsFilter?: OwnerFilterType,

@@ -64,12 +64,39 @@ export interface TopField {
   rank: number;
 }
 
-// Dashboard Statistics
-export interface DashboardStatistics {
+// Daily Revenue Chart Statistics
+export interface DailyPoint {
+  date: string;
+  revenue: number;
+  bookingCount: number;
+}
+
+export interface VenueDailyRevenue {
+  venueId: number;
+  venueName: string;
+  venueAvatar: string;
+  totalRevenue: number;
+  totalBookings: number;
+  dailyData: DailyPoint[];
+}
+
+export interface DailyRevenueChartData {
+  filterType: string;
+  totalRevenue: number;
+  totalBookings: number;
+  venueData: VenueDailyRevenue[];
+}
+
+// Basic Statistics
+export interface BasicStatistics {
   totalVenues: number;
   totalCourts: number;
   averageRating: number;
   bookingSuccessRate: number;
+}
+
+// Dashboard Statistics
+export interface DashboardStatistics {
   revenueStatistics: RevenueStatistics;
   topFieldsByRevenue: TopField[];
   orderStatistics: OrderStatistics;

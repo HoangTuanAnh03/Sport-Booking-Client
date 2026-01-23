@@ -34,6 +34,8 @@ export function NotificationDropdown() {
   
   const userId = useAppStore((state) => state.userId);
 
+  const pagination = useMemo(() => ({ pageNo: 0, pageSize: 20 }), []);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = getAccessTokenFormLocalStorage();
@@ -121,9 +123,8 @@ export function NotificationDropdown() {
       sub.unsubscribe();
       centrifuge.disconnect();
     };
-  }, [isAuth, userId, queryClient]);
+  }, [isAuth, userId, queryClient, pagination]);
 
-  const pagination = useMemo(() => ({ pageNo: 0, pageSize: 20 }), []);
   const { data: unreadCountData } = useGetUnreadCount();
   const { data: notificationsData } = useGetUserNotifications(pagination);
 

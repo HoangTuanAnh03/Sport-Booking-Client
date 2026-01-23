@@ -25,9 +25,11 @@ import {
 import {
   useGetOnlineStatisticsQuery,
   useGetDashboardStatisticsQuery,
+  useGetBasicStatisticsQuery,
+  useGetDailyRevenueChartQuery,
 } from "@/queries/useStatistics";
 import { OwnerFilterType } from "@/types/statistics";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Users,
   Building2,
@@ -91,6 +93,10 @@ export default function DashboardPage() {
 
   const { data: onlineStats, isLoading: isLoadingOnline } =
     useGetOnlineStatisticsQuery();
+  const { data: basicStats, isLoading: isLoadingBasic } =
+    useGetBasicStatisticsQuery();
+  const { data: dailyRevenueStats, isLoading: isLoadingDailyRevenue } =
+    useGetDailyRevenueChartQuery(revenueFilter);
   const { data: dashboardStats, isLoading: isLoadingDashboard } =
     useGetDashboardStatisticsQuery(
       revenueFilter,
@@ -117,46 +123,58 @@ export default function DashboardPage() {
   };
 
   // Prepare booking success rate pie chart data
-  const bookingSuccessData = dashboardStats?.bookingSuccessRate
+  const bookingSuccessData = basicStats?.bookingSuccessRate
     ? [
         {
           name: "success",
-          value: dashboardStats.bookingSuccessRate,
+          value: basicStats.bookingSuccessRate,
           fill: "#22c55e",
         },
         {
           name: "failed",
-          value: 100 - dashboardStats.bookingSuccessRate,
+          value: 100 - basicStats.bookingSuccessRate,
           fill: "#ef4444",
         },
       ]
     : [];
 
   // Prepare period revenue data for line chart
-  const periodRevenueData =
-    dashboardStats?.revenueStatistics?.periodRevenues?.map((period) => {
-      const dataPoint: any = {
-        periodLabel: period.periodLabel,
-        total: period.revenue,
-      };
-      // Add each venue's revenue as a separate key
-      period.venueBreakdown.forEach((venue) => {
-        dataPoint[`venue_${venue.venueId}`] = venue.revenue || 0;
+  const periodRevenueData = useMemo(() => {
+    if (!dailyRevenueStats?.venueData || dailyRevenueStats.venueData.length === 0)
+      return [];
+
+    // Get unique dates from all venues
+    const dates =
+      dailyRevenueStats.venueData[0]?.dailyData.map((d) => d.date) || [];
+
+    return dates.map((date) => {
+      const dataPoint: any = { periodLabel: date };
+      let totalRevenue = 0;
+      dailyRevenueStats.venueData.forEach((venue) => {
+        const dayData = venue.dailyData.find((d) => d.date === date);
+        const revenue = dayData ? dayData.revenue : 0;
+        dataPoint[`venue_${venue.venueId}`] = revenue;
+        totalRevenue += revenue;
       });
+      dataPoint.total = totalRevenue;
       return dataPoint;
-    }) || [];
+    });
+  }, [dailyRevenueStats]);
 
   // Prepare venue revenue data for bar chart
-  const venueRevenueData =
-    dashboardStats?.revenueStatistics?.venueRevenues?.map((venue, index) => ({
-      name:
-        venue.venueName.length > 15
-          ? venue.venueName.substring(0, 15) + "..."
-          : venue.venueName,
-      fullName: venue.venueName,
-      revenue: venue.revenue || 0,
-      fill: VENUE_COLORS[index % VENUE_COLORS.length],
-    })) || [];
+  const venueRevenueData = useMemo(() => {
+    return (
+      dailyRevenueStats?.venueData?.map((venue, index) => ({
+        name:
+          venue.venueName.length > 15
+            ? venue.venueName.substring(0, 15) + "..."
+            : venue.venueName,
+        fullName: venue.venueName,
+        revenue: venue.totalRevenue || 0,
+        fill: VENUE_COLORS[index % VENUE_COLORS.length],
+      })) || []
+    );
+  }, [dailyRevenueStats]);
 
   // Prepare top fields data
   const topFieldsData =
@@ -172,14 +190,17 @@ export default function DashboardPage() {
     })) || [];
 
   // Get unique venues for line chart legend
-  const uniqueVenues =
-    dashboardStats?.revenueStatistics?.venueRevenues?.map((venue, index) => ({
-      venueId: venue.venueId,
-      venueName: venue.venueName,
-      color: VENUE_COLORS[index % VENUE_COLORS.length],
-    })) || [];
+  const uniqueVenues = useMemo(() => {
+    return (
+      dailyRevenueStats?.venueData?.map((venue, index) => ({
+        venueId: venue.venueId,
+        venueName: venue.venueName,
+        color: VENUE_COLORS[index % VENUE_COLORS.length],
+      })) || []
+    );
+  }, [dailyRevenueStats]);
 
-  if (isLoadingDashboard) {
+  if (isLoadingDashboard || isLoadingBasic || isLoadingDailyRevenue) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -219,7 +240,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatNumber(dashboardStats?.totalVenues || 0)}
+              {formatNumber(basicStats?.totalVenues || 0)}
             </div>
             <p className="text-xs text-muted-foreground">Địa điểm</p>
           </CardContent>
@@ -233,7 +254,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatNumber(dashboardStats?.totalCourts || 0)}
+              {formatNumber(basicStats?.totalCourts || 0)}
             </div>
             <p className="text-xs text-muted-foreground">Sân thể thao</p>
           </CardContent>
@@ -249,7 +270,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {dashboardStats?.averageRating?.toFixed(1) || "0.0"}
+              {basicStats?.averageRating?.toFixed(1) || "0.0"}
             </div>
             <p className="text-xs text-muted-foreground">Trên 5 sao</p>
           </CardContent>
@@ -353,10 +374,7 @@ export default function DashboardPage() {
                     dataKey="periodLabel"
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => {
-                      const date = new Date(value);
-                      return `${date.getDate()}/${date.getMonth() + 1}`;
-                    }}
+                    tickFormatter={(value) => value}
                   />
                   <YAxis
                     tickLine={false}
