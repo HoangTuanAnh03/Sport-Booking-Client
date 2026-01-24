@@ -25,7 +25,7 @@ import {
 import {
   useGetOnlineStatisticsQuery,
   useGetSystemStatisticsQuery,
-  useGetTopVenuesQuery,
+  useGetTopVenuesByRevenueQuery,
 } from "@/queries/useStatistics";
 import { FilterType } from "@/types/statistics";
 import { useState } from "react";
@@ -82,17 +82,17 @@ const bookingsChartConfig = {
 } satisfies ChartConfig;
 
 export default function DashboardPage() {
-  const [revenueFilter, setRevenueFilter] = useState<FilterType>("THIS_MONTH");
-  const [bookingsFilter, setBookingsFilter] = useState<FilterType>("THIS_MONTH");
+  const [revenueFilter, setRevenueFilter] = useState<FilterType>("LAST_30_DAYS");
+  const [bookingsFilter, setBookingsFilter] = useState<FilterType>("LAST_30_DAYS");
 
   const { data: onlineStats, isLoading: isLoadingOnline } =
     useGetOnlineStatisticsQuery();
   const { data: systemStats, isLoading: isLoadingSystem } =
     useGetSystemStatisticsQuery();
   const { data: topRevenueStats, isLoading: isLoadingTopRevenue } =
-    useGetTopVenuesQuery(revenueFilter);
+    useGetTopVenuesByRevenueQuery(revenueFilter);
   const { data: topBookingsStats, isLoading: isLoadingTopBookings } =
-    useGetTopVenuesQuery(bookingsFilter);
+    useGetTopVenuesByRevenueQuery(bookingsFilter);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -140,27 +140,27 @@ export default function DashboardPage() {
 
   // Prepare top venues by revenue data
   const topRevenueData =
-    topRevenueStats?.topVenuesByRevenue?.slice(0, 5).map((venue, index) => ({
+    topRevenueStats?.topVenues?.slice(0, 5).map((venue, index) => ({
       name:
         venue.venueName.length > 15
           ? venue.venueName.substring(0, 15) + "..."
           : venue.venueName,
       fullName: venue.venueName,
-      revenue: venue.totalRevenue,
+      revenue: venue.revenue,
       bookings: venue.bookingCount,
       fill: COLORS[index % COLORS.length],
     })) || [];
 
   // Prepare top venues by booking count data
   const topBookingsData =
-    topBookingsStats?.topVenuesByBookingCount?.slice(0, 5).map(
+    topBookingsStats?.topVenues?.slice(0, 5).map(
       (venue, index) => ({
         name:
           venue.venueName.length > 15
             ? venue.venueName.substring(0, 15) + "..."
             : venue.venueName,
         fullName: venue.venueName,
-        revenue: venue.totalRevenue,
+        revenue: venue.revenue,
         bookings: venue.bookingCount,
         fill: COLORS[index % COLORS.length],
       })
@@ -381,8 +381,8 @@ export default function DashboardPage() {
                 <SelectValue placeholder="Chọn thời gian" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="TODAY">Hôm nay</SelectItem>
-                <SelectItem value="THIS_MONTH">Tháng này</SelectItem>
+                <SelectItem value="LAST_7_DAYS">7 ngày</SelectItem>
+                <SelectItem value="LAST_30_DAYS">30 ngày</SelectItem>
               </SelectContent>
             </Select>
           </CardHeader>
@@ -464,8 +464,8 @@ export default function DashboardPage() {
                 <SelectValue placeholder="Chọn thời gian" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="TODAY">Hôm nay</SelectItem>
-                <SelectItem value="THIS_MONTH">Tháng này</SelectItem>
+                <SelectItem value="LAST_7_DAYS">7 ngày</SelectItem>
+                <SelectItem value="LAST_30_DAYS">30 ngày</SelectItem>
               </SelectContent>
             </Select>
           </CardHeader>

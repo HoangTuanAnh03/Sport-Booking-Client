@@ -37,10 +37,27 @@ export interface TopVenue {
   rank: number;
 }
 
-export type FilterType = "TODAY" | "THIS_MONTH";
+export type FilterType = "TODAY" | "THIS_MONTH" | "LAST_7_DAYS" | "LAST_30_DAYS";
 
 export interface TopVenuesStatistics {
   filterType: FilterType;
   topVenuesByRevenue: TopVenue[];
   topVenuesByBookingCount: TopVenue[];
+}
+
+export interface TopVenueByRevenueItem {
+  venueId: number;
+  venueName: string;
+  venueAvatar: string;
+  address: string;
+  revenue: number;
+  bookingCount: number;
+  rank: number;
+}
+
+export interface TopVenueByRevenueStatistics {
+  filterType: FilterType;
+  totalRevenue: number;
+  totalVenues: number;
+  topVenues: TopVenueByRevenueItem[];
 }

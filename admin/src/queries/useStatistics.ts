@@ -32,3 +32,15 @@ export const useGetTopVenuesQuery = (filterType?: FilterType) => {
     },
   });
 };
+
+export const useGetTopVenuesByRevenueQuery = (filterType: FilterType) => {
+  return useQuery({
+    queryKey: ["statistics", "top-venues-by-revenue", filterType],
+    queryFn: async () => {
+      const response = await statisticsApiRequest.sGetTopVenuesByRevenue(
+        filterType
+      );
+      return response.payload?.data;
+    },
+  });
+};

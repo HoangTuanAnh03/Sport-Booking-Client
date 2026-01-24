@@ -5,6 +5,7 @@ import {
   SystemStatistics,
   TopVenuesStatistics,
   FilterType,
+  TopVenueByRevenueStatistics,
 } from "@/types/statistics";
 
 const statisticsApiRequest = {
@@ -38,6 +39,16 @@ const statisticsApiRequest = {
       }
     );
   },
+
+  // Get top venues by revenue (admin)
+  sGetTopVenuesByRevenue: (filterType: FilterType) =>
+    http.get<IBackendRes<TopVenueByRevenueStatistics>>(
+      `/statistics/admin/top-venues-by-revenue?filterType=${filterType}`,
+      {
+        baseUrl:
+          envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8888/api/v1",
+      }
+    ),
 };
 
 export default statisticsApiRequest;
