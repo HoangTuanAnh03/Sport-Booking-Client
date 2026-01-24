@@ -2,11 +2,10 @@ import http from "@/utils/api";
 import envConfig from "@/config";
 import {
   OnlineStatistics,
-  DashboardStatistics,
-  DashboardQueryParams,
   BasicStatistics,
   DailyRevenueChartData,
   OwnerFilterType,
+  RevenueByVenueStatistics,
 } from "@/types/statistics";
 
 const statisticsApiRequest = {
@@ -34,28 +33,17 @@ const statisticsApiRequest = {
       }
     ),
 
-  // Get dashboard statistics (owner)
-  sGetDashboardStatistics: (params?: DashboardQueryParams) => {
-    const queryParams = new URLSearchParams();
-    if (params?.revenueFilterType) {
-      queryParams.append("revenueFilterType", params.revenueFilterType);
-    }
-    if (params?.topFieldsFilterType) {
-      queryParams.append("topFieldsFilterType", params.topFieldsFilterType);
-    }
-    if (params?.orderFilterType) {
-      queryParams.append("orderFilterType", params.orderFilterType);
-    }
-
-    const queryString = queryParams.toString();
-    return http.get<IBackendRes<DashboardStatistics>>(
-      `/statistics/owner/dashboard${queryString ? `?${queryString}` : ""}`,
+  // Get revenue by venue (top courts)
+  sGetRevenueByVenue: (filterType: OwnerFilterType) =>
+    http.get<IBackendRes<RevenueByVenueStatistics>>(
+      `/statistics/owner/revenue-by-venue?filterType=${filterType}`,
       {
         baseUrl:
           envConfig.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8888/api/v1",
       }
-    );
-  },
+    ),
+
+
 };
 
 export default statisticsApiRequest;

@@ -87,6 +87,23 @@ export interface DailyRevenueChartData {
   venueData: VenueDailyRevenue[];
 }
 
+export interface TopCourt {
+  courtId: number;
+  courtName: string;
+  venueId: number;
+  venueName: string;
+  venueAvatar: string;
+  revenue: number;
+  rank: number;
+}
+
+export interface RevenueByVenueStatistics {
+  filterType: string;
+  totalRevenue: number;
+  totalCourts: number;
+  topCourts: TopCourt[];
+}
+
 // Basic Statistics
 export interface BasicStatistics {
   totalVenues: number;

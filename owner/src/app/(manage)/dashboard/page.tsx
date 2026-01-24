@@ -24,9 +24,9 @@ import {
 } from "@/components/ui/chart";
 import {
   useGetOnlineStatisticsQuery,
-  useGetDashboardStatisticsQuery,
   useGetBasicStatisticsQuery,
   useGetDailyRevenueChartQuery,
+  useGetRevenueByVenueQuery,
 } from "@/queries/useStatistics";
 import { OwnerFilterType } from "@/types/statistics";
 import { useState, useMemo } from "react";
@@ -83,11 +83,18 @@ const topFieldsChartConfig = {
   },
 } satisfies ChartConfig;
 
+const bookingChartConfig = {
+  booking: {
+    label: "Đơn đặt",
+    color: "#3b82f6",
+  },
+} satisfies ChartConfig;
+
 export default function DashboardPage() {
   const [revenueFilter, setRevenueFilter] =
     useState<OwnerFilterType>("LAST_7_DAYS");
   const [topFieldsFilter, setTopFieldsFilter] =
-    useState<OwnerFilterType>("YESTERDAY");
+    useState<OwnerFilterType>("LAST_30_DAYS");
   const [orderFilter, setOrderFilter] =
     useState<OwnerFilterType>("LAST_7_DAYS");
 
@@ -97,12 +104,10 @@ export default function DashboardPage() {
     useGetBasicStatisticsQuery();
   const { data: dailyRevenueStats, isLoading: isLoadingDailyRevenue } =
     useGetDailyRevenueChartQuery(revenueFilter);
-  const { data: dashboardStats, isLoading: isLoadingDashboard } =
-    useGetDashboardStatisticsQuery(
-      revenueFilter,
-      topFieldsFilter,
-      orderFilter
-    );
+  const { data: bookingStats, isLoading: isLoadingBooking } =
+    useGetDailyRevenueChartQuery(orderFilter);
+  const { data: topCourtsStats, isLoading: isLoadingTopCourts } =
+    useGetRevenueByVenueQuery(topFieldsFilter);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -161,31 +166,50 @@ export default function DashboardPage() {
     });
   }, [dailyRevenueStats]);
 
-  // Prepare venue revenue data for bar chart
-  const venueRevenueData = useMemo(() => {
+  // Prepare period booking data for line chart
+  const periodBookingData = useMemo(() => {
+    if (!bookingStats?.venueData || bookingStats.venueData.length === 0)
+      return [];
+
+    // Get unique dates from all venues
+    const dates =
+      bookingStats.venueData[0]?.dailyData.map((d) => d.date) || [];
+
+    return dates.map((date) => {
+      const dataPoint: any = { periodLabel: date };
+      let totalBookings = 0;
+      bookingStats.venueData.forEach((venue) => {
+        const dayData = venue.dailyData.find((d) => d.date === date);
+        const bookingCount = dayData ? dayData.bookingCount : 0;
+        dataPoint[`venue_${venue.venueId}`] = bookingCount;
+        totalBookings += bookingCount;
+      });
+      dataPoint.total = totalBookings;
+      return dataPoint;
+    });
+  }, [bookingStats]);
+
+  // Get unique venues for booking chart legend
+  const uniqueBookingVenues = useMemo(() => {
     return (
-      dailyRevenueStats?.venueData?.map((venue, index) => ({
-        name:
-          venue.venueName.length > 15
-            ? venue.venueName.substring(0, 15) + "..."
-            : venue.venueName,
-        fullName: venue.venueName,
-        revenue: venue.totalRevenue || 0,
-        fill: VENUE_COLORS[index % VENUE_COLORS.length],
+      bookingStats?.venueData?.map((venue, index) => ({
+        venueId: venue.venueId,
+        venueName: venue.venueName,
+        color: VENUE_COLORS[index % VENUE_COLORS.length],
       })) || []
     );
-  }, [dailyRevenueStats]);
+  }, [bookingStats]);
 
-  // Prepare top fields data
+  // Prepare top fields data (top courts)
   const topFieldsData =
-    dashboardStats?.topFieldsByRevenue?.slice(0, 5).map((field, index) => ({
+    topCourtsStats?.topCourts?.slice(0, 5).map((court, index) => ({
       name:
-        field.fieldName.length > 12
-          ? field.fieldName.substring(0, 12) + "..."
-          : field.fieldName,
-      fullName: `${field.fieldName} - ${field.venueName}`,
-      revenue: field.totalRevenue,
-      venueName: field.venueName,
+        court.courtName.length > 12
+          ? court.courtName.substring(0, 12) + "..."
+          : court.courtName,
+      fullName: `${court.courtName} - ${court.venueName}`,
+      revenue: court.revenue,
+      venueName: court.venueName,
       fill: COLORS[index % COLORS.length],
     })) || [];
 
@@ -200,7 +224,12 @@ export default function DashboardPage() {
     );
   }, [dailyRevenueStats]);
 
-  if (isLoadingDashboard || isLoadingBasic || isLoadingDailyRevenue) {
+  if (
+    isLoadingBasic ||
+    isLoadingDailyRevenue ||
+    isLoadingBooking ||
+    isLoadingTopCourts
+  ) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -462,62 +491,116 @@ export default function DashboardPage() {
 
       {/* Charts Row 3: Venue Revenue & Top Fields */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Venue Revenue Bar Chart */}
+        {/* Order Count Over Time Line Chart */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div className="space-y-1">
-              <CardTitle>Doanh thu theo venue</CardTitle>
-              <CardDescription>So sánh doanh thu giữa các venue</CardDescription>
+              <CardTitle>Số lượng đơn đặt theo thời gian</CardTitle>
+              <CardDescription>Theo dõi số lượng đơn đặt hàng</CardDescription>
             </div>
+            <Select
+              value={orderFilter}
+              onValueChange={(value: OwnerFilterType) =>
+                setOrderFilter(value)
+              }
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Thời gian" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="LAST_7_DAYS">7 ngày</SelectItem>
+                <SelectItem value="LAST_30_DAYS">30 ngày</SelectItem>
+              </SelectContent>
+            </Select>
           </CardHeader>
           <CardContent>
-            {venueRevenueData.length > 0 ? (
+            {periodBookingData.length > 0 ? (
               <ChartContainer
-                config={revenueChartConfig}
+                config={bookingChartConfig}
                 className="h-[350px] w-full"
               >
-                <BarChart
-                  key={revenueFilter}
-                  data={venueRevenueData}
-                  layout="vertical"
-                  margin={{ left: 10, right: 10 }}
-                  accessibilityLayer
-                >
-                  <CartesianGrid horizontal={false} />
+                <LineChart data={periodBookingData} accessibilityLayer>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis
-                    type="number"
+                    dataKey="periodLabel"
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => value}
+                  />
+                  <YAxis
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={formatCompactNumber}
                   />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    tickLine={false}
-                    axisLine={false}
-                    width={100}
-                    tick={{ fontSize: 11 }}
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid gap-1">
+                              <div className="font-medium text-xs">
+                                {payload[0].payload.periodLabel}
+                              </div>
+                              {payload.map((entry: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center gap-2 text-[10px]"
+                                >
+                                  <div
+                                    className="h-1.5 w-1.5 rounded-full"
+                                    style={{ backgroundColor: entry.color }}
+                                  />
+                                  <span className="flex-1 truncate max-w-[80px]">
+                                    {entry.dataKey === "total"
+                                      ? "Tổng"
+                                      : uniqueBookingVenues.find(
+                                          (v) =>
+                                            `venue_${v.venueId}` ===
+                                            entry.dataKey
+                                        )?.venueName || entry.dataKey}
+                                  </span>
+                                  <span className="font-bold">
+                                    {entry.value} đơn
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
                   />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value) => (
-                          <span className="font-bold">
-                            {formatCurrency(value as number)}
-                          </span>
-                        )}
-                        labelFormatter={(label, payload) =>
-                          payload?.[0]?.payload?.fullName || label
-                        }
-                      />
-                    }
+                  {uniqueBookingVenues.map((venue) => (
+                    <Line
+                      key={venue.venueId}
+                      type="monotone"
+                      dataKey={`venue_${venue.venueId}`}
+                      stroke={venue.color}
+                      strokeWidth={2}
+                      dot={false}
+                      name={venue.venueName}
+                    />
+                  ))}
+                  <Legend
+                    content={({ payload }) => (
+                      <div className="flex flex-wrap gap-2 justify-center mt-2">
+                        {payload?.map((entry: any, index: number) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-1 text-[10px]"
+                          >
+                            <div
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: entry.color }}
+                            />
+                            <span className="truncate max-w-[60px]">{entry.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   />
-                  <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
-                    {venueRevenueData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
+                </LineChart>
               </ChartContainer>
             ) : (
               <div className="flex items-center justify-center h-[350px] text-muted-foreground">
@@ -546,8 +629,8 @@ export default function DashboardPage() {
                 <SelectValue placeholder="Chọn thời gian" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="YESTERDAY">Hôm qua</SelectItem>
-                <SelectItem value="TODAY">Hôm nay</SelectItem>
+                <SelectItem value="LAST_7_DAYS">7 ngày qua</SelectItem>
+                <SelectItem value="LAST_30_DAYS">30 ngày qua</SelectItem>
               </SelectContent>
             </Select>
           </CardHeader>

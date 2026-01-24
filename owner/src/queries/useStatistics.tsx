@@ -1,6 +1,6 @@
 import statisticsApiRequest from "@/apiRequests/statistics";
 import { useQuery } from "@tanstack/react-query";
-import { DashboardQueryParams, OwnerFilterType } from "@/types/statistics";
+import { OwnerFilterType } from "@/types/statistics";
 
 export const useGetOnlineStatisticsQuery = () => {
   return useQuery({
@@ -35,30 +35,14 @@ export const useGetDailyRevenueChartQuery = (filterType: OwnerFilterType) => {
   });
 };
 
-export const useGetDashboardStatisticsQuery = (
-  revenueFilter?: OwnerFilterType,
-  topFieldsFilter?: OwnerFilterType,
-  orderFilter?: OwnerFilterType
-) => {
+export const useGetRevenueByVenueQuery = (filterType: OwnerFilterType) => {
   return useQuery({
-    queryKey: [
-      "statistics",
-      "owner",
-      "dashboard",
-      revenueFilter,
-      topFieldsFilter,
-      orderFilter,
-    ],
+    queryKey: ["statistics", "owner", "revenue-by-venue", filterType],
     queryFn: async () => {
-      const params: DashboardQueryParams = {
-        revenueFilterType: revenueFilter,
-        topFieldsFilterType: topFieldsFilter,
-        orderFilterType: orderFilter,
-      };
-      const response = await statisticsApiRequest.sGetDashboardStatistics(
-        params
-      );
+      const response = await statisticsApiRequest.sGetRevenueByVenue(filterType);
       return response.payload?.data;
     },
   });
 };
+
+
