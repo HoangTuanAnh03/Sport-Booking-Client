@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { useGetOwnerVenuePaymentsQuery, useCreatePaymentMutation, useCancelPaymentMutation } from "@/queries/usePayment";
 import {
   Card,
@@ -39,6 +41,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { data: payments, isLoading, error } = useGetOwnerVenuePaymentsQuery();
   const createPaymentMutation = useCreatePaymentMutation();
   const cancelPaymentMutation = useCancelPaymentMutation();
@@ -51,6 +55,24 @@ export default function PaymentPage() {
     const cancel = searchParams.get("cancel");
     const orderCode = searchParams.get("orderCode");
 
+    if (status === "PAID" || status === "success") {
+      toast({
+        title: "Thanh toán thành công",
+        description: "Dữ liệu thanh toán đã được cập nhật.",
+        variant: "default",
+      });
+      queryClient.invalidateQueries({ queryKey: ["payment", "owner", "venues"] });
+      router.replace("/payment");
+    } else if (status === "FAILED") {
+      toast({
+        title: "Thanh toán thất bại",
+        description: "Giao dịch thanh toán đã thất bại. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+      queryClient.invalidateQueries({ queryKey: ["payment", "owner", "venues"] });
+      router.replace("/payment");
+    }
+
     if (status === "CANCELLED" && code === "00" && cancel === "true" && orderCode) {
       cancelPaymentMutation.mutate(orderCode, {
         onSuccess: () => {
@@ -59,7 +81,7 @@ export default function PaymentPage() {
         }
       });
     }
-  }, []);
+  }, [searchParams, queryClient, router, cancelPaymentMutation, toast]);
 
   const handleSelectVenue = (venueId: number, checked: boolean) => {
     const newSelected = new Set(selectedVenues);
