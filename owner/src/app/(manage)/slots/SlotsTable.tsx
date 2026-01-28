@@ -183,6 +183,8 @@ const SlotsTable: React.FC<SlotsTableProps> = ({
     const slots = Array.from(selectedSlotsV2.values())[0];
     if (!slots || slots.length < 2) return true;
     if (slots.some((slot) => slot.status !== "AVAILABLE")) return true;
+    // Disable merge button if any slot has isMerge = true
+    if (slots.some((slot) => slot.isMerged)) return true;
 
     // slots đã được sắp xếp theo startTime
     return !slots.every((slot, i, arr) => {
@@ -479,7 +481,16 @@ const SlotsTable: React.FC<SlotsTableProps> = ({
               Array.from(selectedSlotsV2.values()).flat().length === 0 ||
               Array.from(selectedSlotsV2.values())
                 .flat()
-                .some((slot) => slot.status === "LOCK")
+                .some((slot) => slot.status === "LOCK") ||
+              // Disable lock button if any slot has bookingId
+              courts.some((court) =>
+                court.slots?.some(
+                  (timeSlot) =>
+                    isSlotSelected(timeSlot, court.id) &&
+                    timeSlot.bookingId != null &&
+                    timeSlot.bookingId !== ""
+                )
+              )
             }
           >
             Khóa
