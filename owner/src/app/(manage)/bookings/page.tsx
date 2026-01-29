@@ -451,8 +451,18 @@ export default function BookingsPage() {
                           <div className="flex items-center justify-center gap-2">
                             {/* Left side - Action buttons */}
                             <div className="flex gap-2">
-                              {(booking.status === BookingStatus.PENDING ||
-                                booking.status === BookingStatus.CONFIRMED) && (
+                              {booking.status === BookingStatus.PENDING && (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleCancel(booking.id)}
+                                  disabled={cancelMutation.isPending}
+                                >
+                                  <XCircleIcon className="h-4 w-4 mr-1" />
+                                  Hủy
+                                </Button>
+                              )}
+                              {booking.status === BookingStatus.CONFIRMED && (
                                 <>
                                   <Button
                                     size="sm"
@@ -591,8 +601,32 @@ export default function BookingsPage() {
                 </Card>
 
                 {/* Action Buttons - Show for PENDING or CONFIRMED status */}
-                {(selectedBooking.status === BookingStatus.PENDING ||
-                  selectedBooking.status === BookingStatus.CONFIRMED) && (
+                {selectedBooking.status === BookingStatus.PENDING && (
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      className="flex-1 bg-white text-red-600 border-red-400 hover:bg-red-50 hover:text-red-700 font-bold py-6 rounded-xl transition-all"
+                      onClick={() => {
+                        handleCancel(selectedBooking.id);
+                        setDetailDialogOpen(false);
+                      }}
+                      disabled={cancelMutation.isPending}
+                    >
+                      {cancelMutation.isPending ? (
+                        <>
+                          <span className="animate-spin mr-2">⏳</span>
+                          Đang từ chối...
+                        </>
+                      ) : (
+                        <>
+                          <XCircleIcon className="h-5 w-5 mr-2" />
+                          TỪ CHỐI
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+                {selectedBooking.status === BookingStatus.CONFIRMED && (
                   <div className="flex gap-3">
                     <Button
                       variant="outline"
