@@ -6,7 +6,10 @@ export const useGetListBooking = () => {
   return useQuery({
     queryKey: ["getListBooking"],
     queryFn: () => bookingApiRequest.sGetBookingList(),
-    staleTime: 10 * 1000,
+    staleTime: 0, // Data is always considered stale
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    gcTime: 0, // Don't cache data after query becomes inactive (was cacheTime in older versions)
   });
 };
 
@@ -60,6 +63,10 @@ export const useGetBookingById = (bookingId: string) => {
   return useQuery({
     queryKey: ["getBookingById", bookingId],
     queryFn: () => bookingApiRequest.sGetBookingById(bookingId),
+    staleTime: 0, // Data is always considered stale
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    gcTime: 0, // Don't cache data after query becomes inactive (was cacheTime in older versions)
   });
 };
 
